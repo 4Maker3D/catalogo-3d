@@ -2,10 +2,15 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>4Maker 3D</title>
+
 
     <style>
 
@@ -13,307 +18,558 @@
             box-sizing: border-box;
         }
 
+
+        html,
         body {
+
             margin: 0;
+            width: 100%;
+            height: 100%;
+
             overflow: hidden;
-            background: #f3f3f3;
-            font-family: Arial, Helvetica, sans-serif;
-            color: #222;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            color: #2B292A;
+
         }
+
+
+        /* =================================
+           CENA
+        ================================= */
+
+        body {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #eeeeee
+                );
+
+            transition:
+                background 0.4s ease;
+
+        }
+
 
         canvas {
+
             display: block;
+
         }
 
-        /* =========================
-           CABEÇALHO
-        ========================= */
 
-        #header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-
-            padding: 18px 22px;
-
-            z-index: 20;
-
-            pointer-events: none;
-        }
+        /* =================================
+           LOGO
+        ================================= */
 
         #brand {
-            font-size: 22px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        #brand span {
-            font-weight: normal;
-            opacity: 0.55;
-        }
-
-
-        /* =========================
-           INFORMAÇÕES DO PRODUTO
-        ========================= */
-
-        #productInfo {
 
             position: absolute;
 
+            top: 20px;
             left: 22px;
-            bottom: 22px;
-
-            width: 330px;
-            max-width: calc(100% - 44px);
-
-            background: rgba(255,255,255,0.94);
-
-            backdrop-filter: blur(10px);
-
-            padding: 20px;
-
-            border-radius: 16px;
-
-            box-shadow:
-                0 10px 35px rgba(0,0,0,0.12);
 
             z-index: 20;
-        }
 
-        #category {
+            width: 150px;
 
-            font-size: 12px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 1.2px;
-
-            opacity: 0.55;
-
-            margin-bottom: 6px;
-        }
-
-        #productName {
-
-            font-size: 24px;
-
-            font-weight: bold;
-
-            margin-bottom: 10px;
-        }
-
-        #description {
-
-            font-size: 14px;
-
-            line-height: 1.5;
-
-            opacity: 0.75;
-
-            margin-bottom: 15px;
-        }
-
-        .detail {
-
-            font-size: 13px;
-
-            margin-top: 6px;
-        }
-
-        .detail strong {
-
-            font-weight: 600;
         }
 
 
-        /* =========================
-           BOTÃO WHATSAPP
-        ========================= */
-
-        #whatsapp {
-
-            display: block;
+        #brand img {
 
             width: 100%;
 
-            margin-top: 18px;
+            height: auto;
 
-            padding: 13px;
+            display: block;
 
-            border: none;
-
-            border-radius: 10px;
-
-            background: #222;
-
-            color: white;
-
-            text-align: center;
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        #whatsapp:hover {
-
-            transform: translateY(-1px);
-
-            opacity: 0.9;
         }
 
 
-        /* =========================
+        /* =================================
            CONTROLES
-        ========================= */
+        ================================= */
 
         #controls {
 
             position: absolute;
 
-            top: 22px;
-            right: 22px;
+            top: 20px;
+            right: 20px;
 
             z-index: 20;
 
             display: flex;
 
             gap: 8px;
+
         }
 
-        .controlButton {
 
-            width: 42px;
-            height: 42px;
+        .control {
+
+            width: 44px;
+            height: 44px;
 
             border: none;
 
-            border-radius: 10px;
+            border-radius: 12px;
 
-            background: rgba(255,255,255,0.92);
+            background:
+                rgba(255,255,255,0.94);
 
-            box-shadow:
-                0 5px 20px rgba(0,0,0,0.1);
+            color: #2B292A;
+
+            font-size: 19px;
 
             cursor: pointer;
 
-            font-size: 18px;
+            box-shadow:
+                0 5px 20px
+                rgba(0,0,0,0.10);
 
-            transition: 0.2s;
+            transition:
+                transform 0.2s,
+                background 0.2s,
+                color 0.2s;
+
         }
 
-        .controlButton:hover {
 
-            transform: translateY(-2px);
+        .control:hover {
+
+            transform:
+                translateY(-2px);
+
         }
 
 
-        /* =========================
+        .control.active {
+
+            background:
+                #183765;
+
+            color:
+                white;
+
+        }
+
+
+        /* =================================
+           MENU DE FUNDO
+        ================================= */
+
+        #backgroundMenu {
+
+            position: absolute;
+
+            top: 75px;
+            right: 20px;
+
+            z-index: 20;
+
+            background:
+                rgba(255,255,255,0.96);
+
+            padding: 10px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 8px 30px
+                rgba(0,0,0,0.12);
+
+            display: none;
+
+        }
+
+
+        #backgroundMenu.show {
+
+            display: block;
+
+        }
+
+
+        .backgroundOption {
+
+            display: block;
+
+            width: 150px;
+
+            border: none;
+
+            background: transparent;
+
+            padding: 9px 10px;
+
+            border-radius: 8px;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            font-size: 13px;
+
+        }
+
+
+        .backgroundOption:hover {
+
+            background:
+                #f0f0f0;
+
+        }
+
+
+        /* =================================
            INSTRUÇÕES
-        ========================= */
+        ================================= */
 
         #instructions {
 
             position: absolute;
 
-            top: 75px;
-            right: 22px;
+            top: 82px;
+            left: 50%;
 
-            z-index: 20;
+            transform:
+                translateX(-50%);
 
-            background: rgba(255,255,255,0.9);
+            z-index: 10;
 
-            padding: 9px 12px;
+            padding: 7px 12px;
 
-            border-radius: 9px;
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,0.70);
+
+            backdrop-filter:
+                blur(8px);
 
             font-size: 11px;
 
             opacity: 0.65;
+
+            pointer-events: none;
+
         }
 
 
-        /* =========================
-           CARREGANDO
-        ========================= */
+        /* =================================
+           PRODUTO
+        ================================= */
+
+        #productCard {
+
+            position: absolute;
+
+            left: 22px;
+            bottom: 22px;
+
+            width: 360px;
+
+            max-width:
+                calc(100% - 44px);
+
+            padding: 22px;
+
+            z-index: 20;
+
+            background:
+                rgba(255,255,255,0.95);
+
+            backdrop-filter:
+                blur(12px);
+
+            border-radius: 18px;
+
+            box-shadow:
+                0 12px 40px
+                rgba(0,0,0,0.13);
+
+        }
+
+
+        #category {
+
+            color:
+                #183765;
+
+            font-size: 11px;
+
+            font-weight: bold;
+
+            letter-spacing:
+                1.5px;
+
+            text-transform:
+                uppercase;
+
+            margin-bottom: 7px;
+
+        }
+
+
+        #productName {
+
+            font-size: 26px;
+
+            font-weight: 600;
+
+            margin-bottom: 9px;
+
+        }
+
+
+        #description {
+
+            color:
+                #666;
+
+            font-size: 14px;
+
+            line-height: 1.5;
+
+            margin-bottom: 16px;
+
+        }
+
+
+        .detail {
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            margin-top: 5px;
+
+        }
+
+
+        .detail strong {
+
+            color:
+                #2B292A;
+
+        }
+
+
+        /* =================================
+           CORES
+        ================================= */
+
+        #colorsTitle {
+
+            margin-top: 16px;
+
+            margin-bottom: 8px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+        }
+
+
+        #colors {
+
+            display: flex;
+
+            gap: 8px;
+
+        }
+
+
+        .colorButton {
+
+            width: 25px;
+            height: 25px;
+
+            border-radius: 50%;
+
+            border: 2px solid white;
+
+            outline:
+                1px solid #ccc;
+
+            cursor: pointer;
+
+        }
+
+
+        .colorButton.active {
+
+            outline:
+                2px solid #183765;
+
+            outline-offset: 2px;
+
+        }
+
+
+        /* =================================
+           WHATSAPP
+        ================================= */
+
+        #whatsapp {
+
+            display: block;
+
+            margin-top: 18px;
+
+            padding: 13px;
+
+            border-radius: 10px;
+
+            background:
+                #183765;
+
+            color: white;
+
+            text-decoration: none;
+
+            text-align: center;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            transition:
+                0.2s;
+
+        }
+
+
+        #whatsapp:hover {
+
+            transform:
+                translateY(-1px);
+
+            filter:
+                brightness(1.08);
+
+        }
+
+
+        /* =================================
+           LOADING
+        ================================= */
 
         #loading {
 
-            position: absolute;
+            position: fixed;
 
             inset: 0;
 
             display: flex;
 
-            align-items: center;
-
             justify-content: center;
 
-            z-index: 30;
+            align-items: center;
 
-            background: #f3f3f3;
+            z-index: 100;
+
+            background:
+                #f4f4f4;
 
             font-size: 14px;
+
         }
 
 
-        /* =========================
+        /* =================================
            MOBILE
-        ========================= */
+        ================================= */
 
         @media (max-width: 600px) {
 
-            #header {
-
-                padding: 14px 16px;
-            }
 
             #brand {
 
-                font-size: 18px;
+                top: 14px;
+                left: 16px;
+
+                width: 125px;
+
             }
+
 
             #controls {
 
                 top: 14px;
                 right: 14px;
+
             }
+
+
+            .control {
+
+                width: 40px;
+                height: 40px;
+
+                border-radius: 10px;
+
+            }
+
 
             #instructions {
 
                 display: none;
+
             }
 
-            #productInfo {
+
+            #productCard {
 
                 left: 12px;
                 bottom: 12px;
 
-                width: calc(100% - 24px);
+                width:
+                    calc(100% - 24px);
 
-                padding: 16px;
+                padding: 17px;
 
-                border-radius: 14px;
+                border-radius: 16px;
+
             }
+
 
             #productName {
 
-                font-size: 20px;
+                font-size: 21px;
+
             }
+
 
             #description {
 
                 font-size: 13px;
 
                 margin-bottom: 10px;
+
+            }
+
+
+            #colorsTitle {
+
+                margin-top: 12px;
+
+            }
+
+
+            #whatsapp {
+
+                margin-top: 14px;
+
             }
 
         }
@@ -326,42 +582,30 @@
 <body>
 
 
-    <!-- =========================
-         CARREGAMENTO
-    ========================= -->
+    <!-- =================================
+         LOGO
+    ================================= -->
 
-    <div id="loading">
+    <div id="brand">
 
-        Carregando modelo 3D...
-
-    </div>
-
-
-    <!-- =========================
-         CABEÇALHO
-    ========================= -->
-
-    <div id="header">
-
-        <div id="brand">
-
-            4MAKER <span>3D</span>
-
-        </div>
+        <img
+            src="logo.png"
+            alt="4Maker 3D">
 
     </div>
 
 
-    <!-- =========================
+    <!-- =================================
          CONTROLES
-    ========================= -->
+    ================================= -->
 
     <div id="controls">
 
+
         <button
-            class="controlButton"
+            class="control"
             id="resetButton"
-            title="Centralizar modelo">
+            title="Centralizar">
 
             ↺
 
@@ -369,7 +613,7 @@
 
 
         <button
-            class="controlButton"
+            class="control"
             id="rotateButton"
             title="Rotação automática">
 
@@ -379,7 +623,17 @@
 
 
         <button
-            class="controlButton"
+            class="control"
+            id="backgroundButton"
+            title="Alterar fundo">
+
+            ◐
+
+        </button>
+
+
+        <button
+            class="control"
             id="fullscreenButton"
             title="Tela cheia">
 
@@ -387,12 +641,59 @@
 
         </button>
 
+
     </div>
 
 
-    <!-- =========================
+    <!-- =================================
+         FUNDOS
+    ================================= -->
+
+    <div id="backgroundMenu">
+
+
+        <button
+            class="backgroundOption"
+            data-bg="light">
+
+            Fundo claro
+
+        </button>
+
+
+        <button
+            class="backgroundOption"
+            data-bg="dark">
+
+            Fundo escuro
+
+        </button>
+
+
+        <button
+            class="backgroundOption"
+            data-bg="studio">
+
+            Estúdio
+
+        </button>
+
+
+        <button
+            class="backgroundOption"
+            data-bg="blue">
+
+            Azul 4Maker
+
+        </button>
+
+
+    </div>
+
+
+    <!-- =================================
          INSTRUÇÕES
-    ========================= -->
+    ================================= -->
 
     <div id="instructions">
 
@@ -401,11 +702,12 @@
     </div>
 
 
-    <!-- =========================
+    <!-- =================================
          INFORMAÇÕES
-    ========================= -->
+    ================================= -->
 
-    <div id="productInfo">
+    <div id="productCard">
+
 
         <div id="category">
 
@@ -446,6 +748,61 @@
         </div>
 
 
+        <div id="colorsTitle">
+
+            Cores disponíveis
+
+        </div>
+
+
+        <div id="colors">
+
+
+            <button
+                class="colorButton active"
+                data-color="#FFFFFF"
+                style="background:#FFFFFF">
+            </button>
+
+
+            <button
+                class="colorButton"
+                data-color="#2B292A"
+                style="background:#2B292A">
+            </button>
+
+
+            <button
+                class="colorButton"
+                data-color="#183765"
+                style="background:#183765">
+            </button>
+
+
+            <button
+                class="colorButton"
+                data-color="#D92B2B"
+                style="background:#D92B2B">
+            </button>
+
+
+            <button
+                class="colorButton"
+                data-color="#D6A21E"
+                style="background:#D6A21E">
+            </button>
+
+
+            <button
+                class="colorButton"
+                data-color="#3E8F55"
+                style="background:#3E8F55">
+            </button>
+
+
+        </div>
+
+
         <a
             id="whatsapp"
             href="#"
@@ -455,16 +812,18 @@
 
         </a>
 
+
     </div>
 
 
-    <!-- =========================
+    <!-- =================================
          THREE.JS
-    ========================= -->
+    ================================= -->
 
     <script type="importmap">
 
     {
+
         "imports": {
 
             "three":
@@ -474,6 +833,7 @@
             "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
 
         }
+
     }
 
     </script>
@@ -482,28 +842,38 @@
     <script type="module">
 
 
-        import * as THREE from 'three';
+        import * as THREE
+        from 'three';
+
 
         import {
             OrbitControls
-        } from 'three/addons/controls/OrbitControls.js';
+        }
+        from
+        'three/addons/controls/OrbitControls.js';
+
 
         import {
             STLLoader
-        } from 'three/addons/loaders/STLLoader.js';
+        }
+        from
+        'three/addons/loaders/STLLoader.js';
 
 
-        /* =========================
-           CONFIGURAÇÃO DO PRODUTO
-        ========================= */
+        /* =================================
+           PRODUTOS
+        ================================= */
 
         const produtos = {
 
+
             "Self-Watering-3": {
 
-                nome: "Self-Watering 3",
+                nome:
+                    "Self-Watering 3",
 
-                categoria: "Plantas e decoração",
+                categoria:
+                    "Plantas e decoração",
 
                 descricao:
                     "Modelo disponível para produção personalizada.",
@@ -516,9 +886,11 @@
 
             "vaso-01": {
 
-                nome: "Vaso Geométrico 01",
+                nome:
+                    "Vaso Geométrico 01",
 
-                categoria: "Plantas e decoração",
+                categoria:
+                    "Plantas e decoração",
 
                 descricao:
                     "Vaso decorativo com design exclusivo.",
@@ -526,66 +898,46 @@
                 materiais:
                     "PLA • PETG • ABS"
 
-            },
-
-
-            "vaso-02": {
-
-                nome: "Vaso Geométrico 02",
-
-                categoria: "Plantas e decoração",
-
-                descricao:
-                    "Modelo decorativo disponível em diversas opções.",
-
-                materiais:
-                    "PLA • PETG • ABS"
-
             }
+
 
         };
 
 
-        /* =========================
-           IDENTIFICAR MODELO PELA URL
-        ========================= */
+        /* =================================
+           MODELO DA URL
+        ================================= */
 
-        const parametros =
+        const params =
             new URLSearchParams(
                 window.location.search
             );
 
 
-        let modeloNome =
-            parametros.get("modelo");
-
-
-        if (!modeloNome) {
-
-            modeloNome = "Self-Watering-3";
-
-        }
+        const modeloNome =
+            params.get("modelo")
+            || "Self-Watering-3";
 
 
         const produto =
-            produtos[modeloNome] ||
-            produtos["Self-Watering-3"];
+            produtos[modeloNome]
+            || produtos["Self-Watering-3"];
 
 
-        /* =========================
-           ATUALIZAR INFORMAÇÕES
-        ========================= */
-
-        document.getElementById(
-            "productName"
-        ).textContent =
-            produto.nome;
-
+        /* =================================
+           INFORMAÇÕES
+        ================================= */
 
         document.getElementById(
             "category"
         ).textContent =
             produto.categoria;
+
+
+        document.getElementById(
+            "productName"
+        ).textContent =
+            produto.nome;
 
 
         document.getElementById(
@@ -595,51 +947,45 @@
 
 
         document.querySelector(
-            ".detail"
+            "#productCard .detail"
         ).innerHTML =
-            "<strong>Materiais:</strong> " +
-            produto.materiais;
+            "<strong>Materiais:</strong> "
+            + produto.materiais;
 
 
-        /* =========================
+        /* =================================
            WHATSAPP
-        ========================= */
+        ================================= */
 
         const telefone =
             "5500000000000";
 
 
         const mensagem =
-            "Olá! Gostaria de solicitar um orçamento para o modelo " +
-            produto.nome;
+            "Olá! Gostaria de solicitar um orçamento para "
+            + produto.nome;
 
 
         document.getElementById(
             "whatsapp"
         ).href =
-            "https://wa.me/" +
-            telefone +
-            "?text=" +
-            encodeURIComponent(mensagem);
+            "https://wa.me/"
+            + telefone
+            + "?text="
+            + encodeURIComponent(mensagem);
 
 
-        /* =========================
+        /* =================================
            CENA
-        ========================= */
+        ================================= */
 
         const scene =
             new THREE.Scene();
 
 
-        scene.background =
-            new THREE.Color(
-                0xf3f3f3
-            );
-
-
-        /* =========================
+        /* =================================
            CÂMERA
-        ========================= */
+        ================================= */
 
         const camera =
             new THREE.PerspectiveCamera(
@@ -659,13 +1005,13 @@
         camera.position.set(
             0,
             0,
-            100
+            75
         );
 
 
-        /* =========================
-           RENDERIZADOR
-        ========================= */
+        /* =================================
+           RENDER
+        ================================= */
 
         const renderer =
             new THREE.WebGLRenderer({
@@ -696,22 +1042,14 @@
         );
 
 
-        renderer.shadowMap.enabled =
-            true;
-
-
-        renderer.shadowMap.type =
-            THREE.PCFSoftShadowMap;
-
-
         document.body.appendChild(
             renderer.domElement
         );
 
 
-        /* =========================
+        /* =================================
            CONTROLES
-        ========================= */
+        ================================= */
 
         const controls =
             new OrbitControls(
@@ -735,17 +1073,14 @@
             false;
 
 
-        /* =========================
-           ILUMINAÇÃO
-        ========================= */
+        /* =================================
+           LUZ
+        ================================= */
 
         const keyLight =
             new THREE.DirectionalLight(
-
                 0xffffff,
-
                 4
-
             );
 
 
@@ -756,10 +1091,6 @@
         );
 
 
-        keyLight.castShadow =
-            true;
-
-
         scene.add(
             keyLight
         );
@@ -767,11 +1098,8 @@
 
         const fillLight =
             new THREE.DirectionalLight(
-
                 0xffffff,
-
                 2
-
             );
 
 
@@ -787,53 +1115,33 @@
         );
 
 
-        const backLight =
-            new THREE.DirectionalLight(
-
-                0xffffff,
-
-                2
-
-            );
-
-
-        backLight.position.set(
-            0,
-            5,
-            -10
-        );
-
-
-        scene.add(
-            backLight
-        );
-
-
-        const ambientLight =
+        const ambient =
             new THREE.AmbientLight(
-
                 0xffffff,
-
-                1.5
-
+                2
             );
 
 
         scene.add(
-            ambientLight
+            ambient
         );
 
 
-        /* =========================
+        /* =================================
            MODELO
-        ========================= */
+        ================================= */
 
         let model = null;
 
-        let originalRotation = null;
 
         let automaticRotation =
             false;
+
+
+        let initialPosition;
+
+
+        let initialRotation;
 
 
         const loader =
@@ -857,11 +1165,14 @@
                 const material =
                     new THREE.MeshStandardMaterial({
 
-                        color: 0x777777,
+                        color:
+                            0x777777,
 
-                        metalness: 0.05,
+                        metalness:
+                            0.05,
 
-                        roughness: 0.6
+                        roughness:
+                            0.58
 
                     });
 
@@ -876,26 +1187,20 @@
                     );
 
 
-                model.castShadow =
-                    true;
-
-
-                model.receiveShadow =
-                    true;
-
-
                 scene.add(
                     model
                 );
 
 
-                /* =====================
-                   DIMENSIONAMENTO
-                ===================== */
+                /* =========================
+                   ESCALA
+                ========================= */
 
                 const box =
                     new THREE.Box3()
-                    .setFromObject(model);
+                    .setFromObject(
+                        model
+                    );
 
 
                 const size =
@@ -912,39 +1217,26 @@
                     );
 
 
-                const scale =
-                    50 /
-                    maxDimension;
-
-
                 model.scale.setScalar(
-                    scale
+                    50 / maxDimension
                 );
 
 
-                /* =====================
-                   POSIÇÃO INICIAL
-                ===================== */
+                /* =========================
+                   ESTADO INICIAL
+                ========================= */
 
-                model.rotation.x =
-                    0;
-
-
-                model.rotation.y =
-                    0;
+                initialPosition =
+                    model.position.clone();
 
 
-                model.rotation.z =
-                    0;
-
-
-                originalRotation =
+                initialRotation =
                     model.rotation.clone();
 
 
-                /* =====================
+                /* =========================
                    CÂMERA
-                ===================== */
+                ========================= */
 
                 camera.position.set(
                     0,
@@ -965,8 +1257,7 @@
 
                 document.getElementById(
                     "loading"
-                ).style.display =
-                    "none";
+                );
 
 
             },
@@ -978,114 +1269,230 @@
             function (error) {
 
                 console.error(
-                    "Erro ao carregar STL:",
                     error
                 );
 
-
-                document.getElementById(
-                    "loading"
-                ).textContent =
-                    "Não foi possível carregar o modelo.";
-
             }
 
         );
 
 
-        /* =========================
-           RESET
-        ========================= */
+        /* =================================
+           CENTRALIZAR
+        ================================= */
 
         document.getElementById(
             "resetButton"
-        ).addEventListener(
-
-            "click",
-
-            function () {
-
-                if (!model)
-                    return;
+        ).onclick = function () {
 
 
-                model.rotation.copy(
-                    originalRotation
-                );
+            if (!model)
+                return;
 
 
-                controls.reset();
-
-            }
-
-        );
+            model.position.copy(
+                initialPosition
+            );
 
 
-        /* =========================
-           ROTAÇÃO AUTOMÁTICA
-        ========================= */
+            model.rotation.copy(
+                initialRotation
+            );
+
+
+            controls.reset();
+
+        };
+
+
+        /* =================================
+           ROTAÇÃO
+        ================================= */
 
         document.getElementById(
             "rotateButton"
-        ).addEventListener(
-
-            "click",
-
-            function () {
-
-                automaticRotation =
-                    !automaticRotation;
+        ).onclick = function () {
 
 
-                this.textContent =
-                    automaticRotation
-                    ? "Ⅱ"
-                    : "▶";
+            automaticRotation =
+                !automaticRotation;
+
+
+            this.classList.toggle(
+                "active",
+                automaticRotation
+            );
+
+
+            this.textContent =
+                automaticRotation
+                ? "Ⅱ"
+                : "▶";
+
+        };
+
+
+        /* =================================
+           CORES
+        ================================= */
+
+        document.querySelectorAll(
+            ".colorButton"
+        ).forEach(
+
+            button => {
+
+                button.onclick =
+                    function () {
+
+
+                        if (!model)
+                            return;
+
+
+                        const color =
+                            this.dataset.color;
+
+
+                        model.material.color.set(
+                            color
+                        );
+
+
+                        document
+                            .querySelectorAll(
+                                ".colorButton"
+                            )
+                            .forEach(
+                                b =>
+                                b.classList.remove(
+                                    "active"
+                                )
+                            );
+
+
+                        this.classList.add(
+                            "active"
+                        );
+
+                    };
 
             }
 
         );
 
 
-        /* =========================
+        /* =================================
+           FUNDOS
+        ================================= */
+
+        const backgroundMenu =
+            document.getElementById(
+                "backgroundMenu"
+            );
+
+
+        document.getElementById(
+            "backgroundButton"
+        ).onclick = function () {
+
+            backgroundMenu.classList.toggle(
+                "show"
+            );
+
+        };
+
+
+        document.querySelectorAll(
+            ".backgroundOption"
+        ).forEach(
+
+            option => {
+
+                option.onclick =
+                    function () {
+
+
+                        const bg =
+                            this.dataset.bg;
+
+
+                        if (bg === "light") {
+
+                            document.body.style.background =
+                                "linear-gradient(135deg,#ffffff,#eeeeee)";
+
+                        }
+
+
+                        if (bg === "dark") {
+
+                            document.body.style.background =
+                                "linear-gradient(135deg,#202124,#08090b)";
+
+                        }
+
+
+                        if (bg === "studio") {
+
+                            document.body.style.background =
+                                "radial-gradient(circle at 50% 35%,#ffffff,#dcdcdc)";
+
+                        }
+
+
+                        if (bg === "blue") {
+
+                            document.body.style.background =
+                                "linear-gradient(135deg,#183765,#0c1c35)";
+
+                        }
+
+
+                        backgroundMenu.classList.remove(
+                            "show"
+                        );
+
+                    };
+
+            }
+
+        );
+
+
+        /* =================================
            TELA CHEIA
-        ========================= */
+        ================================= */
 
         document.getElementById(
             "fullscreenButton"
-        ).addEventListener(
+        ).onclick = function () {
 
-            "click",
 
-            function () {
+            if (!document.fullscreenElement) {
 
-                if (
-                    !document.fullscreenElement
-                ) {
+                document.documentElement
+                    .requestFullscreen();
 
-                    document.documentElement
-                        .requestFullscreen();
+            } else {
 
-                } else {
-
-                    document.exitFullscreen();
-
-                }
+                document.exitFullscreen();
 
             }
 
-        );
+        };
 
 
-        /* =========================
-           REDIMENSIONAMENTO
-        ========================= */
+        /* =================================
+           RESIZE
+        ================================= */
 
         window.addEventListener(
 
             "resize",
 
             function () {
+
 
                 camera.aspect =
                     window.innerWidth /
@@ -1108,11 +1515,12 @@
         );
 
 
-        /* =========================
+        /* =================================
            ANIMAÇÃO
-        ========================= */
+        ================================= */
 
         function animate() {
+
 
             requestAnimationFrame(
                 animate
@@ -1138,6 +1546,7 @@
                 camera
             );
 
+
         }
 
 
@@ -1145,6 +1554,7 @@
 
 
     </script>
+
 
 </body>
 
