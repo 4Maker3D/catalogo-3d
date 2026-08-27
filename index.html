@@ -3,1558 +3,1612 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>4Maker 3D</title>
+<title>4Maker 3D</title>
 
+<style>
 
-    <style>
+* {
+    box-sizing: border-box;
+}
 
-        * {
-            box-sizing: border-box;
-        }
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f5f7;
+    color: #202124;
+}
 
+/* =========================
+   ÁREA 3D
+========================= */
 
-        html,
-        body {
+#viewer {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
 
-            margin: 0;
-            width: 100%;
-            height: 100%;
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
 
-            overflow: hidden;
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+/* =========================
+   CABEÇALHO
+========================= */
 
-            color: #2B292A;
+#header {
 
-        }
+    position: fixed;
 
+    top: 0;
+    left: 0;
+    right: 0;
 
-        /* =================================
-           CENA
-        ================================= */
+    height: 76px;
 
-        body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffffff,
-                    #eeeeee
-                );
+    padding: 12px 20px;
 
-            transition:
-                background 0.4s ease;
+    background: rgba(25, 62, 108, 0.96);
 
-        }
+    z-index: 20;
 
+    box-shadow: 0 4px 18px rgba(0,0,0,0.10);
 
-        canvas {
+    backdrop-filter: blur(10px);
+}
 
-            display: block;
+.brand {
 
-        }
+    display: flex;
+    align-items: center;
+    gap: 10px;
 
+    color: white;
+}
 
-        /* =================================
-           LOGO
-        ================================= */
+.brand img {
 
-        #brand {
+    height: 48px;
+    width: auto;
 
-            position: absolute;
+    object-fit: contain;
 
-            top: 20px;
-            left: 22px;
+    background: white;
 
-            z-index: 20;
+    border-radius: 8px;
+}
 
-            width: 150px;
+.brand-text {
 
-        }
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
 
+.brand-text span {
 
-        #brand img {
+    font-weight: 300;
+    opacity: 0.8;
+}
 
-            width: 100%;
 
-            height: auto;
+/* =========================
+   CONTROLES
+========================= */
 
-            display: block;
+#controls {
 
-        }
+    display: flex;
+    gap: 8px;
+}
 
+.control-button {
 
-        /* =================================
-           CONTROLES
-        ================================= */
+    width: 48px;
+    height: 48px;
 
-        #controls {
+    border: none;
 
-            position: absolute;
+    border-radius: 13px;
 
-            top: 20px;
-            right: 20px;
+    background: rgba(255,255,255,0.96);
 
-            z-index: 20;
+    color: #193e6c;
 
-            display: flex;
+    font-size: 20px;
 
-            gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        }
+    cursor: pointer;
 
+    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
 
-        .control {
+    transition: transform 0.15s ease,
+                background 0.15s ease;
+}
 
-            width: 44px;
-            height: 44px;
+.control-button:active {
 
-            border: none;
+    transform: scale(0.92);
+}
 
-            border-radius: 12px;
+.control-button:hover {
 
-            background:
-                rgba(255,255,255,0.94);
+    background: white;
+}
 
-            color: #2B292A;
 
-            font-size: 19px;
+/* =========================
+   CARD DO PRODUTO
+========================= */
 
-            cursor: pointer;
+#product-card {
 
-            box-shadow:
-                0 5px 20px
-                rgba(0,0,0,0.10);
+    position: fixed;
 
-            transition:
-                transform 0.2s,
-                background 0.2s,
-                color 0.2s;
+    left: 50%;
 
-        }
+    bottom: 22px;
 
+    transform: translateX(-50%);
 
-        .control:hover {
+    width: min(560px, calc(100% - 32px));
 
-            transform:
-                translateY(-2px);
+    padding: 25px 28px 27px;
 
-        }
+    background: rgba(255,255,255,0.96);
 
+    border-radius: 24px;
 
-        .control.active {
+    z-index: 15;
 
-            background:
-                #183765;
+    box-shadow:
+        0 10px 35px rgba(0,0,0,0.15);
 
-            color:
-                white;
+    backdrop-filter: blur(15px);
 
-        }
+    transition:
+        background 0.3s ease,
+        color 0.3s ease;
+}
 
+.category {
 
-        /* =================================
-           MENU DE FUNDO
-        ================================= */
+    color: #193e6c;
 
-        #backgroundMenu {
+    font-size: 13px;
 
-            position: absolute;
+    font-weight: 600;
 
-            top: 75px;
-            right: 20px;
+    letter-spacing: 2px;
 
-            z-index: 20;
+    text-transform: uppercase;
 
-            background:
-                rgba(255,255,255,0.96);
+    margin-bottom: 8px;
+}
 
-            padding: 10px;
+.product-name {
 
-            border-radius: 12px;
+    font-size: 29px;
 
-            box-shadow:
-                0 8px 30px
-                rgba(0,0,0,0.12);
+    line-height: 1.15;
 
-            display: none;
+    margin-bottom: 12px;
 
-        }
+    font-weight: 500;
+}
 
+.description {
 
-        #backgroundMenu.show {
+    color: #666;
 
-            display: block;
+    font-size: 16px;
 
-        }
+    line-height: 1.45;
 
+    margin-bottom: 17px;
+}
 
-        .backgroundOption {
+.info-line {
 
-            display: block;
+    font-size: 16px;
 
-            width: 150px;
+    margin-top: 8px;
 
-            border: none;
+    line-height: 1.45;
+}
 
-            background: transparent;
+.info-line strong {
 
-            padding: 9px 10px;
+    font-weight: 600;
+}
 
-            border-radius: 8px;
 
-            text-align: left;
+/* =========================
+   CORES
+========================= */
 
-            cursor: pointer;
+.color-title {
 
-            font-size: 13px;
+    font-size: 15px;
 
-        }
+    margin-top: 18px;
+    margin-bottom: 9px;
 
+    font-weight: 500;
+}
 
-        .backgroundOption:hover {
+.colors {
 
-            background:
-                #f0f0f0;
+    display: flex;
 
-        }
+    gap: 10px;
 
+    margin-bottom: 20px;
+}
 
-        /* =================================
-           INSTRUÇÕES
-        ================================= */
+.color {
 
-        #instructions {
+    width: 42px;
+    height: 42px;
 
-            position: absolute;
+    border-radius: 50%;
 
-            top: 82px;
-            left: 50%;
+    border: 2px solid #d5d5d5;
 
-            transform:
-                translateX(-50%);
+    cursor: pointer;
 
-            z-index: 10;
+    position: relative;
 
-            padding: 7px 12px;
+    transition:
+        transform 0.15s ease,
+        border 0.15s ease;
+}
 
-            border-radius: 20px;
+.color.selected {
 
-            background:
-                rgba(255,255,255,0.70);
+    border: 3px solid #193e6c;
 
-            backdrop-filter:
-                blur(8px);
+    transform: scale(1.08);
+}
 
-            font-size: 11px;
+.color:active {
 
-            opacity: 0.65;
+    transform: scale(0.94);
+}
 
-            pointer-events: none;
 
-        }
+/* =========================
+   BOTÃO ORÇAMENTO
+========================= */
 
+.quote-button {
 
-        /* =================================
-           PRODUTO
-        ================================= */
+    width: 100%;
 
-        #productCard {
+    min-height: 56px;
 
-            position: absolute;
+    border: none;
 
-            left: 22px;
-            bottom: 22px;
+    border-radius: 15px;
 
-            width: 360px;
+    background: #193e6c;
 
-            max-width:
-                calc(100% - 44px);
+    color: white;
 
-            padding: 22px;
+    font-size: 17px;
 
-            z-index: 20;
+    font-weight: 600;
 
-            background:
-                rgba(255,255,255,0.95);
+    cursor: pointer;
 
-            backdrop-filter:
-                blur(12px);
+    transition:
+        transform 0.15s ease,
+        opacity 0.15s ease;
+}
 
-            border-radius: 18px;
+.quote-button:active {
 
-            box-shadow:
-                0 12px 40px
-                rgba(0,0,0,0.13);
+    transform: scale(0.98);
+}
 
-        }
+.quote-button:hover {
 
+    opacity: 0.92;
+}
 
-        #category {
 
-            color:
-                #183765;
+/* =========================
+   CARREGANDO
+========================= */
 
-            font-size: 11px;
+#loading {
 
-            font-weight: bold;
+    position: fixed;
 
-            letter-spacing:
-                1.5px;
+    left: 50%;
+    top: 50%;
 
-            text-transform:
-                uppercase;
+    transform: translate(-50%, -50%);
 
-            margin-bottom: 7px;
+    z-index: 10;
 
-        }
+    padding: 12px 18px;
 
+    border-radius: 12px;
 
-        #productName {
+    background: rgba(255,255,255,0.9);
 
-            font-size: 26px;
+    color: #333;
 
-            font-weight: 600;
+    font-size: 14px;
 
-            margin-bottom: 9px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+}
 
-        }
 
+/* =========================
+   MODO ESCURO
+========================= */
 
-        #description {
+body.dark #product-card {
 
-            color:
-                #666;
+    background: rgba(28,30,34,0.94);
 
-            font-size: 14px;
+    color: white;
+}
 
-            line-height: 1.5;
+body.dark .description {
 
-            margin-bottom: 16px;
+    color: #b8b8b8;
+}
 
-        }
+body.dark .category {
 
+    color: #8eb4e5;
+}
 
-        .detail {
+body.dark .color-title {
 
-            font-size: 13px;
+    color: #ddd;
+}
 
-            line-height: 1.5;
 
-            margin-top: 5px;
+/* =========================
+   RESPONSIVO
+========================= */
 
-        }
+@media (max-width: 600px) {
 
+    #header {
 
-        .detail strong {
+        height: 68px;
 
-            color:
-                #2B292A;
+        padding: 9px 12px;
+    }
 
-        }
+    .brand img {
 
+        height: 43px;
+    }
 
-        /* =================================
-           CORES
-        ================================= */
+    .brand-text {
 
-        #colorsTitle {
+        display: none;
+    }
 
-            margin-top: 16px;
+    #controls {
 
-            margin-bottom: 8px;
+        gap: 6px;
+    }
 
-            font-size: 12px;
+    .control-button {
 
-            font-weight: bold;
+        width: 43px;
+        height: 43px;
 
-        }
+        border-radius: 12px;
 
+        font-size: 18px;
+    }
 
-        #colors {
+    #product-card {
 
-            display: flex;
+        left: 12px;
+        right: 12px;
 
-            gap: 8px;
+        bottom: 12px;
 
-        }
+        transform: none;
 
+        width: auto;
 
-        .colorButton {
+        padding: 20px 20px 21px;
 
-            width: 25px;
-            height: 25px;
+        border-radius: 21px;
 
-            border-radius: 50%;
+        max-height: 48vh;
 
-            border: 2px solid white;
+        overflow-y: auto;
+    }
 
-            outline:
-                1px solid #ccc;
+    .category {
 
-            cursor: pointer;
+        font-size: 12px;
 
-        }
+        letter-spacing: 1.7px;
+    }
 
+    .product-name {
 
-        .colorButton.active {
+        font-size: 27px;
+    }
 
-            outline:
-                2px solid #183765;
+    .description {
 
-            outline-offset: 2px;
+        font-size: 15px;
 
-        }
+        margin-bottom: 14px;
+    }
 
+    .info-line {
 
-        /* =================================
-           WHATSAPP
-        ================================= */
+        font-size: 15px;
+    }
 
-        #whatsapp {
+    .color {
 
-            display: block;
+        width: 39px;
+        height: 39px;
+    }
 
-            margin-top: 18px;
+    .quote-button {
 
-            padding: 13px;
+        min-height: 53px;
 
-            border-radius: 10px;
+        font-size: 16px;
+    }
+}
 
-            background:
-                #183765;
-
-            color: white;
-
-            text-decoration: none;
-
-            text-align: center;
-
-            font-size: 14px;
-
-            font-weight: bold;
-
-            transition:
-                0.2s;
-
-        }
-
-
-        #whatsapp:hover {
-
-            transform:
-                translateY(-1px);
-
-            filter:
-                brightness(1.08);
-
-        }
-
-
-        /* =================================
-           LOADING
-        ================================= */
-
-        #loading {
-
-            position: fixed;
-
-            inset: 0;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            z-index: 100;
-
-            background:
-                #f4f4f4;
-
-            font-size: 14px;
-
-        }
-
-
-        /* =================================
-           MOBILE
-        ================================= */
-
-        @media (max-width: 600px) {
-
-
-            #brand {
-
-                top: 14px;
-                left: 16px;
-
-                width: 125px;
-
-            }
-
-
-            #controls {
-
-                top: 14px;
-                right: 14px;
-
-            }
-
-
-            .control {
-
-                width: 40px;
-                height: 40px;
-
-                border-radius: 10px;
-
-            }
-
-
-            #instructions {
-
-                display: none;
-
-            }
-
-
-            #productCard {
-
-                left: 12px;
-                bottom: 12px;
-
-                width:
-                    calc(100% - 24px);
-
-                padding: 17px;
-
-                border-radius: 16px;
-
-            }
-
-
-            #productName {
-
-                font-size: 21px;
-
-            }
-
-
-            #description {
-
-                font-size: 13px;
-
-                margin-bottom: 10px;
-
-            }
-
-
-            #colorsTitle {
-
-                margin-top: 12px;
-
-            }
-
-
-            #whatsapp {
-
-                margin-top: 14px;
-
-            }
-
-        }
-
-    </style>
+</style>
 
 </head>
 
 
 <body>
 
+<div id="viewer"></div>
 
-    <!-- =================================
-         LOGO
-    ================================= -->
 
-    <div id="brand">
+<!-- =========================
+     CABEÇALHO
+========================= -->
+
+<header id="header">
+
+    <div class="brand">
 
         <img
-            src="logo.png"
+            src="Geral%204Maker3D%2020260824_080445.jpg"
             alt="4Maker 3D">
+
+        <div class="brand-text">
+            4MAKER <span>3D</span>
+        </div>
 
     </div>
 
-
-    <!-- =================================
-         CONTROLES
-    ================================= -->
 
     <div id="controls">
 
-
         <button
-            class="control"
+            class="control-button"
             id="resetButton"
             title="Centralizar">
-
-            ↺
-
+            ↻
         </button>
 
-
         <button
-            class="control"
-            id="rotateButton"
+            class="control-button"
+            id="autoButton"
             title="Rotação automática">
-
             ▶
-
         </button>
 
-
         <button
-            class="control"
-            id="backgroundButton"
-            title="Alterar fundo">
-
+            class="control-button"
+            id="environmentButton"
+            title="Mudar ambiente">
             ◐
-
         </button>
 
-
         <button
-            class="control"
+            class="control-button"
             id="fullscreenButton"
             title="Tela cheia">
-
             ⛶
-
         </button>
-
 
     </div>
 
-
-    <!-- =================================
-         FUNDOS
-    ================================= -->
-
-    <div id="backgroundMenu">
+</header>
 
 
-        <button
-            class="backgroundOption"
-            data-bg="light">
-
-            Fundo claro
-
-        </button>
+<div id="loading">
+    Carregando modelo 3D...
+</div>
 
 
-        <button
-            class="backgroundOption"
-            data-bg="dark">
+<!-- =========================
+     PRODUTO
+========================= -->
 
-            Fundo escuro
+<section id="product-card">
 
-        </button>
-
-
-        <button
-            class="backgroundOption"
-            data-bg="studio">
-
-            Estúdio
-
-        </button>
-
-
-        <button
-            class="backgroundOption"
-            data-bg="blue">
-
-            Azul 4Maker
-
-        </button>
-
-
+    <div class="category" id="category">
+        PLANTAS E DECORAÇÃO
     </div>
 
-
-    <!-- =================================
-         INSTRUÇÕES
-    ================================= -->
-
-    <div id="instructions">
-
-        Arraste para girar • Pinça para aproximar
-
+    <div class="product-name" id="productName">
+        Self-Watering 3
     </div>
 
+    <div class="description" id="description">
+        Modelo disponível para produção personalizada.
+    </div>
 
-    <!-- =================================
-         INFORMAÇÕES
-    ================================= -->
-
-    <div id="productCard">
-
-
-        <div id="category">
-
-            Plantas e decoração
-
-        </div>
-
-
-        <div id="productName">
-
-            Self-Watering 3
-
-        </div>
-
-
-        <div id="description">
-
-            Modelo disponível para produção personalizada.
-
-        </div>
-
-
-        <div class="detail">
-
-            <strong>Materiais:</strong>
-
+    <div class="info-line">
+        <strong>Materiais:</strong>
+        <span id="materials">
             PLA • PETG • ABS
+        </span>
+    </div>
 
-        </div>
-
-
-        <div class="detail">
-
-            <strong>Personalização:</strong>
-
+    <div class="info-line">
+        <strong>Personalização:</strong>
+        <span id="customization">
             Cores e tamanhos sob consulta
-
-        </div>
-
-
-        <div id="colorsTitle">
-
-            Cores disponíveis
-
-        </div>
-
-
-        <div id="colors">
-
-
-            <button
-                class="colorButton active"
-                data-color="#FFFFFF"
-                style="background:#FFFFFF">
-            </button>
-
-
-            <button
-                class="colorButton"
-                data-color="#2B292A"
-                style="background:#2B292A">
-            </button>
-
-
-            <button
-                class="colorButton"
-                data-color="#183765"
-                style="background:#183765">
-            </button>
-
-
-            <button
-                class="colorButton"
-                data-color="#D92B2B"
-                style="background:#D92B2B">
-            </button>
-
-
-            <button
-                class="colorButton"
-                data-color="#D6A21E"
-                style="background:#D6A21E">
-            </button>
-
-
-            <button
-                class="colorButton"
-                data-color="#3E8F55"
-                style="background:#3E8F55">
-            </button>
-
-
-        </div>
-
-
-        <a
-            id="whatsapp"
-            href="#"
-            target="_blank">
-
-            Solicitar orçamento
-
-        </a>
-
-
+        </span>
     </div>
 
 
-    <!-- =================================
-         THREE.JS
-    ================================= -->
+    <div class="color-title">
+        Cores disponíveis
+    </div>
 
-    <script type="importmap">
+    <div class="colors" id="colors"></div>
+
+
+    <button
+        class="quote-button"
+        id="quoteButton">
+
+        Solicitar orçamento
+
+    </button>
+
+</section>
+
+
+<script type="importmap">
+
+{
+    "imports": {
+
+        "three":
+        "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js",
+
+        "three/addons/":
+        "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
+
+    }
+}
+
+</script>
+
+
+<script type="module">
+
+import * as THREE from 'three';
+
+import {
+    OrbitControls
+}
+from 'three/addons/controls/OrbitControls.js';
+
+import {
+    STLLoader
+}
+from 'three/addons/loaders/STLLoader.js';
+
+import {
+    RGBELoader
+}
+from 'three/addons/loaders/RGBELoader.js';
+
+
+/* =====================================================
+   CONFIGURAÇÃO DOS PRODUTOS
+===================================================== */
+
+const products = {
+
+    "Self-Watering-3": {
+
+        name: "Self-Watering 3",
+
+        category: "PLANTAS E DECORAÇÃO",
+
+        description:
+            "Modelo disponível para produção personalizada.",
+
+        materials:
+            "PLA • PETG • ABS",
+
+        customization:
+            "Cores e tamanhos sob consulta",
+
+        colors: [
+
+            {
+                name: "Branco",
+                hex: 0xf5f5f5
+            },
+
+            {
+                name: "Preto",
+                hex: 0x252525
+            },
+
+            {
+                name: "Azul",
+                hex: 0x214779
+            },
+
+            {
+                name: "Vermelho",
+                hex: 0xdd3030
+            },
+
+            {
+                name: "Amarelo",
+                hex: 0xd6a51b
+            },
+
+            {
+                name: "Verde",
+                hex: 0x3c985c
+            }
+
+        ]
+
+    }
+
+};
+
+
+/* =====================================================
+   IDENTIFICA O MODELO PELA URL
+===================================================== */
+
+const params =
+    new URLSearchParams(window.location.search);
+
+let modelName =
+    params.get("modelo") || "Self-Watering-3";
+
+
+/*
+   Remove .stl caso alguém coloque:
+   ?modelo=Self-Watering-3.stl
+*/
+
+modelName =
+    modelName.replace(/\.stl$/i, "");
+
+
+/*
+   Procura as informações do produto.
+*/
+
+const product =
+    products[modelName] || products["Self-Watering-3"];
+
+
+/* =====================================================
+   PREENCHER INTERFACE
+===================================================== */
+
+document.getElementById("productName").textContent =
+    product.name;
+
+document.getElementById("category").textContent =
+    product.category;
+
+document.getElementById("description").textContent =
+    product.description;
+
+document.getElementById("materials").textContent =
+    product.materials;
+
+document.getElementById("customization").textContent =
+    product.customization;
+
+
+/* =====================================================
+   CENA
+===================================================== */
+
+const scene =
+    new THREE.Scene();
+
+scene.background =
+    new THREE.Color(0xf4f5f7);
+
+
+/* =====================================================
+   CÂMERA
+===================================================== */
+
+const camera =
+    new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.01,
+        5000
+    );
+
+camera.position.set(
+    0,
+    0,
+    100
+);
+
+
+/* =====================================================
+   RENDERIZADOR
+===================================================== */
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: false
+    });
+
+renderer.setPixelRatio(
+    Math.min(window.devicePixelRatio, 2)
+);
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+renderer.outputColorSpace =
+    THREE.SRGBColorSpace;
+
+renderer.toneMapping =
+    THREE.ACESFilmicToneMapping;
+
+renderer.toneMappingExposure =
+    1.15;
+
+
+/*
+   Importante:
+
+   Não usamos shadowMap aqui.
+
+   Isso evita o problema do
+   "quadrado cinza escuro" que
+   apareceu anteriormente.
+*/
+
+renderer.shadowMap.enabled = false;
+
+
+document.getElementById("viewer")
+    .appendChild(renderer.domElement);
+
+
+/* =====================================================
+   CONTROLES
+===================================================== */
+
+const controls =
+    new OrbitControls(
+        camera,
+        renderer.domElement
+    );
+
+controls.enableDamping = true;
+
+controls.dampingFactor = 0.07;
+
+controls.enableZoom = true;
+
+controls.enablePan = true;
+
+
+/*
+   CELULAR
+
+   1 dedo:
+   GIRAR
+
+   2 dedos:
+   PAN + ZOOM
+
+   Isso permite mover o modelo com
+   dois dedos sem perder a pinça.
+*/
+
+controls.touches.ONE =
+    THREE.TOUCH.ROTATE;
+
+controls.touches.TWO =
+    THREE.TOUCH.DOLLY_PAN;
+
+
+/*
+   MOUSE
+
+   Esquerdo:
+   Girar
+
+   Direito:
+   Mover
+
+   Roda:
+   Zoom
+*/
+
+controls.mouseButtons.LEFT =
+    THREE.MOUSE.ROTATE;
+
+controls.mouseButtons.RIGHT =
+    THREE.MOUSE.PAN;
+
+controls.mouseButtons.MIDDLE =
+    THREE.MOUSE.DOLLY;
+
+
+/* =====================================================
+   ILUMINAÇÃO
+===================================================== */
+
+const ambient =
+    new THREE.AmbientLight(
+        0xffffff,
+        2.2
+    );
+
+scene.add(ambient);
+
+
+const keyLight =
+    new THREE.DirectionalLight(
+        0xffffff,
+        3.5
+    );
+
+keyLight.position.set(
+    5,
+    10,
+    8
+);
+
+scene.add(keyLight);
+
+
+const fillLight =
+    new THREE.DirectionalLight(
+        0xffffff,
+        1.8
+    );
+
+fillLight.position.set(
+    -6,
+    4,
+    -5
+);
+
+scene.add(fillLight);
+
+
+/* =====================================================
+   MODELO
+===================================================== */
+
+let model = null;
+
+let originalMaterialColor =
+    0x777777;
+
+let modelScale = 1;
+
+
+/* =====================================================
+   CENTRALIZAR
+===================================================== */
+
+function centerModel() {
+
+    if (!model)
+        return;
+
+
+    const box =
+        new THREE.Box3()
+            .setFromObject(model);
+
+    const center =
+        box.getCenter(
+            new THREE.Vector3()
+        );
+
+
+    model.position.sub(center);
+
+
+    /*
+       Calcula tamanho novamente
+    */
+
+    const newBox =
+        new THREE.Box3()
+            .setFromObject(model);
+
+    const size =
+        newBox.getSize(
+            new THREE.Vector3()
+        );
+
+    const maxDimension =
+        Math.max(
+            size.x,
+            size.y,
+            size.z
+        );
+
+
+    /*
+       Distância da câmera
+    */
+
+    const distance =
+        maxDimension * 1.9;
+
+    camera.position.set(
+        0,
+        maxDimension * 0.15,
+        distance
+    );
+
+    controls.target.set(
+        0,
+        0,
+        0
+    );
+
+    controls.update();
+}
+
+
+/* =====================================================
+   CARREGAR STL
+===================================================== */
+
+const loader =
+    new STLLoader();
+
+
+/*
+   IMPORTANTE:
+
+   O STL está na raiz.
+
+   Portanto:
+
+   Self-Watering-3.stl
+
+   é encontrado automaticamente
+   através do parâmetro:
+
+   ?modelo=Self-Watering-3
+*/
+
+const stlPath =
+    modelName + ".stl";
+
+
+loader.load(
+
+    stlPath,
+
+
+    function(geometry) {
+
+        geometry.computeVertexNormals();
+
+        geometry.center();
+
+
+        /*
+           Material inicial
+        */
+
+        const material =
+            new THREE.MeshStandardMaterial({
+
+                color:
+                    originalMaterialColor,
+
+                metalness:
+                    0.05,
+
+                roughness:
+                    0.58
+
+            });
+
+
+        model =
+            new THREE.Mesh(
+                geometry,
+                material
+            );
+
+
+        scene.add(model);
+
+
+        /*
+           Ajuste automático
+        */
+
+        const box =
+            new THREE.Box3()
+                .setFromObject(model);
+
+        const size =
+            box.getSize(
+                new THREE.Vector3()
+            );
+
+        const maxDimension =
+            Math.max(
+                size.x,
+                size.y,
+                size.z
+            );
+
+
+        modelScale =
+            50 / maxDimension;
+
+        model.scale.setScalar(
+            modelScale
+        );
+
+
+        centerModel();
+
+
+        document.getElementById("loading")
+            .style.display = "none";
+
+    },
+
+
+    undefined,
+
+
+    function(error) {
+
+        console.error(
+            "Erro ao carregar STL:",
+            error
+        );
+
+
+        document.getElementById("loading")
+            .textContent =
+            "Não foi possível carregar o modelo.";
+
+    }
+
+);
+
+
+/* =====================================================
+   CORES
+===================================================== */
+
+const colorsContainer =
+    document.getElementById("colors");
+
+
+product.colors.forEach(
+    (colorData, index) => {
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            "color";
+
+
+        button.title =
+            colorData.name;
+
+
+        button.style.background =
+            "#" +
+            colorData.hex
+                .toString(16)
+                .padStart(6, "0");
+
+
+        if (index === 0) {
+
+            button.classList.add(
+                "selected"
+            );
+
+        }
+
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                if (!model)
+                    return;
+
+
+                model.material.color.setHex(
+                    colorData.hex
+                );
+
+
+                document
+                    .querySelectorAll(".color")
+                    .forEach(
+                        item =>
+                            item.classList.remove(
+                                "selected"
+                            )
+                    );
+
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+        );
+
+
+        colorsContainer.appendChild(
+            button
+        );
+
+    }
+);
+
+
+/* =====================================================
+   AMBIENTES
+===================================================== */
+
+let environmentMode = 0;
+
+
+/*
+   0 = Claro
+   1 = Escuro
+   2 = Estúdio HDRI
+   3 = 4Maker
+*/
+
+const environments = [
 
     {
+        name: "Claro",
+        background: 0xf4f5f7,
+        hdr: false
+    },
 
-        "imports": {
+    {
+        name: "Escuro",
+        background: 0x17191d,
+        hdr: false
+    },
 
-            "three":
-            "https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js",
+    {
+        name: "Estúdio",
+        background: null,
+        hdr: true
+    },
 
-            "three/addons/":
-            "https://cdn.jsdelivr.net/npm/three@0.179.1/examples/jsm/"
+    {
+        name: "4Maker",
+        background: 0x193e6c,
+        hdr: false
+    }
+
+];
+
+
+let studioEnvironment = null;
+
+
+/* =====================================================
+   CARREGAR HDRI
+===================================================== */
+
+const rgbeLoader =
+    new RGBELoader();
+
+
+rgbeLoader.load(
+
+    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+
+    function(texture) {
+
+        texture.mapping =
+            THREE.EquirectangularReflectionMapping;
+
+        studioEnvironment =
+            texture;
+
+    },
+
+    undefined,
+
+    function(error) {
+
+        console.warn(
+            "HDRI não carregado.",
+            error
+        );
+
+    }
+
+);
+
+
+/* =====================================================
+   ALTERAR AMBIENTE
+===================================================== */
+
+function updateEnvironment() {
+
+    const env =
+        environments[
+            environmentMode
+        ];
+
+
+    if (env.hdr) {
+
+        /*
+           HDRI como fundo e iluminação
+        */
+
+        if (studioEnvironment) {
+
+            scene.background =
+                studioEnvironment;
+
+            scene.environment =
+                studioEnvironment;
 
         }
 
     }
 
-    </script>
+    else {
+
+        scene.background =
+            new THREE.Color(
+                env.background
+            );
+
+        scene.environment =
+            null;
+
+    }
 
 
-    <script type="module">
+    /*
+       Modo escuro altera também
+       o cartão do produto.
+    */
+
+    if (environmentMode === 1) {
+
+        document.body.classList.add(
+            "dark"
+        );
+
+    }
+
+    else {
+
+        document.body.classList.remove(
+            "dark"
+        );
+
+    }
+
+}
 
 
-        import * as THREE
-        from 'three';
+updateEnvironment();
 
 
-        import {
-            OrbitControls
-        }
-        from
-        'three/addons/controls/OrbitControls.js';
+/* =====================================================
+   BOTÃO AMBIENTE
+===================================================== */
 
+document
+    .getElementById("environmentButton")
+    .addEventListener(
+        "click",
+        function() {
 
-        import {
-            STLLoader
-        }
-        from
-        'three/addons/loaders/STLLoader.js';
+            environmentMode++;
 
+            if (
+                environmentMode >=
+                environments.length
+            ) {
 
-        /* =================================
-           PRODUTOS
-        ================================= */
-
-        const produtos = {
-
-
-            "Self-Watering-3": {
-
-                nome:
-                    "Self-Watering 3",
-
-                categoria:
-                    "Plantas e decoração",
-
-                descricao:
-                    "Modelo disponível para produção personalizada.",
-
-                materiais:
-                    "PLA • PETG • ABS"
-
-            },
-
-
-            "vaso-01": {
-
-                nome:
-                    "Vaso Geométrico 01",
-
-                categoria:
-                    "Plantas e decoração",
-
-                descricao:
-                    "Vaso decorativo com design exclusivo.",
-
-                materiais:
-                    "PLA • PETG • ABS"
+                environmentMode = 0;
 
             }
 
 
-        };
+            updateEnvironment();
 
+        }
+    );
 
-        /* =================================
-           MODELO DA URL
-        ================================= */
 
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
+/* =====================================================
+   ROTAÇÃO AUTOMÁTICA
+===================================================== */
 
+let autoRotate = false;
 
-        const modeloNome =
-            params.get("modelo")
-            || "Self-Watering-3";
 
+document
+    .getElementById("autoButton")
+    .addEventListener(
+        "click",
+        function() {
 
-        const produto =
-            produtos[modeloNome]
-            || produtos["Self-Watering-3"];
+            autoRotate =
+                !autoRotate;
 
+            this.textContent =
+                autoRotate
+                    ? "Ⅱ"
+                    : "▶";
 
-        /* =================================
-           INFORMAÇÕES
-        ================================= */
+        }
+    );
 
-        document.getElementById(
-            "category"
-        ).textContent =
-            produto.categoria;
 
+/* =====================================================
+   CENTRALIZAR
+===================================================== */
 
-        document.getElementById(
-            "productName"
-        ).textContent =
-            produto.nome;
+document
+    .getElementById("resetButton")
+    .addEventListener(
+        "click",
+        function() {
 
+            centerModel();
 
-        document.getElementById(
-            "description"
-        ).textContent =
-            produto.descricao;
+        }
+    );
 
 
-        document.querySelector(
-            "#productCard .detail"
-        ).innerHTML =
-            "<strong>Materiais:</strong> "
-            + produto.materiais;
+/* =====================================================
+   TELA CHEIA
+===================================================== */
 
+document
+    .getElementById("fullscreenButton")
+    .addEventListener(
+        "click",
+        async function() {
 
-        /* =================================
-           WHATSAPP
-        ================================= */
+            try {
 
-        const telefone =
-            "5500000000000";
+                if (
+                    !document.fullscreenElement
+                ) {
 
+                    await document
+                        .documentElement
+                        .requestFullscreen();
 
-        const mensagem =
-            "Olá! Gostaria de solicitar um orçamento para "
-            + produto.nome;
+                }
 
+                else {
 
-        document.getElementById(
-            "whatsapp"
-        ).href =
-            "https://wa.me/"
-            + telefone
-            + "?text="
-            + encodeURIComponent(mensagem);
+                    await document.exitFullscreen();
 
+                }
 
-        /* =================================
-           CENA
-        ================================= */
+            }
 
-        const scene =
-            new THREE.Scene();
+            catch(error) {
 
-
-        /* =================================
-           CÂMERA
-        ================================= */
-
-        const camera =
-            new THREE.PerspectiveCamera(
-
-                45,
-
-                window.innerWidth /
-                window.innerHeight,
-
-                0.1,
-
-                1000
-
-            );
-
-
-        camera.position.set(
-            0,
-            0,
-            75
-        );
-
-
-        /* =================================
-           RENDER
-        ================================= */
-
-        const renderer =
-            new THREE.WebGLRenderer({
-
-                antialias: true,
-
-                alpha: true
-
-            });
-
-
-        renderer.setSize(
-
-            window.innerWidth,
-
-            window.innerHeight
-
-        );
-
-
-        renderer.setPixelRatio(
-
-            Math.min(
-                window.devicePixelRatio,
-                2
-            )
-
-        );
-
-
-        document.body.appendChild(
-            renderer.domElement
-        );
-
-
-        /* =================================
-           CONTROLES
-        ================================= */
-
-        const controls =
-            new OrbitControls(
-
-                camera,
-
-                renderer.domElement
-
-            );
-
-
-        controls.enableDamping =
-            true;
-
-
-        controls.dampingFactor =
-            0.06;
-
-
-        controls.enablePan =
-            false;
-
-
-        /* =================================
-           LUZ
-        ================================= */
-
-        const keyLight =
-            new THREE.DirectionalLight(
-                0xffffff,
-                4
-            );
-
-
-        keyLight.position.set(
-            5,
-            10,
-            10
-        );
-
-
-        scene.add(
-            keyLight
-        );
-
-
-        const fillLight =
-            new THREE.DirectionalLight(
-                0xffffff,
-                2
-            );
-
-
-        fillLight.position.set(
-            -10,
-            5,
-            5
-        );
-
-
-        scene.add(
-            fillLight
-        );
-
-
-        const ambient =
-            new THREE.AmbientLight(
-                0xffffff,
-                2
-            );
-
-
-        scene.add(
-            ambient
-        );
-
-
-        /* =================================
-           MODELO
-        ================================= */
-
-        let model = null;
-
-
-        let automaticRotation =
-            false;
-
-
-        let initialPosition;
-
-
-        let initialRotation;
-
-
-        const loader =
-            new STLLoader();
-
-
-        loader.load(
-
-            modeloNome + ".stl",
-
-
-            function (geometry) {
-
-
-                geometry.computeVertexNormals();
-
-
-                geometry.center();
-
-
-                const material =
-                    new THREE.MeshStandardMaterial({
-
-                        color:
-                            0x777777,
-
-                        metalness:
-                            0.05,
-
-                        roughness:
-                            0.58
-
-                    });
-
-
-                model =
-                    new THREE.Mesh(
-
-                        geometry,
-
-                        material
-
-                    );
-
-
-                scene.add(
-                    model
-                );
-
-
-                /* =========================
-                   ESCALA
-                ========================= */
-
-                const box =
-                    new THREE.Box3()
-                    .setFromObject(
-                        model
-                    );
-
-
-                const size =
-                    box.getSize(
-                        new THREE.Vector3()
-                    );
-
-
-                const maxDimension =
-                    Math.max(
-                        size.x,
-                        size.y,
-                        size.z
-                    );
-
-
-                model.scale.setScalar(
-                    50 / maxDimension
-                );
-
-
-                /* =========================
-                   ESTADO INICIAL
-                ========================= */
-
-                initialPosition =
-                    model.position.clone();
-
-
-                initialRotation =
-                    model.rotation.clone();
-
-
-                /* =========================
-                   CÂMERA
-                ========================= */
-
-                camera.position.set(
-                    0,
-                    0,
-                    75
-                );
-
-
-                controls.target.set(
-                    0,
-                    0,
-                    0
-                );
-
-
-                controls.update();
-
-
-                document.getElementById(
-                    "loading"
-                );
-
-
-            },
-
-
-            undefined,
-
-
-            function (error) {
-
-                console.error(
+                console.warn(
+                    "Tela cheia não disponível.",
                     error
                 );
 
             }
 
-        );
+        }
+    );
 
 
-        /* =================================
-           CENTRALIZAR
-        ================================= */
+/* =====================================================
+   WHATSAPP
+===================================================== */
 
-        document.getElementById(
-            "resetButton"
-        ).onclick = function () {
+/*
+   COLOQUE AQUI O NÚMERO DA 4MAKER.
 
+   Exemplo:
 
-            if (!model)
-                return;
+   const WHATSAPP_NUMBER =
+       "5531999999999";
 
+   O formato deve ser:
 
-            model.position.copy(
-                initialPosition
-            );
+   55 + DDD + número
 
+   sem espaços, parênteses ou hífen.
+*/
 
-            model.rotation.copy(
-                initialRotation
-            );
+const WHATSAPP_NUMBER = "";
 
 
-            controls.reset();
+document
+    .getElementById("quoteButton")
+    .addEventListener(
+        "click",
+        function() {
 
-        };
+            const message =
+                encodeURIComponent(
+                    "Olá! Gostaria de solicitar um orçamento para o modelo " +
+                    product.name +
+                    "."
+                );
 
 
-        /* =================================
-           ROTAÇÃO
-        ================================= */
+            if (WHATSAPP_NUMBER) {
 
-        document.getElementById(
-            "rotateButton"
-        ).onclick = function () {
-
-
-            automaticRotation =
-                !automaticRotation;
-
-
-            this.classList.toggle(
-                "active",
-                automaticRotation
-            );
-
-
-            this.textContent =
-                automaticRotation
-                ? "Ⅱ"
-                : "▶";
-
-        };
-
-
-        /* =================================
-           CORES
-        ================================= */
-
-        document.querySelectorAll(
-            ".colorButton"
-        ).forEach(
-
-            button => {
-
-                button.onclick =
-                    function () {
-
-
-                        if (!model)
-                            return;
-
-
-                        const color =
-                            this.dataset.color;
-
-
-                        model.material.color.set(
-                            color
-                        );
-
-
-                        document
-                            .querySelectorAll(
-                                ".colorButton"
-                            )
-                            .forEach(
-                                b =>
-                                b.classList.remove(
-                                    "active"
-                                )
-                            );
-
-
-                        this.classList.add(
-                            "active"
-                        );
-
-                    };
-
-            }
-
-        );
-
-
-        /* =================================
-           FUNDOS
-        ================================= */
-
-        const backgroundMenu =
-            document.getElementById(
-                "backgroundMenu"
-            );
-
-
-        document.getElementById(
-            "backgroundButton"
-        ).onclick = function () {
-
-            backgroundMenu.classList.toggle(
-                "show"
-            );
-
-        };
-
-
-        document.querySelectorAll(
-            ".backgroundOption"
-        ).forEach(
-
-            option => {
-
-                option.onclick =
-                    function () {
-
-
-                        const bg =
-                            this.dataset.bg;
-
-
-                        if (bg === "light") {
-
-                            document.body.style.background =
-                                "linear-gradient(135deg,#ffffff,#eeeeee)";
-
-                        }
-
-
-                        if (bg === "dark") {
-
-                            document.body.style.background =
-                                "linear-gradient(135deg,#202124,#08090b)";
-
-                        }
-
-
-                        if (bg === "studio") {
-
-                            document.body.style.background =
-                                "radial-gradient(circle at 50% 35%,#ffffff,#dcdcdc)";
-
-                        }
-
-
-                        if (bg === "blue") {
-
-                            document.body.style.background =
-                                "linear-gradient(135deg,#183765,#0c1c35)";
-
-                        }
-
-
-                        backgroundMenu.classList.remove(
-                            "show"
-                        );
-
-                    };
-
-            }
-
-        );
-
-
-        /* =================================
-           TELA CHEIA
-        ================================= */
-
-        document.getElementById(
-            "fullscreenButton"
-        ).onclick = function () {
-
-
-            if (!document.fullscreenElement) {
-
-                document.documentElement
-                    .requestFullscreen();
-
-            } else {
-
-                document.exitFullscreen();
-
-            }
-
-        };
-
-
-        /* =================================
-           RESIZE
-        ================================= */
-
-        window.addEventListener(
-
-            "resize",
-
-            function () {
-
-
-                camera.aspect =
-                    window.innerWidth /
-                    window.innerHeight;
-
-
-                camera.updateProjectionMatrix();
-
-
-                renderer.setSize(
-
-                    window.innerWidth,
-
-                    window.innerHeight
-
+                window.open(
+                    "https://wa.me/" +
+                    WHATSAPP_NUMBER +
+                    "?text=" +
+                    message,
+                    "_blank"
                 );
 
             }
 
-        );
+            else {
 
+                /*
+                   Caso o número ainda não esteja
+                   configurado, abre o WhatsApp
+                   com a mensagem preparada.
+                */
 
-        /* =================================
-           ANIMAÇÃO
-        ================================= */
-
-        function animate() {
-
-
-            requestAnimationFrame(
-                animate
-            );
-
-
-            if (
-                model &&
-                automaticRotation
-            ) {
-
-                model.rotation.y +=
-                    0.005;
+                window.open(
+                    "https://wa.me/?text=" +
+                    message,
+                    "_blank"
+                );
 
             }
 
-
-            controls.update();
-
-
-            renderer.render(
-                scene,
-                camera
-            );
-
-
         }
+    );
 
 
-        animate();
+/* =====================================================
+   REDIMENSIONAMENTO
+===================================================== */
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+        camera.updateProjectionMatrix();
 
 
-    </script>
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
 
+    }
+);
+
+
+/* =====================================================
+   ANIMAÇÃO
+===================================================== */
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    if (
+        autoRotate &&
+        model
+    ) {
+
+        model.rotation.y +=
+            0.005;
+
+    }
+
+
+    controls.update();
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+animate();
+
+</script>
 
 </body>
 
