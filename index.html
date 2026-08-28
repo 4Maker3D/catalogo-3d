@@ -1594,11 +1594,12 @@ const loader =
 */
 
 const stlPath =
-    "Modelos/" +
-    encodeURIComponent(
-        modelName +
-        ".stl"
-    );
+    new URL(
+        "Modelos/" +
+        encodeURIComponent(modelName) +
+        ".stl",
+        window.location.href
+    ).href;
 
 
 console.log(
