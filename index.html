@@ -1161,13 +1161,13 @@ const products = {
        MINI PALUDARIUM PLANTER
     ========================= */
 
-    "Mini Paludarium Planter": {
+    "Mini-Paludarium-Planter": {
 
         name:
             "Mini Paludarium Planter",
 
         file:
-            "Mini Paludarium Planter.stl",
+            "Mini-Paludarium-Planter.stl",
 
         category:
             "PLANTAS E DECORAÇÃO",
@@ -1593,48 +1593,49 @@ const loader =
 /*
    IMPORTANTE:
 
-   Cada produto possui agora o nome
-   EXATO do arquivo STL.
-
-   Pasta:
-
-       Modelos/
-
-   Self-Watering:
+   Os arquivos devem estar exatamente assim:
 
        Modelos/Self-Watering-3.stl
 
-   Mini Paludarium:
+       Modelos/Mini-Paludarium-Planter.stl
 
-       Modelos/Mini Paludarium Planter.stl
-
-   O encodeURIComponent trata
-   automaticamente os espaços do segundo arquivo.
+   Não usamos espaços nos nomes dos arquivos.
 */
 
 const stlPath =
     new URL(
         "./Modelos/" +
-        encodeURIComponent(product.file),
-        document.baseURI
+        product.file,
+        window.location.href
     ).href;
 
 
 console.log(
-    "Modelo selecionado:",
+    "================================"
+);
+
+console.log(
+    "MODELO SELECIONADO:",
     modelName
 );
 
+console.log(
+    "PRODUTO:",
+    product.name
+);
 
 console.log(
-    "Arquivo STL:",
+    "ARQUIVO STL:",
     product.file
 );
 
+console.log(
+    "CAMINHO STL:",
+    stlPath
+);
 
 console.log(
-    "Caminho STL:",
-    stlPath
+    "================================"
 );
 
 
@@ -1736,7 +1737,8 @@ loader.load(
         if (xhr.total) {
 
             console.log(
-                "Carregamento STL:",
+                "Carregando:",
+                product.file,
                 Math.round(
                     xhr.loaded /
                     xhr.total *
@@ -1752,14 +1754,35 @@ loader.load(
     function(error) {
 
         console.error(
-            "Erro ao carregar STL:",
+            "================================"
+        );
+
+        console.error(
+            "ERRO AO CARREGAR STL"
+        );
+
+        console.error(
+            "Produto:",
+            product.name
+        );
+
+        console.error(
+            "Arquivo:",
+            product.file
+        );
+
+        console.error(
+            "URL:",
+            stlPath
+        );
+
+        console.error(
+            "Erro:",
             error
         );
 
-
         console.error(
-            "Caminho que falhou:",
-            stlPath
+            "================================"
         );
 
 
@@ -2255,6 +2278,7 @@ function getEnvironmentIcon(
             fill="none"
             stroke="currentColor"
             stroke-width="2"
+            stroke-linecap="round"
             stroke-linejoin="round">
 
             <path
