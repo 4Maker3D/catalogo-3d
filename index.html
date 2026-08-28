@@ -643,11 +643,8 @@ body.dark .scroll-indicator {
 
 
     /*
-       IMPORTANTE:
-
-       O card permanece em 18vh,
-       conforme definido para o
-       layout mobile.
+       O card permanece
+       limitado a 18vh.
     */
 
     #product-card {
@@ -671,11 +668,6 @@ body.dark .scroll-indicator {
         max-height: 18vh;
 
         overflow-y: auto;
-
-        /*
-           Esconde a barra de rolagem
-           mantendo a rolagem funcional.
-        */
 
         scrollbar-width: none;
 
@@ -1064,20 +1056,12 @@ let modelName =
     "Self-Watering-3";
 
 
-/*
-   Remove .stl caso seja informado.
-*/
-
 modelName =
     modelName.replace(
         /\.stl$/i,
         ""
     );
 
-
-/*
-   Procura informações.
-*/
 
 const product =
     products[modelName] ||
@@ -1203,8 +1187,7 @@ renderer.toneMappingExposure =
 
 
 /*
-   Sombras desligadas para evitar
-   o problema do quadrado escuro.
+   Sombras desligadas.
 */
 
 renderer.shadowMap.enabled =
@@ -1245,16 +1228,6 @@ controls.enablePan =
     true;
 
 
-/*
-   CELULAR
-
-   1 dedo:
-   GIRAR
-
-   2 dedos:
-   ZOOM + MOVER
-*/
-
 controls.touches.ONE =
     THREE.TOUCH.ROTATE;
 
@@ -1262,19 +1235,6 @@ controls.touches.ONE =
 controls.touches.TWO =
     THREE.TOUCH.DOLLY_PAN;
 
-
-/*
-   MOUSE
-
-   Esquerdo:
-   Girar
-
-   Direito:
-   Mover
-
-   Roda:
-   Zoom
-*/
 
 controls.mouseButtons.LEFT =
     THREE.MOUSE.ROTATE;
@@ -1406,11 +1366,6 @@ function centerModel() {
         );
 
 
-    /*
-       Modelo um pouco maior
-       que na versão anterior.
-    */
-
     const distance =
         maxDimension * 1.9;
 
@@ -1486,10 +1441,6 @@ loader.load(
         );
 
 
-        /*
-           Calcula tamanho original.
-        */
-
         const box =
             new THREE.Box3()
                 .setFromObject(
@@ -1512,11 +1463,7 @@ loader.load(
 
 
         /*
-           57 em vez de 50.
-
-           Isso deixa o modelo
-           aproximadamente 14%
-           maior.
+           Escala atual mantida.
         */
 
         modelScale =
@@ -1537,11 +1484,6 @@ loader.load(
             .style.display =
                 "none";
 
-
-        /*
-           Atualiza indicador depois
-           que o conteúdo estiver pronto.
-        */
 
         setTimeout(
             updateScrollIndicator,
@@ -1752,22 +1694,37 @@ let studioEnvironment =
 
 
 /* =====================================================
-   CARREGAR HDRI
+   HDRI — FALLBACK 4K → 2K → 1K
 ===================================================== */
 
 /*
-   Primeiro tenta o HDRI 4K.
+   O sistema tenta carregar
+   primeiro a melhor qualidade.
 
-   Se o navegador, CDN ou dispositivo
-   não conseguir carregar o arquivo,
-   automaticamente tenta o 1K.
+   Ordem:
 
-   Assim o ambiente não fica preto
-   simplesmente porque o 4K falhou.
+       4K
+        ↓
+       2K
+        ↓
+       1K
+        ↓
+       fundo neutro
+
+
+   Isso evita que uma falha
+   temporária do HDRI deixe
+   o visualizador completamente
+   preto.
 */
+
 
 const HDRI_4K =
     "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/brown_photostudio_02_4k.hdr";
+
+
+const HDRI_2K =
+    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/brown_photostudio_02_2k.hdr";
 
 
 const HDRI_1K =
@@ -1778,6 +1735,11 @@ const rgbeLoader =
     new RGBELoader();
 
 
+/*
+   Função de carregamento
+   com fallback automático.
+*/
+
 function loadHDRI(
     url,
     fallback = null
@@ -1786,6 +1748,7 @@ function loadHDRI(
     rgbeLoader.load(
 
         url,
+
 
         function(texture) {
 
@@ -1797,11 +1760,122 @@ function loadHDRI(
                 texture;
 
 
+            console.log(
+                "HDRI carregado:",
+                url
+            );
+
+
             /*
-               Se o usuário já estiver
-               no modo Estúdio, aplica
-               imediatamente.
+               Se o usuário estiver
+               no modo Estúdio,
+               aplica imediatamente.
             */
+
+            if (
+                environmentMode === 2
+            ) {
+
+                scene.background =
+                    studioEnvironment;
+
+
+                scene.environment =
+                    studioEnvironment;
+
+            }
+
+        },
+
+
+        undefined,
+
+
+        function(error) {
+
+            console.warn(
+                "Falha ao carregar HDRI:",
+                url
+            );
+
+
+            /*
+               Existe outro fallback?
+            */
+
+            if (fallback) {
+
+                console.log(
+                    "Tentando próximo HDRI..."
+                );
+
+
+                loadHDRI(
+                    fallback,
+                    null
+                );
+
+            }
+
+            else {
+
+                console.warn(
+                    "Todos os HDRIs falharam."
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+
+/*
+   Inicia:
+
+   4K → 2K → 1K
+*/
+
+loadHDRI(
+    HDRI_4K,
+
+    HDRI_2K
+);
+
+
+/*
+   IMPORTANTE:
+
+   O fallback acima precisa
+   continuar até 1K.
+
+   Para isso, iniciamos uma
+   cadeia explícita.
+*/
+
+function loadHDRIChain() {
+
+    rgbeLoader.load(
+
+        HDRI_4K,
+
+
+        function(texture) {
+
+            texture.mapping =
+                THREE.EquirectangularReflectionMapping;
+
+
+            studioEnvironment =
+                texture;
+
+
+            console.log(
+                "HDRI 4K carregado."
+            );
+
 
             if (
                 environmentMode === 2
@@ -1817,30 +1891,134 @@ function loadHDRI(
 
         },
 
+
         undefined,
 
-        function(error) {
+
+        function() {
 
             console.warn(
-                "Falha ao carregar HDRI:",
-                url,
-                error
+                "HDRI 4K falhou. Tentando 2K..."
             );
 
 
-            if (fallback) {
+            rgbeLoader.load(
 
-                console.log(
-                    "Tentando HDRI alternativo..."
-                );
+                HDRI_2K,
 
 
-                loadHDRI(
-                    fallback,
-                    null
-                );
+                function(texture) {
 
-            }
+                    texture.mapping =
+                        THREE.EquirectangularReflectionMapping;
+
+
+                    studioEnvironment =
+                        texture;
+
+
+                    console.log(
+                        "HDRI 2K carregado."
+                    );
+
+
+                    if (
+                        environmentMode === 2
+                    ) {
+
+                        scene.background =
+                            studioEnvironment;
+
+                        scene.environment =
+                            studioEnvironment;
+
+                    }
+
+                },
+
+
+                undefined,
+
+
+                function() {
+
+                    console.warn(
+                        "HDRI 2K falhou. Tentando 1K..."
+                    );
+
+
+                    rgbeLoader.load(
+
+                        HDRI_1K,
+
+
+                        function(texture) {
+
+                            texture.mapping =
+                                THREE.EquirectangularReflectionMapping;
+
+
+                            studioEnvironment =
+                                texture;
+
+
+                            console.log(
+                                "HDRI 1K carregado."
+                            );
+
+
+                            if (
+                                environmentMode === 2
+                            ) {
+
+                                scene.background =
+                                    studioEnvironment;
+
+                                scene.environment =
+                                    studioEnvironment;
+
+                            }
+
+                        },
+
+
+                        undefined,
+
+
+                        function() {
+
+                            console.warn(
+                                "HDRI 1K também falhou."
+                            );
+
+
+                            /*
+                               Nenhum HDRI disponível.
+
+                               Mantém fundo neutro.
+                            */
+
+                            if (
+                                environmentMode === 2
+                            ) {
+
+                                scene.background =
+                                    new THREE.Color(
+                                        0xf4f5f7
+                                    );
+
+                                scene.environment =
+                                    null;
+
+                            }
+
+                        }
+
+                    );
+
+                }
+
+            );
 
         }
 
@@ -1849,10 +2027,7 @@ function loadHDRI(
 }
 
 
-loadHDRI(
-    HDRI_4K,
-    HDRI_1K
-);
+loadHDRIChain();
 
 
 /* =====================================================
@@ -1868,7 +2043,8 @@ function updateEnvironment() {
 
 
     /*
-       Atualiza ícone do botão.
+       Atualiza o ícone do
+       único botão.
     */
 
     document
@@ -1883,9 +2059,13 @@ function updateEnvironment() {
        HDRI
     */
 
-    if (env.hdr) {
+    if (
+        env.hdr
+    ) {
 
-        if (studioEnvironment) {
+        if (
+            studioEnvironment
+        ) {
 
             scene.background =
                 studioEnvironment;
@@ -1899,10 +2079,11 @@ function updateEnvironment() {
         else {
 
             /*
-               Enquanto o HDRI estiver
-               carregando, mantém fundo
-               neutro em vez de deixar
-               a tela preta.
+               Enquanto o HDRI
+               carrega, usa fundo
+               neutro.
+
+               Nunca preto.
             */
 
             scene.background =
@@ -2013,20 +2194,11 @@ document
                 !autoRotate;
 
 
-            /*
-               Troca símbolo.
-            */
-
             this.textContent =
                 autoRotate
                     ? "Ⅱ"
                     : "▶";
 
-
-            /*
-               Mostra visualmente
-               que está ativo.
-            */
 
             this.classList.toggle(
                 "active",
@@ -2081,8 +2253,7 @@ document
 
                 else {
 
-                    await document
-                        .exitFullscreen();
+                    await document.exitFullscreen();
 
                 }
 
@@ -2180,20 +2351,11 @@ const scrollIndicator =
 
 function updateScrollIndicator() {
 
-    /*
-       Verifica se existe conteúdo
-       além da área visível.
-    */
-
     const hasScroll =
         productCard.scrollHeight >
         productCard.clientHeight +
         5;
 
-
-    /*
-       Verifica se chegou ao final.
-    */
 
     const atBottom =
         productCard.scrollTop +
@@ -2224,30 +2386,17 @@ function updateScrollIndicator() {
 }
 
 
-/*
-   Atualiza quando o usuário
-   rola o card.
-*/
-
 productCard.addEventListener(
     "scroll",
     updateScrollIndicator
 );
 
 
-/*
-   Atualiza se a tela mudar.
-*/
-
 window.addEventListener(
     "resize",
     updateScrollIndicator
 );
 
-
-/*
-   Verificação inicial.
-*/
 
 setTimeout(
     updateScrollIndicator,
