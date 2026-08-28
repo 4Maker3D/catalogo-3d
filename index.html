@@ -752,6 +752,7 @@ body.dark .scroll-indicator {
         bottom: 5px;
 
         width: 35px;
+
         height: 45px;
 
         font-size: 23px;
@@ -860,8 +861,9 @@ body.dark .scroll-indicator {
             title="Ambiente: Claro"
             aria-label="Mudar ambiente">
 
-            <span class="icon"
-                  id="environmentIcon">
+            <span
+                class="icon"
+                id="environmentIcon">
 
                 <svg
                     viewBox="0 0 24 24"
@@ -912,7 +914,7 @@ body.dark .scroll-indicator {
                     <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
                     <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
                     <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
-                    <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                    <path d="M16 21h3a2 2 0 0 1-2-2v-3"/>
 
                 </svg>
 
@@ -1085,6 +1087,9 @@ const products = {
         name:
             "Self-Watering 3",
 
+        file:
+            "Self-Watering-3.stl",
+
         category:
             "PLANTAS E DECORAÇÃO",
 
@@ -1160,6 +1165,9 @@ const products = {
 
         name:
             "Mini Paludarium Planter",
+
+        file:
+            "Mini Paludarium Planter.stl",
 
         category:
             "PLANTAS E DECORAÇÃO",
@@ -1585,22 +1593,47 @@ const loader =
 /*
    IMPORTANTE:
 
-   Os modelos estão dentro da pasta:
+   Cada produto possui agora o nome
+   EXATO do arquivo STL.
+
+   Pasta:
 
        Modelos/
 
-   encodeURIComponent permite
-   nomes com espaços.
+   Self-Watering:
+
+       Modelos/Self-Watering-3.stl
+
+   Mini Paludarium:
+
+       Modelos/Mini Paludarium Planter.stl
+
+   O encodeURIComponent trata
+   automaticamente os espaços do segundo arquivo.
 */
 
 const stlPath =
-    "/catalogo-3d/Modelos/" +
-    encodeURIComponent(modelName) +
-    ".stl";
+    new URL(
+        "./Modelos/" +
+        encodeURIComponent(product.file),
+        document.baseURI
+    ).href;
 
 
 console.log(
-    "Carregando modelo:",
+    "Modelo selecionado:",
+    modelName
+);
+
+
+console.log(
+    "Arquivo STL:",
+    product.file
+);
+
+
+console.log(
+    "Caminho STL:",
     stlPath
 );
 
@@ -1611,6 +1644,12 @@ loader.load(
 
 
     function(geometry) {
+
+        console.log(
+            "STL carregado com sucesso:",
+            product.file
+        );
+
 
         geometry.computeVertexNormals();
 
@@ -1692,7 +1731,22 @@ loader.load(
     },
 
 
-    undefined,
+    function(xhr) {
+
+        if (xhr.total) {
+
+            console.log(
+                "Carregamento STL:",
+                Math.round(
+                    xhr.loaded /
+                    xhr.total *
+                    100
+                ) + "%"
+            );
+
+        }
+
+    },
 
 
     function(error) {
@@ -1700,6 +1754,12 @@ loader.load(
         console.error(
             "Erro ao carregar STL:",
             error
+        );
+
+
+        console.error(
+            "Caminho que falhou:",
+            stlPath
         );
 
 
@@ -1882,7 +1942,6 @@ let studioEnvironment =
 
 /* =====================================================
    HDRI
-   FALLBACK 4K → 2K → 1K
 ===================================================== */
 
 const HDRI_4K =
@@ -2098,10 +2157,6 @@ function getEnvironmentIcon(
 ) {
 
 
-    /* =========================
-       CLARO — SOL
-    ========================= */
-
     if (
         mode === 0
     ) {
@@ -2136,10 +2191,6 @@ function getEnvironmentIcon(
     }
 
 
-    /* =========================
-       ESCURO — LUA
-    ========================= */
-
     if (
         mode === 1
     ) {
@@ -2164,10 +2215,6 @@ function getEnvironmentIcon(
 
     }
 
-
-    /* =========================
-       ESTÚDIO — ESTRELA
-    ========================= */
 
     if (
         mode === 2
@@ -2200,10 +2247,6 @@ function getEnvironmentIcon(
 
     }
 
-
-    /* =========================
-       4MAKER — DIAMANTE
-    ========================= */
 
     return `
 
