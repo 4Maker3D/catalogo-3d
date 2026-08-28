@@ -27,10 +27,6 @@ body {
     color: #202124;
 }
 
-/* =========================
-   ÁREA 3D
-========================= */
-
 #viewer {
     position: fixed;
     inset: 0;
@@ -143,8 +139,9 @@ canvas {
 
     box-shadow: 0 4px 14px rgba(0,0,0,0.10);
 
-    transition: transform 0.15s ease,
-                background 0.15s ease;
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease;
 }
 
 .control-button:active {
@@ -648,7 +645,7 @@ from 'three/addons/loaders/RGBELoader.js';
 
 
 /* =====================================================
-   CONFIGURAÇÃO DOS PRODUTOS
+   PRODUTOS
 ===================================================== */
 
 const products = {
@@ -708,7 +705,7 @@ const products = {
 
 
 /* =====================================================
-   IDENTIFICA O MODELO PELA URL
+   MODELO PELA URL
 ===================================================== */
 
 const params =
@@ -717,26 +714,16 @@ const params =
 let modelName =
     params.get("modelo") || "Self-Watering-3";
 
-
-/*
-   Remove .stl caso alguém coloque:
-   ?modelo=Self-Watering-3.stl
-*/
-
 modelName =
     modelName.replace(/\.stl$/i, "");
 
-
-/*
-   Procura as informações do produto.
-*/
-
 const product =
-    products[modelName] || products["Self-Watering-3"];
+    products[modelName] ||
+    products["Self-Watering-3"];
 
 
 /* =====================================================
-   PREENCHER INTERFACE
+   INTERFACE
 ===================================================== */
 
 document.getElementById("productName").textContent =
@@ -791,12 +778,18 @@ camera.position.set(
 
 const renderer =
     new THREE.WebGLRenderer({
+
         antialias: true,
+
         alpha: false
+
     });
 
 renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio, 2)
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
 );
 
 renderer.setSize(
@@ -813,22 +806,14 @@ renderer.toneMapping =
 renderer.toneMappingExposure =
     1.15;
 
-
-/*
-   Importante:
-
-   Não usamos shadowMap aqui.
-
-   Isso evita o problema do
-   "quadrado cinza escuro" que
-   apareceu anteriormente.
-*/
-
 renderer.shadowMap.enabled = false;
 
 
-document.getElementById("viewer")
-    .appendChild(renderer.domElement);
+document
+    .getElementById("viewer")
+    .appendChild(
+        renderer.domElement
+    );
 
 
 /* =====================================================
@@ -853,14 +838,9 @@ controls.enablePan = true;
 /*
    CELULAR
 
-   1 dedo:
-   GIRAR
+   1 dedo = girar
 
-   2 dedos:
-   PAN + ZOOM
-
-   Isso permite mover o modelo com
-   dois dedos sem perder a pinça.
+   2 dedos = mover + zoom
 */
 
 controls.touches.ONE =
@@ -873,14 +853,9 @@ controls.touches.TWO =
 /*
    MOUSE
 
-   Esquerdo:
-   Girar
-
-   Direito:
-   Mover
-
-   Roda:
-   Zoom
+   Esquerdo = girar
+   Direito = mover
+   Roda = zoom
 */
 
 controls.mouseButtons.LEFT =
@@ -894,7 +869,7 @@ controls.mouseButtons.MIDDLE =
 
 
 /* =====================================================
-   ILUMINAÇÃO
+   ILUMINAÇÃO BASE
 ===================================================== */
 
 const ambient =
@@ -942,11 +917,6 @@ scene.add(fillLight);
 
 let model = null;
 
-let originalMaterialColor =
-    0x777777;
-
-let modelScale = 1;
-
 
 /* =====================================================
    CENTRALIZAR
@@ -962,6 +932,7 @@ function centerModel() {
         new THREE.Box3()
             .setFromObject(model);
 
+
     const center =
         box.getCenter(
             new THREE.Vector3()
@@ -971,18 +942,16 @@ function centerModel() {
     model.position.sub(center);
 
 
-    /*
-       Calcula tamanho novamente
-    */
-
     const newBox =
         new THREE.Box3()
             .setFromObject(model);
+
 
     const size =
         newBox.getSize(
             new THREE.Vector3()
         );
+
 
     const maxDimension =
         Math.max(
@@ -992,12 +961,9 @@ function centerModel() {
         );
 
 
-    /*
-       Distância da câmera
-    */
-
     const distance =
         maxDimension * 1.9;
+
 
     camera.position.set(
         0,
@@ -1005,13 +971,16 @@ function centerModel() {
         distance
     );
 
+
     controls.target.set(
         0,
         0,
         0
     );
 
+
     controls.update();
+
 }
 
 
@@ -1022,22 +991,6 @@ function centerModel() {
 const loader =
     new STLLoader();
 
-
-/*
-   IMPORTANTE:
-
-   O STL está na raiz.
-
-   Portanto:
-
-   Self-Watering-3.stl
-
-   é encontrado automaticamente
-   através do parâmetro:
-
-   ?modelo=Self-Watering-3
-*/
-
 const stlPath =
     modelName + ".stl";
 
@@ -1046,7 +999,6 @@ loader.load(
 
     stlPath,
 
-
     function(geometry) {
 
         geometry.computeVertexNormals();
@@ -1054,21 +1006,14 @@ loader.load(
         geometry.center();
 
 
-        /*
-           Material inicial
-        */
-
         const material =
             new THREE.MeshStandardMaterial({
 
-                color:
-                    originalMaterialColor,
+                color: 0x252525,
 
-                metalness:
-                    0.05,
+                metalness: 0.05,
 
-                roughness:
-                    0.58
+                roughness: 0.58
 
             });
 
@@ -1083,18 +1028,16 @@ loader.load(
         scene.add(model);
 
 
-        /*
-           Ajuste automático
-        */
-
         const box =
             new THREE.Box3()
                 .setFromObject(model);
+
 
         const size =
             box.getSize(
                 new THREE.Vector3()
             );
+
 
         const maxDimension =
             Math.max(
@@ -1104,25 +1047,26 @@ loader.load(
             );
 
 
-        modelScale =
+        const scale =
             50 / maxDimension;
 
+
         model.scale.setScalar(
-            modelScale
+            scale
         );
 
 
         centerModel();
 
 
-        document.getElementById("loading")
+        document
+            .getElementById("loading")
             .style.display = "none";
 
     },
 
 
     undefined,
-
 
     function(error) {
 
@@ -1132,7 +1076,8 @@ loader.load(
         );
 
 
-        document.getElementById("loading")
+        document
+            .getElementById("loading")
             .textContent =
             "Não foi possível carregar o modelo.";
 
@@ -1154,6 +1099,7 @@ product.colors.forEach(
 
         const button =
             document.createElement("button");
+
 
         button.className =
             "color";
@@ -1236,67 +1182,197 @@ const environments = [
 
     {
         name: "Claro",
-        background: 0xf4f5f7,
-        hdr: false
+        background: 0xf4f5f7
     },
 
     {
         name: "Escuro",
-        background: 0x17191d,
-        hdr: false
+        background: 0x17191d
     },
 
     {
         name: "Estúdio",
-        background: null,
-        hdr: true
+        background: null
     },
 
     {
         name: "4Maker",
-        background: 0x193e6c,
-        hdr: false
+        background: 0x193e6c
     }
 
 ];
 
 
+/* =====================================================
+   HDRI
+===================================================== */
+
+/*
+   4K PRINCIPAL
+
+   Observe que agora o arquivo também
+   termina em _4k.hdr.
+
+   O código anterior estava tentando
+   acessar:
+
+   /4k/..._1k.hdr
+
+   o que é incorreto.
+*/
+
+const HDRI_4K =
+    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/brown_photostudio_02_4k.hdr";
+
+
+/*
+   FALLBACK
+
+   Caso o 4K não carregue:
+
+   /1k/..._1k.hdr
+*/
+
+const HDRI_1K =
+    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/brown_photostudio_02_1k.hdr";
+
+
 let studioEnvironment = null;
+
+let studioBackground = null;
+
+let hdrReady = false;
 
 
 /* =====================================================
-   CARREGAR HDRI
+   PMREM
 ===================================================== */
 
-const rgbeLoader =
-    new RGBELoader();
+const pmremGenerator =
+    new THREE.PMREMGenerator(
+        renderer
+    );
+
+pmremGenerator.compileEquirectangularShader();
 
 
-rgbeLoader.load(
+/* =====================================================
+   FUNÇÃO DE CARREGAMENTO HDRI
+===================================================== */
 
-    "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/brown_photostudio_02_1k.hdr",
+function loadHDRI(url, isFallback = false) {
 
-    function(texture) {
+    const hdrLoader =
+        new RGBELoader();
 
-        texture.mapping =
-            THREE.EquirectangularReflectionMapping;
 
-        studioEnvironment =
-            texture;
+    hdrLoader.load(
 
-    },
+        url,
 
-    undefined,
+        function(texture) {
 
-    function(error) {
+            console.log(
+                isFallback
+                    ? "HDRI 1K carregado."
+                    : "HDRI 4K carregado."
+            );
 
-        console.warn(
-            "HDRI não carregado.",
-            error
-        );
 
-    }
+            /*
+               Textura original:
 
+               usada como FUNDO.
+            */
+
+            texture.mapping =
+                THREE.EquirectangularReflectionMapping;
+
+
+            studioBackground =
+                texture;
+
+
+            /*
+               PMREM:
+
+               usado somente para
+               iluminação e reflexos.
+            */
+
+            const pmrem =
+                pmremGenerator
+                    .fromEquirectangular(
+                        texture
+                    );
+
+
+            studioEnvironment =
+                pmrem.texture;
+
+
+            hdrReady = true;
+
+
+            /*
+               Se o usuário já estiver
+               no modo Estúdio, atualiza
+               imediatamente.
+            */
+
+            if (
+                environmentMode === 2
+            ) {
+
+                updateEnvironment();
+
+            }
+
+        },
+
+
+        undefined,
+
+
+        function(error) {
+
+            console.warn(
+                isFallback
+                    ? "HDRI 1K também falhou."
+                    : "HDRI 4K falhou. Tentando 1K...",
+                error
+            );
+
+
+            /*
+               Se o 4K falhar,
+               tenta automaticamente
+               o 1K.
+            */
+
+            if (!isFallback) {
+
+                loadHDRI(
+                    HDRI_1K,
+                    true
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+
+/*
+   Começa pelo 4K.
+*/
+
+loadHDRI(
+    HDRI_4K,
+    false
 );
 
 
@@ -1312,23 +1388,73 @@ function updateEnvironment() {
         ];
 
 
-    if (env.hdr) {
+    /* =========================
+       ESTÚDIO HDRI
+    ========================= */
 
-        /*
-           HDRI como fundo e iluminação
-        */
+    if (
+        environmentMode === 2
+    ) {
 
-        if (studioEnvironment) {
+        if (
+            hdrReady &&
+            studioBackground &&
+            studioEnvironment
+        ) {
+
+            /*
+               Fundo HDRI
+            */
 
             scene.background =
-                studioEnvironment;
+                studioBackground;
+
+
+            /*
+               Iluminação HDRI
+            */
 
             scene.environment =
                 studioEnvironment;
 
+
+            /*
+               Intensidade um pouco
+               mais cinematográfica.
+            */
+
+            renderer.toneMappingExposure =
+                1.15;
+
+        }
+
+        else {
+
+            /*
+               O HDRI ainda não carregou.
+
+               NÃO deixa a tela preta.
+
+               Usa temporariamente o
+               fundo claro.
+            */
+
+            scene.background =
+                new THREE.Color(
+                    0xf4f5f7
+                );
+
+            scene.environment =
+                null;
+
         }
 
     }
+
+
+    /* =========================
+       OUTROS AMBIENTES
+    ========================= */
 
     else {
 
@@ -1340,15 +1466,20 @@ function updateEnvironment() {
         scene.environment =
             null;
 
+
+        renderer.toneMappingExposure =
+            1.15;
+
     }
 
 
     /*
-       Modo escuro altera também
-       o cartão do produto.
+       Modo escuro
     */
 
-    if (environmentMode === 1) {
+    if (
+        environmentMode === 1
+    ) {
 
         document.body.classList.add(
             "dark"
@@ -1367,6 +1498,10 @@ function updateEnvironment() {
 }
 
 
+/*
+   Ambiente inicial
+*/
+
 updateEnvironment();
 
 
@@ -1381,6 +1516,7 @@ document
         function() {
 
             environmentMode++;
+
 
             if (
                 environmentMode >=
@@ -1414,6 +1550,7 @@ document
             autoRotate =
                 !autoRotate;
 
+
             this.textContent =
                 autoRotate
                     ? "Ⅱ"
@@ -1424,7 +1561,7 @@ document
 
 
 /* =====================================================
-   CENTRALIZAR
+   RESET
 ===================================================== */
 
 document
@@ -1463,7 +1600,8 @@ document
 
                 else {
 
-                    await document.exitFullscreen();
+                    await document
+                        .exitFullscreen();
 
                 }
 
@@ -1486,22 +1624,8 @@ document
    WHATSAPP
 ===================================================== */
 
-/*
-   COLOQUE AQUI O NÚMERO DA 4MAKER.
-
-   Exemplo:
-
-   const WHATSAPP_NUMBER =
-       "5531999999999";
-
-   O formato deve ser:
-
-   55 + DDD + número
-
-   sem espaços, parênteses ou hífen.
-*/
-
-const WHATSAPP_NUMBER = "5531982587603";
+const WHATSAPP_NUMBER =
+    "5531982587603";
 
 
 document
@@ -1518,7 +1642,9 @@ document
                 );
 
 
-            if (WHATSAPP_NUMBER) {
+            if (
+                WHATSAPP_NUMBER
+            ) {
 
                 window.open(
                     "https://wa.me/" +
@@ -1531,12 +1657,6 @@ document
             }
 
             else {
-
-                /*
-                   Caso o número ainda não esteja
-                   configurado, abre o WhatsApp
-                   com a mensagem preparada.
-                */
 
                 window.open(
                     "https://wa.me/?text=" +
@@ -1561,6 +1681,7 @@ window.addEventListener(
         camera.aspect =
             window.innerWidth /
             window.innerHeight;
+
 
         camera.updateProjectionMatrix();
 
@@ -1597,6 +1718,7 @@ function animate() {
 
 
     controls.update();
+
 
     renderer.render(
         scene,
