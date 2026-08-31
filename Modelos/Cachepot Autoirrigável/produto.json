@@ -12,7 +12,7 @@
     "colors": [
         {
             "name": "Branco",
-            "hex": 15263976
+            "hex": 16777215
         },
         {
             "name": "Preto",
@@ -20,7 +20,7 @@
         },
         {
             "name": "Azul",
-            "hex": 2384529
+            "hex": 1658476
         },
         {
             "name": "Vermelho",
