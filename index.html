@@ -1770,9 +1770,32 @@ function createColorButtons() {
                         "0"
                     );
 
-            /* O círculo usa a cor original do JSON. */
+            /*
+               O JSON pode separar a cor do modelo 3D
+               da cor visual do círculo (swatch).
+
+               hex    = cor usada no modelo 3D, compensada
+                        para a iluminação/HDRI.
+               swatch = cor exibida no círculo de seleção.
+
+               Se swatch não existir, usamos hex como fallback.
+            */
+            const swatchValue =
+                colorData.swatch !== undefined
+                    ? Number(colorData.swatch)
+                    : hexValue;
+
+            const swatchHex =
+                "#" +
+                swatchValue
+                    .toString(16)
+                    .padStart(
+                        6,
+                        "0"
+                    );
+
             button.style.background =
-                cssHex;
+                swatchHex;
 
 
             if (index === 0) {
