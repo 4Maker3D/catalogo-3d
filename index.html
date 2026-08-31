@@ -912,7 +912,7 @@ body.dark .scroll-indicator {
                     <path d="M8 3H5a2 2 0 0 0-2 2v3"/>
                     <path d="M16 3h3a2 2 0 0 1 2 2v3"/>
                     <path d="M8 21H5a2 2 0 0 1-2-2v-3"/>
-                    <path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+                    <path d="M16 21h3a2 2 0 0 1 2-2v-3"/>
 
                 </svg>
 
@@ -971,7 +971,7 @@ body.dark .scroll-indicator {
         class="description"
         id="description">
 
-        Carregando informações do produto...
+        Carregando informações...
 
     </div>
 
@@ -982,7 +982,7 @@ body.dark .scroll-indicator {
 
         <span id="materials">
 
-            -
+            --
 
         </span>
 
@@ -995,7 +995,7 @@ body.dark .scroll-indicator {
 
         <span id="customization">
 
-            -
+            --
 
         </span>
 
@@ -1069,87 +1069,33 @@ from 'three/addons/loaders/RGBELoader.js';
 
 
 /* =====================================================
-   PRODUTOS DISPONÍVEIS
+   PRODUTO ATUAL
 ===================================================== */
 
-/*
-   IMPORTANTE:
-
-   Estes são os NOMES DAS PASTAS dentro de Modelos.
-
-   Cada pasta deve conter:
-
-       modelo.stl
-       produto.json
-*/
-
-const productFolders = [
-
-    "Cachepot Autoirrigável",
-
-    "Difusor de Água para Solo Fluxo Direto",
-
-    "Difusor de Água para Solo Fluxo Fino",
-
-    "Difusor de Água para Solo Fluxo Médio",
-
-    "Difusor de Água para Solo Fluxo Rápido",
-
-    "Difusor de Água para Solo Kit 4 Peças",
-
-    "Globo para Rega de Plantas",
-
-    "Jardim Zen",
-
-    "Plantador Mini Paludário",
-
-    "Prato de Vaso de Planta",
-
-    "Tampa Plantação Hidropônica 100mm",
-
-    "Tampa Plantação Hidropônica 70mm",
-
-    "Vaso Autoirrigável Redondo",
-
-    "Vaso Autoirrigável",
-
-    "Vaso de Parede"
-
-];
-
-
-/* =====================================================
-   IDENTIFICA O PRODUTO PELA URL
-===================================================== */
-
-const params =
-    new URLSearchParams(
-        window.location.search
-    );
-
+let product = null;
 
 let modelName =
-    params.get("modelo");
+    new URLSearchParams(
+        window.location.search
+    ).get("modelo");
 
 
 /*
-   Se nenhum produto for informado,
-   abre o primeiro da lista.
+   Produto padrão caso a URL
+   não tenha ?modelo=
 */
 
-if (
-    !modelName
-) {
+if (!modelName) {
 
     modelName =
-        productFolders[0];
+        "Cachepot Autoirrigável";
 
 }
 
 
 /*
-   Remove .stl caso alguém coloque
-   o nome do arquivo na URL.
+   Remove .stl caso alguém
+   coloque o nome completo na URL.
 */
 
 modelName =
@@ -1160,46 +1106,31 @@ modelName =
 
 
 /*
-   Verifica se o produto existe
-   na lista.
+   Caminho da pasta do produto.
 */
 
-if (
-    !productFolders.includes(
-        modelName
-    )
-) {
-
-    console.warn(
-        "Produto não encontrado:",
-        modelName
-    );
-
-    modelName =
-        productFolders[0];
-
-}
-
-
-/* =====================================================
-   CAMINHOS DOS ARQUIVOS
-===================================================== */
-
-const encodedFolder =
+const productFolder =
+    "Modelos/" +
     encodeURIComponent(
         modelName
     );
 
 
+/*
+   Caminho do JSON.
+*/
+
 const productJsonPath =
-    "Modelos/" +
-    encodedFolder +
+    productFolder +
     "/produto.json";
 
 
+/*
+   Caminho do STL.
+*/
+
 const stlPath =
-    "Modelos/" +
-    encodedFolder +
+    productFolder +
     "/modelo.stl";
 
 
@@ -1208,12 +1139,10 @@ console.log(
     modelName
 );
 
-
 console.log(
     "JSON:",
     productJsonPath
 );
-
 
 console.log(
     "STL:",
@@ -1222,11 +1151,109 @@ console.log(
 
 
 /* =====================================================
-   VARIÁVEL DO PRODUTO
+   CARREGAR PRODUTO.JSON
 ===================================================== */
 
-let product =
-    null;
+async function loadProductData() {
+
+    try {
+
+        const response =
+            await fetch(
+                productJsonPath
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Não foi possível carregar produto.json. HTTP " +
+                response.status
+            );
+
+        }
+
+
+        product =
+            await response.json();
+
+
+        console.log(
+            "Produto carregado:",
+            product
+        );
+
+
+        updateProductInterface();
+
+
+        loadSTL();
+
+
+    }
+
+    catch(error) {
+
+        console.error(
+            "Erro ao carregar produto:",
+            error
+        );
+
+
+        document
+            .getElementById("loading")
+            .textContent =
+                "Não foi possível carregar as informações do produto.";
+
+    }
+
+}
+
+
+/* =====================================================
+   PREENCHER INTERFACE
+===================================================== */
+
+function updateProductInterface() {
+
+    document
+        .getElementById("productName")
+        .textContent =
+            product.name ||
+            modelName;
+
+
+    document
+        .getElementById("category")
+        .textContent =
+            product.category ||
+            "";
+
+
+    document
+        .getElementById("description")
+        .textContent =
+            product.description ||
+            "";
+
+
+    document
+        .getElementById("materials")
+        .textContent =
+            product.materials ||
+            "Consultar";
+
+
+    document
+        .getElementById("customization")
+        .textContent =
+            product.customization ||
+            "Consultar";
+
+
+    createColorButtons();
+
+}
 
 
 /* =====================================================
@@ -1513,274 +1540,6 @@ function centerModel() {
 
 
 /* =====================================================
-   PREENCHER INTERFACE
-===================================================== */
-
-function fillProductInterface() {
-
-    document
-        .getElementById("productName")
-        .textContent =
-            product.name ||
-            modelName;
-
-
-    document
-        .getElementById("category")
-        .textContent =
-            product.category ||
-            "PLANTAS E DECORAÇÃO";
-
-
-    document
-        .getElementById("description")
-        .textContent =
-            product.description ||
-            "Modelo disponível para produção personalizada.";
-
-
-    document
-        .getElementById("materials")
-        .textContent =
-            product.materials ||
-            "Sob consulta";
-
-
-    document
-        .getElementById("customization")
-        .textContent =
-            product.customization ||
-            "Cores e tamanhos sob consulta";
-
-
-    loadColors();
-
-}
-
-
-/* =====================================================
-   CORES
-===================================================== */
-
-function loadColors() {
-
-    const colorsContainer =
-        document.getElementById(
-            "colors"
-        );
-
-
-    colorsContainer.innerHTML =
-        "";
-
-
-    const colors =
-        Array.isArray(
-            product.colors
-        )
-            ? product.colors
-            : [];
-
-
-    colors.forEach(
-
-        (colorData, index) => {
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-
-            button.className =
-                "color";
-
-
-            button.title =
-                colorData.name ||
-                "Cor";
-
-
-            button.setAttribute(
-                "aria-label",
-                colorData.name ||
-                "Cor"
-            );
-
-
-            /*
-               O JSON usa valores numéricos
-               como 16053493.
-
-               Também aceitamos valores
-               em hexadecimal caso futuramente
-               algum produto use "#FFFFFF".
-            */
-
-            let hexValue =
-                colorData.hex;
-
-
-            if (
-                typeof hexValue ===
-                "string"
-            ) {
-
-                hexValue =
-                    hexValue.replace(
-                        "#",
-                        ""
-                    );
-
-
-                hexValue =
-                    parseInt(
-                        hexValue,
-                        16
-                    );
-
-            }
-
-
-            if (
-                typeof hexValue !==
-                "number"
-            ) {
-
-                hexValue =
-                    0x777777;
-
-            }
-
-
-            button.style.background =
-                "#" +
-                hexValue
-                    .toString(16)
-                    .padStart(
-                        6,
-                        "0"
-                    );
-
-
-            if (
-                index === 0
-            ) {
-
-                button.classList.add(
-                    "selected"
-                );
-
-            }
-
-
-            button.addEventListener(
-                "click",
-                function() {
-
-                    if (!model)
-                        return;
-
-
-                    model.material.color.setHex(
-                        hexValue
-                    );
-
-
-                    document
-                        .querySelectorAll(
-                            ".color"
-                        )
-                        .forEach(
-                            item =>
-                                item.classList.remove(
-                                    "selected"
-                                )
-                        );
-
-
-                    button.classList.add(
-                        "selected"
-                    );
-
-                }
-            );
-
-
-            colorsContainer.appendChild(
-                button
-            );
-
-        }
-
-    );
-
-}
-
-
-/* =====================================================
-   CARREGAR PRODUTO.JSON
-===================================================== */
-
-async function loadProductData() {
-
-    try {
-
-        const response =
-            await fetch(
-                productJsonPath
-            );
-
-
-        if (
-            !response.ok
-        ) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
-
-        }
-
-
-        product =
-            await response.json();
-
-
-        console.log(
-            "produto.json carregado:",
-            product
-        );
-
-
-        fillProductInterface();
-
-
-        loadSTL();
-
-    }
-
-
-    catch(error) {
-
-        console.error(
-            "Erro ao carregar produto.json:",
-            error
-        );
-
-
-        document
-            .getElementById("loading")
-            .textContent =
-                "Não foi possível carregar as informações do produto.";
-
-    }
-
-}
-
-
-/* =====================================================
    CARREGAR STL
 ===================================================== */
 
@@ -1907,6 +1666,133 @@ function loadSTL() {
 
 
 /* =====================================================
+   CORES
+===================================================== */
+
+function createColorButtons() {
+
+    const colorsContainer =
+        document.getElementById(
+            "colors"
+        );
+
+
+    colorsContainer.innerHTML =
+        "";
+
+
+    if (
+        !product.colors ||
+        !Array.isArray(product.colors)
+    ) {
+
+        return;
+
+    }
+
+
+    product.colors.forEach(
+
+        (colorData, index) => {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "color";
+
+
+            button.title =
+                colorData.name;
+
+
+            button.setAttribute(
+                "aria-label",
+                colorData.name
+            );
+
+
+            /*
+               O produto.json usa números
+               decimais para representar a cor.
+
+               Exemplo:
+               16053493 = F5F5F5
+            */
+
+            const hexValue =
+                Number(
+                    colorData.hex
+                );
+
+
+            button.style.background =
+                "#" +
+                hexValue
+                    .toString(16)
+                    .padStart(
+                        6,
+                        "0"
+                    );
+
+
+            if (index === 0) {
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    if (!model)
+                        return;
+
+
+                    model.material.color.setHex(
+                        hexValue
+                    );
+
+
+                    document
+                        .querySelectorAll(
+                            ".color"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "selected"
+                                )
+                        );
+
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+            colorsContainer.appendChild(
+                button
+            );
+
+        }
+
+    );
+
+}
+
+
+/* =====================================================
    AMBIENTES
 ===================================================== */
 
@@ -1920,7 +1806,6 @@ let environmentMode =
    2 = Estúdio HDRI
    3 = 4Maker
 */
-
 
 const environments = [
 
@@ -2567,12 +2452,19 @@ document
         "click",
         function() {
 
+            const productName =
+                product &&
+                product.name
+                    ? product.name
+                    : modelName;
+
+
             const message =
                 encodeURIComponent(
 
                     "Olá! Gostaria de solicitar " +
                     "um orçamento para o modelo " +
-                    product.name +
+                    productName +
                     "."
 
                 );
