@@ -12,27 +12,33 @@
     "colors": [
         {
             "name": "Branco",
-            "hex": 11513775
+            "hex": 10197915,
+            "swatch": 16777215
         },
         {
             "name": "Preto",
-            "hex": 2434341
+            "hex": 2368548,
+            "swatch": 242424
         },
         {
             "name": "Azul",
-            "hex": 1658476
+            "hex": 1527420,
+            "swatch": 1527420
         },
         {
             "name": "Vermelho",
-            "hex": 14495792
+            "hex": 13773867,
+            "swatch": 15018795
         },
         {
             "name": "Amarelo",
-            "hex": 14070043
+            "hex": 12626970,
+            "swatch": 14726426
         },
         {
             "name": "Verde",
-            "hex": 3975260
+            "hex": 3255904,
+            "swatch": 3975776
         }
     ]
 }
