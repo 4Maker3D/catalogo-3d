@@ -1337,7 +1337,7 @@ renderer.toneMapping =
 
 
 renderer.toneMappingExposure =
-    1.15;
+    1.0;
 
 
 renderer.shadowMap.enabled =
@@ -1405,7 +1405,7 @@ controls.mouseButtons.MIDDLE =
 const ambient =
     new THREE.AmbientLight(
         0xffffff,
-        2.2
+        1.25
     );
 
 scene.add(
@@ -1416,7 +1416,7 @@ scene.add(
 const keyLight =
     new THREE.DirectionalLight(
         0xffffff,
-        3.5
+        2.0
     );
 
 
@@ -1435,7 +1435,7 @@ scene.add(
 const fillLight =
     new THREE.DirectionalLight(
         0xffffff,
-        1.8
+        0.8
     );
 
 
@@ -1577,7 +1577,10 @@ function loadSTL() {
                         0.05,
 
                     roughness:
-                        0.58
+                        0.58,
+
+                    envMapIntensity:
+                        1.0
 
                 });
 
@@ -1592,6 +1595,14 @@ function loadSTL() {
             scene.add(
                 model
             );
+
+            if (product &&
+                Array.isArray(product.colors) &&
+                product.colors.length > 0) {
+                applyModelColor(
+                    product.colors[0].hex
+                );
+            }
 
 
             const box =
@@ -1669,6 +1680,27 @@ function loadSTL() {
    CORES
 ===================================================== */
 
+function applyModelColor(hexValue) {
+
+    if (!model || !model.material)
+        return;
+
+    model.material.color.setHex(
+        Number(hexValue)
+    );
+
+    /* Reduz a influência do HDRI somente no modelo. */
+    if (environmentMode === 2) {
+        model.material.envMapIntensity = 0.35;
+    }
+    else {
+        model.material.envMapIntensity = 1.0;
+    }
+
+    model.material.needsUpdate = true;
+}
+
+
 function createColorButtons() {
 
     const colorsContainer =
@@ -1729,7 +1761,7 @@ function createColorButtons() {
                 );
 
 
-            button.style.background =
+            const cssHex =
                 "#" +
                 hexValue
                     .toString(16)
@@ -1737,6 +1769,10 @@ function createColorButtons() {
                         6,
                         "0"
                     );
+
+            /* O círculo usa a cor original do JSON. */
+            button.style.background =
+                cssHex;
 
 
             if (index === 0) {
@@ -1756,7 +1792,7 @@ function createColorButtons() {
                         return;
 
 
-                    model.material.color.setHex(
+                    applyModelColor(
                         hexValue
                     );
 
@@ -1905,6 +1941,18 @@ function applyStudioEnvironment() {
         scene.environment =
             studioEnvironment;
 
+        /* HDRI como fonte principal de luz, em intensidade controlada. */
+        scene.environmentIntensity = 0.55;
+
+        ambient.intensity = 0.18;
+        keyLight.intensity = 0.35;
+        fillLight.intensity = 0.12;
+
+        if (model && model.material) {
+            model.material.envMapIntensity = 0.35;
+            model.material.needsUpdate = true;
+        }
+
     }
 
     else {
@@ -1916,6 +1964,17 @@ function applyStudioEnvironment() {
 
         scene.environment =
             null;
+
+        scene.environmentIntensity = 1.0;
+
+        ambient.intensity = 1.25;
+        keyLight.intensity = 2.0;
+        fillLight.intensity = 0.8;
+
+        if (model && model.material) {
+            model.material.envMapIntensity = 1.0;
+            model.material.needsUpdate = true;
+        }
 
     }
 
@@ -2251,6 +2310,18 @@ function updateEnvironment() {
 
     }
 
+
+    if (environmentMode !== 2) {
+        scene.environmentIntensity = 1.0;
+        ambient.intensity = 1.25;
+        keyLight.intensity = 2.0;
+        fillLight.intensity = 0.8;
+
+        if (model && model.material) {
+            model.material.envMapIntensity = 1.0;
+            model.material.needsUpdate = true;
+        }
+    }
 
     if (
         environmentMode === 1
