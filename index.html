@@ -962,7 +962,7 @@ body.dark .scroll-indicator {
         class="product-name"
         id="productName">
 
-        Self-Watering 3
+        Carregando...
 
     </div>
 
@@ -971,8 +971,7 @@ body.dark .scroll-indicator {
         class="description"
         id="description">
 
-        Modelo disponível para produção
-        personalizada.
+        Carregando informações do produto...
 
     </div>
 
@@ -983,7 +982,7 @@ body.dark .scroll-indicator {
 
         <span id="materials">
 
-            PLA • PETG • ABS
+            -
 
         </span>
 
@@ -996,7 +995,7 @@ body.dark .scroll-indicator {
 
         <span id="customization">
 
-            Cores e tamanhos sob consulta
+            -
 
         </span>
 
@@ -1070,168 +1069,57 @@ from 'three/addons/loaders/RGBELoader.js';
 
 
 /* =====================================================
-   CONFIGURAÇÃO DOS PRODUTOS
+   PRODUTOS DISPONÍVEIS
 ===================================================== */
 
-const products = {
+/*
+   IMPORTANTE:
 
+   Estes são os NOMES DAS PASTAS dentro de Modelos.
 
-    /* =========================
-       SELF-WATERING 3
-    ========================= */
+   Cada pasta deve conter:
 
-    "Self-Watering-3": {
+       modelo.stl
+       produto.json
+*/
 
-        name:
-            "Self-Watering 3",
+const productFolders = [
 
-        category:
-            "PLANTAS E DECORAÇÃO",
+    "Cachepot Autoirrigável",
 
-        description:
-            "Modelo disponível para produção personalizada.",
+    "Difusor de Água para Solo Fluxo Direto",
 
-        materials:
-            "PLA • PETG • ABS",
+    "Difusor de Água para Solo Fluxo Fino",
 
-        customization:
-            "Cores e tamanhos sob consulta",
+    "Difusor de Água para Solo Fluxo Médio",
 
-        colors: [
+    "Difusor de Água para Solo Fluxo Rápido",
 
-            {
-                name:
-                    "Branco",
+    "Difusor de Água para Solo Kit 4 Peças",
 
-                hex:
-                    0xf5f5f5
-            },
+    "Globo para Rega de Plantas",
 
-            {
-                name:
-                    "Preto",
+    "Jardim Zen",
 
-                hex:
-                    0x252525
-            },
+    "Plantador Mini Paludário",
 
-            {
-                name:
-                    "Azul",
+    "Prato de Vaso de Planta",
 
-                hex:
-                    0x214779
-            },
+    "Tampa Plantação Hidropônica 100mm",
 
-            {
-                name:
-                    "Vermelho",
+    "Tampa Plantação Hidropônica 70mm",
 
-                hex:
-                    0xdd3030
-            },
+    "Vaso Autoirrigável Redondo",
 
-            {
-                name:
-                    "Amarelo",
+    "Vaso Autoirrigável",
 
-                hex:
-                    0xd6a51b
-            },
+    "Vaso de Parede"
 
-            {
-                name:
-                    "Verde",
-
-                hex:
-                    0x3c985c
-            }
-
-        ]
-
-    },
-
-
-    /* =========================
-       MINI PALUDARIUM PLANTER
-    ========================= */
-
-    "Mini Paludarium Planter": {
-
-        name:
-            "Mini Paludarium Planter",
-
-        category:
-            "PLANTAS E DECORAÇÃO",
-
-        description:
-            "Mini paludário desenvolvido para plantas e composição decorativa.",
-
-        materials:
-            "PLA • PETG • ABS",
-
-        customization:
-            "Cores e tamanhos sob consulta",
-
-        colors: [
-
-            {
-                name:
-                    "Branco",
-
-                hex:
-                    0xf5f5f5
-            },
-
-            {
-                name:
-                    "Preto",
-
-                hex:
-                    0x252525
-            },
-
-            {
-                name:
-                    "Azul",
-
-                hex:
-                    0x214779
-            },
-
-            {
-                name:
-                    "Vermelho",
-
-                hex:
-                    0xdd3030
-            },
-
-            {
-                name:
-                    "Amarelo",
-
-                hex:
-                    0xd6a51b
-            },
-
-            {
-                name:
-                    "Verde",
-
-                hex:
-                    0x3c985c
-            }
-
-        ]
-
-    }
-
-};
+];
 
 
 /* =====================================================
-   IDENTIFICA O MODELO PELA URL
+   IDENTIFICA O PRODUTO PELA URL
 ===================================================== */
 
 const params =
@@ -1241,9 +1129,28 @@ const params =
 
 
 let modelName =
-    params.get("modelo") ||
-    "Self-Watering-3";
+    params.get("modelo");
 
+
+/*
+   Se nenhum produto for informado,
+   abre o primeiro da lista.
+*/
+
+if (
+    !modelName
+) {
+
+    modelName =
+        productFolders[0];
+
+}
+
+
+/*
+   Remove .stl caso alguém coloque
+   o nome do arquivo na URL.
+*/
 
 modelName =
     modelName.replace(
@@ -1252,43 +1159,74 @@ modelName =
     );
 
 
-const product =
-    products[modelName] ||
-    products["Self-Watering-3"];
+/*
+   Verifica se o produto existe
+   na lista.
+*/
+
+if (
+    !productFolders.includes(
+        modelName
+    )
+) {
+
+    console.warn(
+        "Produto não encontrado:",
+        modelName
+    );
+
+    modelName =
+        productFolders[0];
+
+}
 
 
 /* =====================================================
-   PREENCHER INTERFACE
+   CAMINHOS DOS ARQUIVOS
 ===================================================== */
 
-document
-    .getElementById("productName")
-    .textContent =
-        product.name;
+const encodedFolder =
+    encodeURIComponent(
+        modelName
+    );
 
 
-document
-    .getElementById("category")
-    .textContent =
-        product.category;
+const productJsonPath =
+    "Modelos/" +
+    encodedFolder +
+    "/produto.json";
 
 
-document
-    .getElementById("description")
-    .textContent =
-        product.description;
+const stlPath =
+    "Modelos/" +
+    encodedFolder +
+    "/modelo.stl";
 
 
-document
-    .getElementById("materials")
-    .textContent =
-        product.materials;
+console.log(
+    "Produto:",
+    modelName
+);
 
 
-document
-    .getElementById("customization")
-    .textContent =
-        product.customization;
+console.log(
+    "JSON:",
+    productJsonPath
+);
+
+
+console.log(
+    "STL:",
+    stlPath
+);
+
+
+/* =====================================================
+   VARIÁVEL DO PRODUTO
+===================================================== */
+
+let product =
+    null;
 
 
 /* =====================================================
@@ -1575,132 +1513,259 @@ function centerModel() {
 
 
 /* =====================================================
-   CARREGAR STL
+   PREENCHER INTERFACE
 ===================================================== */
 
-const loader =
-    new STLLoader();
+function fillProductInterface() {
+
+    document
+        .getElementById("productName")
+        .textContent =
+            product.name ||
+            modelName;
 
 
-/*
-   IMPORTANTE:
-
-   Os modelos estão dentro da pasta:
-
-       Modelos/
-
-   encodeURIComponent permite
-   nomes com espaços.
-*/
-
-const stlPath =
-    "Modelos/" +
-    encodeURIComponent(
-        modelName +
-        ".stl"
-    );
+    document
+        .getElementById("category")
+        .textContent =
+            product.category ||
+            "PLANTAS E DECORAÇÃO";
 
 
-console.log(
-    "Carregando modelo:",
-    stlPath
-);
+    document
+        .getElementById("description")
+        .textContent =
+            product.description ||
+            "Modelo disponível para produção personalizada.";
 
 
-loader.load(
-
-    stlPath,
-
-
-    function(geometry) {
-
-        geometry.computeVertexNormals();
-
-        geometry.center();
+    document
+        .getElementById("materials")
+        .textContent =
+            product.materials ||
+            "Sob consulta";
 
 
-        const material =
-            new THREE.MeshStandardMaterial({
-
-                color:
-                    originalMaterialColor,
-
-                metalness:
-                    0.05,
-
-                roughness:
-                    0.58
-
-            });
+    document
+        .getElementById("customization")
+        .textContent =
+            product.customization ||
+            "Cores e tamanhos sob consulta";
 
 
-        model =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
+    loadColors();
+
+}
 
 
-        scene.add(
-            model
+/* =====================================================
+   CORES
+===================================================== */
+
+function loadColors() {
+
+    const colorsContainer =
+        document.getElementById(
+            "colors"
         );
 
 
-        const box =
-            new THREE.Box3()
-                .setFromObject(
-                    model
+    colorsContainer.innerHTML =
+        "";
+
+
+    const colors =
+        Array.isArray(
+            product.colors
+        )
+            ? product.colors
+            : [];
+
+
+    colors.forEach(
+
+        (colorData, index) => {
+
+            const button =
+                document.createElement(
+                    "button"
                 );
 
 
-        const size =
-            box.getSize(
-                new THREE.Vector3()
+            button.className =
+                "color";
+
+
+            button.title =
+                colorData.name ||
+                "Cor";
+
+
+            button.setAttribute(
+                "aria-label",
+                colorData.name ||
+                "Cor"
             );
 
 
-        const maxDimension =
-            Math.max(
-                size.x,
-                size.y,
-                size.z
+            /*
+               O JSON usa valores numéricos
+               como 16053493.
+
+               Também aceitamos valores
+               em hexadecimal caso futuramente
+               algum produto use "#FFFFFF".
+            */
+
+            let hexValue =
+                colorData.hex;
+
+
+            if (
+                typeof hexValue ===
+                "string"
+            ) {
+
+                hexValue =
+                    hexValue.replace(
+                        "#",
+                        ""
+                    );
+
+
+                hexValue =
+                    parseInt(
+                        hexValue,
+                        16
+                    );
+
+            }
+
+
+            if (
+                typeof hexValue !==
+                "number"
+            ) {
+
+                hexValue =
+                    0x777777;
+
+            }
+
+
+            button.style.background =
+                "#" +
+                hexValue
+                    .toString(16)
+                    .padStart(
+                        6,
+                        "0"
+                    );
+
+
+            if (
+                index === 0
+            ) {
+
+                button.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    if (!model)
+                        return;
+
+
+                    model.material.color.setHex(
+                        hexValue
+                    );
+
+
+                    document
+                        .querySelectorAll(
+                            ".color"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "selected"
+                                )
+                        );
+
+
+                    button.classList.add(
+                        "selected"
+                    );
+
+                }
             );
 
 
-        modelScale =
-            57 /
-            maxDimension;
+            colorsContainer.appendChild(
+                button
+            );
+
+        }
+
+    );
+
+}
 
 
-        model.scale.setScalar(
-            modelScale
+/* =====================================================
+   CARREGAR PRODUTO.JSON
+===================================================== */
+
+async function loadProductData() {
+
+    try {
+
+        const response =
+            await fetch(
+                productJsonPath
+            );
+
+
+        if (
+            !response.ok
+        ) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        product =
+            await response.json();
+
+
+        console.log(
+            "produto.json carregado:",
+            product
         );
 
 
-        centerModel();
+        fillProductInterface();
 
 
-        document
-            .getElementById("loading")
-            .style.display =
-                "none";
+        loadSTL();
+
+    }
 
 
-        setTimeout(
-            updateScrollIndicator,
-            100
-        );
-
-    },
-
-
-    undefined,
-
-
-    function(error) {
+    catch(error) {
 
         console.error(
-            "Erro ao carregar STL:",
+            "Erro ao carregar produto.json:",
             error
         );
 
@@ -1708,106 +1773,137 @@ loader.load(
         document
             .getElementById("loading")
             .textContent =
-                "Não foi possível carregar o modelo.";
+                "Não foi possível carregar as informações do produto.";
 
     }
 
-);
+}
 
 
 /* =====================================================
-   CORES
+   CARREGAR STL
 ===================================================== */
 
-const colorsContainer =
-    document.getElementById(
-        "colors"
+const loader =
+    new STLLoader();
+
+
+function loadSTL() {
+
+    console.log(
+        "Carregando modelo:",
+        stlPath
     );
 
 
-product.colors.forEach(
+    loader.load(
 
-    (colorData, index) => {
-
-        const button =
-            document.createElement(
-                "button"
-            );
+        stlPath,
 
 
-        button.className =
-            "color";
+        function(geometry) {
+
+            geometry.computeVertexNormals();
+
+            geometry.center();
 
 
-        button.title =
-            colorData.name;
+            const material =
+                new THREE.MeshStandardMaterial({
+
+                    color:
+                        originalMaterialColor,
+
+                    metalness:
+                        0.05,
+
+                    roughness:
+                        0.58
+
+                });
 
 
-        button.setAttribute(
-            "aria-label",
-            colorData.name
-        );
-
-
-        button.style.background =
-            "#" +
-            colorData.hex
-                .toString(16)
-                .padStart(
-                    6,
-                    "0"
+            model =
+                new THREE.Mesh(
+                    geometry,
+                    material
                 );
 
 
-        if (index === 0) {
-
-            button.classList.add(
-                "selected"
+            scene.add(
+                model
             );
 
-        }
 
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                if (!model)
-                    return;
-
-
-                model.material.color.setHex(
-                    colorData.hex
-                );
-
-
-                document
-                    .querySelectorAll(
-                        ".color"
-                    )
-                    .forEach(
-                        item =>
-                            item.classList.remove(
-                                "selected"
-                            )
+            const box =
+                new THREE.Box3()
+                    .setFromObject(
+                        model
                     );
 
 
-                button.classList.add(
-                    "selected"
+            const size =
+                box.getSize(
+                    new THREE.Vector3()
                 );
 
-            }
-        );
+
+            const maxDimension =
+                Math.max(
+                    size.x,
+                    size.y,
+                    size.z
+                );
 
 
-        colorsContainer.appendChild(
-            button
-        );
+            modelScale =
+                57 /
+                maxDimension;
 
-    }
 
-);
+            model.scale.setScalar(
+                modelScale
+            );
+
+
+            centerModel();
+
+
+            document
+                .getElementById("loading")
+                .style.display =
+                    "none";
+
+
+            setTimeout(
+                updateScrollIndicator,
+                100
+            );
+
+        },
+
+
+        undefined,
+
+
+        function(error) {
+
+            console.error(
+                "Erro ao carregar STL:",
+                error
+            );
+
+
+            document
+                .getElementById("loading")
+                .textContent =
+                    "Não foi possível carregar o modelo 3D.";
+
+        }
+
+    );
+
+}
 
 
 /* =====================================================
@@ -1884,7 +1980,6 @@ let studioEnvironment =
 
 /* =====================================================
    HDRI
-   FALLBACK 4K → 2K → 1K
 ===================================================== */
 
 const HDRI_4K =
@@ -2099,11 +2194,6 @@ function getEnvironmentIcon(
     mode
 ) {
 
-
-    /* =========================
-       CLARO — SOL
-    ========================= */
-
     if (
         mode === 0
     ) {
@@ -2138,10 +2228,6 @@ function getEnvironmentIcon(
     }
 
 
-    /* =========================
-       ESCURO — LUA
-    ========================= */
-
     if (
         mode === 1
     ) {
@@ -2166,10 +2252,6 @@ function getEnvironmentIcon(
 
     }
 
-
-    /* =========================
-       ESTÚDIO — ESTRELA
-    ========================= */
 
     if (
         mode === 2
@@ -2202,10 +2284,6 @@ function getEnvironmentIcon(
 
     }
 
-
-    /* =========================
-       4MAKER — DIAMANTE
-    ========================= */
 
     return `
 
@@ -2670,6 +2748,13 @@ function animate() {
 
 
 animate();
+
+
+/* =====================================================
+   INICIAR
+===================================================== */
+
+loadProductData();
 
 </script>
 
