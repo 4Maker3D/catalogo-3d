@@ -1,0 +1,38 @@
+{
+    "name": "Cachepot Autoirrigável",
+
+    "category": "PLANTAS E DECORAÇÃO",
+
+    "description": "Modelo disponível para produção personalizada.",
+
+    "materials": "PLA • PETG • ABS",
+
+    "customization": "Cores e tamanhos sob consulta",
+
+    "colors": [
+        {
+            "name": "Branco",
+            "hex": 16053493
+        },
+        {
+            "name": "Preto",
+            "hex": 2434341
+        },
+        {
+            "name": "Azul",
+            "hex": 218713
+        },
+        {
+            "name": "Vermelho",
+            "hex": 14495792
+        },
+        {
+            "name": "Amarelo",
+            "hex": 14070043
+        },
+        {
+            "name": "Verde",
+            "hex": 3975260
+        }
+    ]
+}
