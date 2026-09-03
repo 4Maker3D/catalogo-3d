@@ -1,18 +1,13 @@
 {
     "name": "Vaso Autoirrigável Redondo",
-
     "category": "PLANTAS E DECORAÇÃO",
-
     "description": "Modelo disponível para produção personalizada.",
-
     "materials": "PLA • PETG • ABS",
-
     "customization": "Cores e tamanhos sob consulta",
-
     "colors": [
         {
             "name": "Branco",
-            "hex": 10197915,
+            "hex": 16777215,
             "swatch": 16777215
         },
         {
@@ -27,17 +22,17 @@
         },
         {
             "name": "Vermelho",
-            "hex": 13773867,
+            "hex": 15018795,
             "swatch": 15018795
         },
         {
             "name": "Amarelo",
-            "hex": 12626970,
+            "hex": 14726426,
             "swatch": 14726426
         },
         {
             "name": "Verde",
-            "hex": 3255904,
+            "hex": 3975776,
             "swatch": 3975776
         }
     ]
