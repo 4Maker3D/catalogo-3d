@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>4Maker 3D • Login</title>
+
+<style>
+:root {
+    --bg: #090b0f;
+    --panel: rgba(20, 23, 29, 0.88);
+    --panel-border: rgba(255,255,255,0.09);
+    --text: #f2f3f5;
+    --muted: #8f96a3;
+    --accent: #ff7a00;
+    --accent-hover: #ff8f26;
+    --danger: #ff4d4d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(255,122,0,0.09), transparent 35%),
+        var(--bg);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.login-container {
+    width: min(420px, calc(100% - 32px));
+}
+
+.login-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 24px;
+    padding: 38px 32px 32px;
+    box-shadow:
+        0 25px 80px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.logo-area {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.logo {
+    width: min(230px, 75%);
+    max-height: 90px;
+    object-fit: contain;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.field {
+    margin-bottom: 18px;
+}
+
+.field label {
+    display: block;
+    font-size: 13px;
+    color: #c9cdd4;
+    margin-bottom: 8px;
+}
+
+.field input {
+    width: 100%;
+    height: 50px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(0,0,0,0.28);
+    color: white;
+    padding: 0 15px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+.field input:focus {
+    border-color: rgba(255,122,0,0.7);
+    box-shadow: 0 0 0 3px rgba(255,122,0,0.10);
+}
+
+.login-button {
+    width: 100%;
+    height: 52px;
+    margin-top: 8px;
+    border: 0;
+    border-radius: 13px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.login-button:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+}
+
+.login-button:active {
+    transform: translateY(0);
+}
+
+.error {
+    display: none;
+    color: #ff8585;
+    font-size: 13px;
+    margin-top: 14px;
+    text-align: center;
+}
+
+.footer {
+    text-align: center;
+    color: #626975;
+    font-size: 11px;
+    margin-top: 22px;
+}
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 22px 25px;
+        border-radius: 20px;
+    }
+
+    .logo {
+        width: 200px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-container">
+
+    <div class="login-card">
+
+        <div class="logo-area">
+            <img
+                src="logo.png"
+                alt="4Maker 3D"
+                class="logo"
+                onerror="this.style.display='none';"
+            >
+
+            <div class="subtitle">
+                Painel administrativo
+            </div>
+        </div>
+
+        <form id="loginForm">
+
+            <div class="field">
+                <label for="username">
+                    Usuário
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <div class="field">
+                <label for="password">
+                    Senha
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="login-button"
+            >
+                ENTRAR
+            </button>
+
+            <div
+                class="error"
+                id="loginError"
+            >
+                Usuário ou senha incorretos.
+            </div>
+
+        </form>
+
+        <div class="footer">
+            4Maker 3D • Painel
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/*
+    ============================================================
+    LOGIN — VERSÃO INICIAL
+    ============================================================
+
+    Nesta primeira versão o login é apenas uma interface.
+
+    NÃO coloque aqui:
+        - Token do GitHub
+        - Senhas reais
+        - Chaves de API
+
+    Posteriormente esta validação será substituída por uma
+    autenticação adequada através do backend/API.
+*/
+
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
+
+loginForm.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    /*
+        Apenas demonstração visual.
+
+        Usuário:
+        admin
+
+        Senha:
+        4maker
+
+        ISSO NÃO DEVE SER UTILIZADO COMO SENHA REAL.
+    */
+
+    const username =
+        document.getElementById("username").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    if (
+        username === "admin" &&
+        password === "4maker"
+    ) {
+
+        sessionStorage.setItem(
+            "4maker_logged",
+            "true"
+        );
+
+        window.location.href = "painel.html";
+
+    } else {
+
+        loginError.style.display = "block";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
