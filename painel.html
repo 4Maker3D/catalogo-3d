@@ -1,0 +1,3936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>4Maker 3D • Painel</title>
+
+<style>
+
+:root {
+
+    --bg:
+        #090b0f;
+
+    --sidebar:
+        rgba(15,18,23,0.94);
+
+    --panel:
+        rgba(20,23,29,0.88);
+
+    --panel-light:
+        rgba(255,255,255,0.045);
+
+    --border:
+        rgba(255,255,255,0.08);
+
+    --text:
+        #f1f2f4;
+
+    --muted:
+        #8e95a1;
+
+    --accent:
+        #ff7a00;
+
+    --accent-hover:
+        #ff8e24;
+
+    --success:
+        #35c98a;
+
+    --warning:
+        #f2b84b;
+
+    --danger:
+        #ff5757;
+
+    --sidebar-width:
+        260px;
+
+}
+
+
+/* ============================================================
+   RESET
+============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 70% 20%,
+            rgba(255,122,0,0.055),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color:
+        var(--text);
+
+    overflow: hidden;
+
+}
+
+
+/* ============================================================
+   LAYOUT
+============================================================ */
+
+.app {
+
+    display: flex;
+
+    width: 100%;
+    height: 100%;
+
+}
+
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+
+.sidebar {
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width:
+        var(--sidebar-width);
+
+    height: 100vh;
+
+    background:
+        var(--sidebar);
+
+    border-right:
+        1px solid var(--border);
+
+    backdrop-filter:
+        blur(22px);
+
+    -webkit-backdrop-filter:
+        blur(22px);
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    z-index: 1000;
+
+    transform:
+        translateX(0);
+
+    transition:
+        transform 0.28s ease;
+
+}
+
+
+.sidebar.collapsed {
+
+    transform:
+        translateX(
+            calc(-1 * var(--sidebar-width) + 62px)
+        );
+
+}
+
+
+/* ============================================================
+   SIDEBAR HEADER
+============================================================ */
+
+.sidebar-header {
+
+    height: 82px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 16px 0 20px;
+
+    border-bottom:
+        1px solid var(--border);
+
+}
+
+
+.sidebar-logo {
+
+    width:
+        145px;
+
+    max-height:
+        48px;
+
+    object-fit:
+        contain;
+
+}
+
+
+.sidebar.collapsed
+.sidebar-logo {
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ============================================================
+   MENU BUTTON
+============================================================ */
+
+.menu-button {
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        var(--text);
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        20px;
+
+    transition:
+        0.2s ease;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.menu-button:hover {
+
+    background:
+        rgba(255,122,0,0.12);
+
+    border-color:
+        rgba(255,122,0,0.4);
+
+}
+
+
+/* ============================================================
+   MENU
+============================================================ */
+
+.menu {
+
+    padding:
+        18px 10px;
+
+    flex:
+        1;
+
+    overflow-y:
+        auto;
+
+}
+
+
+.menu-title {
+
+    font-size:
+        10px;
+
+    color:
+        #666d78;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.12em;
+
+    padding:
+        0 12px 9px;
+
+}
+
+
+.menu-item {
+
+    width:
+        100%;
+
+    height:
+        48px;
+
+    border:
+        0;
+
+    background:
+        transparent;
+
+    color:
+        #aeb4be;
+
+    border-radius:
+        11px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        13px;
+
+    padding:
+        0 13px;
+
+    margin-bottom:
+        5px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        14px;
+
+    text-align:
+        left;
+
+    transition:
+        0.2s ease;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.menu-item:hover {
+
+    background:
+        rgba(255,255,255,0.045);
+
+    color:
+        white;
+
+}
+
+
+.menu-item.active {
+
+    background:
+        rgba(255,122,0,0.13);
+
+    color:
+        #ff9a40;
+
+}
+
+
+.menu-icon {
+
+    width:
+        21px;
+
+    text-align:
+        center;
+
+    font-size:
+        17px;
+
+    flex-shrink:
+        0;
+
+}
+
+
+.sidebar.collapsed
+.menu-item span:not(.menu-icon) {
+
+    opacity:
+        0;
+
+}
+
+
+.sidebar-footer {
+
+    padding:
+        14px;
+
+    border-top:
+        1px solid var(--border);
+
+}
+
+
+.logout {
+
+    width:
+        100%;
+
+    height:
+        44px;
+
+    border:
+        0;
+
+    background:
+        transparent;
+
+    color:
+        #9299a4;
+
+    border-radius:
+        10px;
+
+    cursor:
+        pointer;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        0 12px;
+
+}
+
+
+.logout:hover {
+
+    color:
+        var(--danger);
+
+    background:
+        rgba(255,80,80,0.07);
+
+}
+
+
+/* ============================================================
+   MAIN
+============================================================ */
+
+.main {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    margin-left:
+        var(--sidebar-width);
+
+    transition:
+        margin-left 0.28s ease;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.sidebar.collapsed ~ .main {
+
+    margin-left:
+        62px;
+
+}
+
+
+/* ============================================================
+   TOPBAR
+============================================================ */
+
+.topbar {
+
+    height:
+        82px;
+
+    min-height:
+        82px;
+
+    border-bottom:
+        1px solid var(--border);
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 28px;
+
+    background:
+        rgba(9,11,15,0.55);
+
+    backdrop-filter:
+        blur(15px);
+
+}
+
+
+.topbar-left {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        14px;
+
+}
+
+
+.page-title {
+
+    font-size:
+        20px;
+
+    font-weight:
+        600;
+
+}
+
+
+.page-subtitle {
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    margin-top:
+        3px;
+
+}
+
+
+.user {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+}
+
+
+.avatar {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    border-radius:
+        50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff7a00,
+            #ffb15c
+        );
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    font-size:
+        13px;
+
+    font-weight:
+        bold;
+
+}
+
+
+/* ============================================================
+   CONTENT
+============================================================ */
+
+.content {
+
+    flex:
+        1;
+
+    overflow-y:
+        auto;
+
+    padding:
+        28px;
+
+}
+
+
+.section {
+
+    display:
+        none;
+
+    animation:
+        sectionIn 0.25s ease;
+
+}
+
+
+.section.active {
+
+    display:
+        block;
+
+}
+
+
+@keyframes sectionIn {
+
+    from {
+
+        opacity:
+            0;
+
+        transform:
+            translateY(7px);
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+
+.welcome {
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.welcome h1 {
+
+    margin:
+        0 0 6px;
+
+    font-size:
+        27px;
+
+}
+
+
+.welcome p {
+
+    margin:
+        0;
+
+    color:
+        var(--muted);
+
+    font-size:
+        14px;
+
+}
+
+
+.stats {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap:
+        15px;
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.stat-card {
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        17px;
+
+    padding:
+        21px;
+
+    min-height:
+        130px;
+
+}
+
+
+.stat-label {
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.stat-value {
+
+    font-size:
+        28px;
+
+    font-weight:
+        600;
+
+    margin-top:
+        13px;
+
+}
+
+
+.stat-extra {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* ============================================================
+   CARDS
+============================================================ */
+
+.card {
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        17px;
+
+    padding:
+        22px;
+
+}
+
+
+.card-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.card-title {
+
+    font-size:
+        16px;
+
+    font-weight:
+        600;
+
+}
+
+
+.card-description {
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* ============================================================
+   QUICK ACTIONS
+============================================================ */
+
+.quick-actions {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        14px;
+
+}
+
+
+.action {
+
+    border:
+        1px solid var(--border);
+
+    background:
+        rgba(255,255,255,0.025);
+
+    border-radius:
+        14px;
+
+    padding:
+        20px;
+
+    color:
+        white;
+
+    cursor:
+        pointer;
+
+    text-align:
+        left;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.action:hover {
+
+    border-color:
+        rgba(255,122,0,0.4);
+
+    background:
+        rgba(255,122,0,0.06);
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+.action-icon {
+
+    font-size:
+        24px;
+
+    margin-bottom:
+        13px;
+
+}
+
+
+.action-title {
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+}
+
+
+.action-description {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* ============================================================
+   TOOLBAR
+============================================================ */
+
+.toolbar {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.search {
+
+    flex:
+        1;
+
+    height:
+        46px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(0,0,0,0.2);
+
+    color:
+        white;
+
+    padding:
+        0 14px;
+
+    outline:
+        none;
+
+}
+
+
+.search:focus {
+
+    border-color:
+        rgba(255,122,0,0.55);
+
+}
+
+
+.button {
+
+    height:
+        46px;
+
+    border:
+        0;
+
+    border-radius:
+        11px;
+
+    padding:
+        0 18px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+    transition:
+        0.2s ease;
+
+}
+
+
+.button-primary {
+
+    background:
+        var(--accent);
+
+    color:
+        white;
+
+}
+
+
+.button-primary:hover {
+
+    background:
+        var(--accent-hover);
+
+}
+
+
+.button-secondary {
+
+    background:
+        rgba(255,255,255,0.055);
+
+    color:
+        #d5d8dd;
+
+    border:
+        1px solid var(--border);
+
+}
+
+
+/* ============================================================
+   PRODUCT GRID
+============================================================ */
+
+.product-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        15px;
+
+}
+
+
+.product-card {
+
+    background:
+        var(--panel);
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        16px;
+
+    padding:
+        18px;
+
+}
+
+
+.product-category {
+
+    color:
+        var(--accent);
+
+    font-size:
+        10px;
+
+    text-transform:
+        uppercase;
+
+    letter-spacing:
+        0.08em;
+
+}
+
+
+.product-name {
+
+    font-size:
+        16px;
+
+    font-weight:
+        600;
+
+    margin:
+        8px 0;
+
+}
+
+
+.product-description {
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+    min-height:
+        38px;
+
+}
+
+
+.product-data {
+
+    display:
+        flex;
+
+    gap:
+        7px;
+
+    flex-wrap:
+        wrap;
+
+    margin:
+        15px 0;
+
+}
+
+
+.badge {
+
+    padding:
+        6px 8px;
+
+    border-radius:
+        7px;
+
+    background:
+        rgba(255,255,255,0.045);
+
+    color:
+        #aeb4be;
+
+    font-size:
+        10px;
+
+}
+
+
+.product-actions {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+}
+
+
+.small-button {
+
+    height:
+        36px;
+
+    flex:
+        1;
+
+    border:
+        1px solid var(--border);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        #cfd3d9;
+
+    border-radius:
+        9px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        11px;
+
+}
+
+
+/* ============================================================
+   FORM
+============================================================ */
+
+.form-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap:
+        16px;
+
+}
+
+
+.form-group {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        7px;
+
+}
+
+
+.form-group.full {
+
+    grid-column:
+        1 / -1;
+
+}
+
+
+.form-group label {
+
+    font-size:
+        12px;
+
+    color:
+        #b9bec7;
+
+}
+
+
+.form-control {
+
+    width:
+        100%;
+
+    min-height:
+        44px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(0,0,0,0.22);
+
+    color:
+        white;
+
+    padding:
+        10px 12px;
+
+    outline:
+        none;
+
+    font-size:
+        13px;
+
+}
+
+
+textarea.form-control {
+
+    min-height:
+        95px;
+
+    resize:
+        vertical;
+
+}
+
+
+.form-control:focus {
+
+    border-color:
+        rgba(255,122,0,0.55);
+
+}
+
+
+.form-section {
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.form-section-title {
+
+    font-size:
+        14px;
+
+    font-weight:
+        600;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+.form-actions {
+
+    display:
+        flex;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        10px;
+
+    margin-top:
+        20px;
+
+}
+
+
+/* ============================================================
+   COLORS
+============================================================ */
+
+.colors-list {
+
+    display:
+        flex;
+
+    flex-wrap:
+        wrap;
+
+    gap:
+        10px;
+
+}
+
+
+.color-option {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    padding:
+        8px 11px;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(255,255,255,0.025);
+
+    font-size:
+        11px;
+
+}
+
+
+.color-circle {
+
+    width:
+        18px;
+
+    height:
+        18px;
+
+    border-radius:
+        50%;
+
+    border:
+        1px solid rgba(255,255,255,0.2);
+
+}
+
+
+/* ============================================================
+   CALCULATOR
+============================================================ */
+
+.calculator-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1.25fr 0.75fr;
+
+    gap:
+        18px;
+
+}
+
+
+.mode-buttons {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.mode-button {
+
+    height:
+        40px;
+
+    padding:
+        0 14px;
+
+    border:
+        1px solid var(--border);
+
+    background:
+        rgba(255,255,255,0.035);
+
+    color:
+        #9da4ae;
+
+    border-radius:
+        9px;
+
+    cursor:
+        pointer;
+
+    font-size:
+        12px;
+
+}
+
+
+.mode-button.active {
+
+    background:
+        rgba(255,122,0,0.12);
+
+    border-color:
+        rgba(255,122,0,0.35);
+
+    color:
+        #ff9940;
+
+}
+
+
+.result {
+
+    background:
+        rgba(255,122,0,0.055);
+
+    border:
+        1px solid rgba(255,122,0,0.16);
+
+    border-radius:
+        14px;
+
+    padding:
+        20px;
+
+}
+
+
+.result-label {
+
+    color:
+        var(--muted);
+
+    font-size:
+        12px;
+
+}
+
+
+.result-value {
+
+    font-size:
+        32px;
+
+    font-weight:
+        600;
+
+    margin-top:
+        7px;
+
+}
+
+
+.calculation-line {
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    padding:
+        10px 0;
+
+    border-bottom:
+        1px solid var(--border);
+
+    color:
+        #b9bec6;
+
+    font-size:
+        12px;
+
+}
+
+
+.calculation-line:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+
+.setting {
+
+    padding:
+        17px 0;
+
+    border-bottom:
+        1px solid var(--border);
+
+}
+
+
+.setting:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+.setting-title {
+
+    font-size:
+        13px;
+
+    font-weight:
+        600;
+
+}
+
+
+.setting-description {
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    margin-top:
+        5px;
+
+}
+
+
+/* ============================================================
+   MOBILE OVERLAY
+============================================================ */
+
+.overlay {
+
+    display:
+        none;
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    background:
+        rgba(0,0,0,0.55);
+
+    z-index:
+        900;
+
+}
+
+
+.overlay.active {
+
+    display:
+        block;
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media (max-width: 1000px) {
+
+    .stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .product-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .calculator-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    body {
+
+        overflow:
+            hidden;
+
+    }
+
+    .sidebar {
+
+        transform:
+            translateX(-100%);
+
+        width:
+            min(280px, 86vw);
+
+    }
+
+    .sidebar.mobile-open {
+
+        transform:
+            translateX(0);
+
+    }
+
+    .sidebar.collapsed {
+
+        transform:
+            translateX(-100%);
+
+    }
+
+    .main,
+    .sidebar.collapsed ~ .main {
+
+        margin-left:
+            0;
+
+    }
+
+    .topbar {
+
+        height:
+            70px;
+
+        min-height:
+            70px;
+
+        padding:
+            0 15px;
+
+    }
+
+    .topbar .menu-button {
+
+        display:
+            flex;
+
+    }
+
+    .content {
+
+        padding:
+            17px;
+
+    }
+
+    .page-title {
+
+        font-size:
+            16px;
+
+    }
+
+    .user {
+
+        display:
+            none;
+
+    }
+
+    .stats {
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap:
+            10px;
+
+    }
+
+    .stat-card {
+
+        min-height:
+            105px;
+
+        padding:
+            15px;
+
+    }
+
+    .stat-value {
+
+        font-size:
+            23px;
+
+    }
+
+    .quick-actions {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .product-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .form-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+    .form-group.full {
+
+        grid-column:
+            auto;
+
+    }
+
+    .toolbar {
+
+        flex-direction:
+            column;
+
+    }
+
+    .button {
+
+        width:
+            100%;
+
+    }
+
+}
+
+
+/* ============================================================
+   MOBILE MENU BUTTON
+============================================================ */
+
+.mobile-menu {
+
+    display:
+        none;
+
+}
+
+
+@media (max-width: 700px) {
+
+    .mobile-menu {
+
+        display:
+            flex;
+
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<!-- ========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside
+    class="sidebar"
+    id="sidebar"
+>
+
+    <div class="sidebar-header">
+
+        <img
+            src="logo.png"
+            alt="4Maker 3D"
+            class="sidebar-logo"
+        >
+
+        <button
+            class="menu-button"
+            id="sidebarToggle"
+            aria-label="Abrir menu"
+        >
+            ☰
+        </button>
+
+    </div>
+
+
+    <nav class="menu">
+
+        <div class="menu-title">
+            Principal
+        </div>
+
+
+        <button
+            class="menu-item active"
+            data-section="dashboard"
+        >
+
+            <span class="menu-icon">⌂</span>
+
+            <span>
+                Dashboard
+            </span>
+
+        </button>
+
+
+        <div class="menu-title">
+            Produtos
+        </div>
+
+
+        <button
+            class="menu-item"
+            data-section="products"
+        >
+
+            <span class="menu-icon">▦</span>
+
+            <span>
+                Produtos
+            </span>
+
+        </button>
+
+
+        <button
+            class="menu-item"
+            data-section="new-product"
+        >
+
+            <span class="menu-icon">＋</span>
+
+            <span>
+                Novo produto
+            </span>
+
+        </button>
+
+
+        <div class="menu-title">
+            Ferramentas
+        </div>
+
+
+        <button
+            class="menu-item"
+            data-section="calculator"
+        >
+
+            <span class="menu-icon">⌁</span>
+
+            <span>
+                Calculadora
+            </span>
+
+        </button>
+
+
+        <div class="menu-title">
+            Sistema
+        </div>
+
+
+        <button
+            class="menu-item"
+            data-section="settings"
+        >
+
+            <span class="menu-icon">⚙</span>
+
+            <span>
+                Configurações
+            </span>
+
+        </button>
+
+    </nav>
+
+
+    <div class="sidebar-footer">
+
+        <button
+            class="logout"
+            id="logoutButton"
+        >
+
+            <span class="menu-icon">
+                ⇥
+            </span>
+
+            <span>
+                Sair
+            </span>
+
+        </button>
+
+    </div>
+
+</aside>
+
+
+<div
+    class="overlay"
+    id="overlay"
+></div>
+
+
+<!-- ========================================================
+     MAIN
+========================================================= -->
+
+<main class="main">
+
+
+<header class="topbar">
+
+    <div class="topbar-left">
+
+        <button
+            class="menu-button mobile-menu"
+            id="mobileMenu"
+        >
+            ☰
+        </button>
+
+
+        <div>
+
+            <div
+                class="page-title"
+                id="pageTitle"
+            >
+                Dashboard
+            </div>
+
+            <div class="page-subtitle">
+                Gerenciamento 4Maker 3D
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="user">
+
+        <div>
+
+            <div
+                style="
+                font-size:13px;
+                font-weight:600;
+                text-align:right;
+                "
+            >
+                Administrador
+            </div>
+
+            <div
+                style="
+                font-size:10px;
+                color:var(--muted);
+                text-align:right;
+                margin-top:3px;
+                "
+            >
+                Painel geral
+            </div>
+
+        </div>
+
+
+        <div class="avatar">
+            A
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="content">
+
+
+<!-- ========================================================
+     DASHBOARD
+========================================================= -->
+
+<section
+    class="section active"
+    id="dashboard"
+>
+
+    <div class="welcome">
+
+        <h1>
+            Bem-vindo ao painel
+        </h1>
+
+        <p>
+            Gerencie seus produtos, custos e informações de produção.
+        </p>
+
+    </div>
+
+
+    <div class="stats">
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Produtos cadastrados
+            </div>
+
+            <div
+                class="stat-value"
+                id="statProducts"
+            >
+                15
+            </div>
+
+            <div class="stat-extra">
+                Modelos disponíveis
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Dados de produção
+            </div>
+
+            <div
+                class="stat-value"
+                id="statData"
+            >
+                —
+            </div>
+
+            <div class="stat-extra">
+                Dados internos cadastrados
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Calculadora
+            </div>
+
+            <div class="stat-value">
+                R$ —
+            </div>
+
+            <div class="stat-extra">
+                Custo estimado
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-label">
+                Sistema
+            </div>
+
+            <div class="stat-value">
+                V1
+            </div>
+
+            <div class="stat-extra">
+                Painel administrativo
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <div class="card-title">
+                    Acesso rápido
+                </div>
+
+                <div class="card-description">
+                    Principais ferramentas do painel.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions">
+
+
+            <button
+                class="action"
+                data-go="products"
+            >
+
+                <div class="action-icon">
+                    📦
+                </div>
+
+                <div class="action-title">
+                    Produtos
+                </div>
+
+                <div class="action-description">
+                    Visualizar e editar produtos cadastrados.
+                </div>
+
+            </button>
+
+
+            <button
+                class="action"
+                data-go="new-product"
+            >
+
+                <div class="action-icon">
+                    ＋
+                </div>
+
+                <div class="action-title">
+                    Novo produto
+                </div>
+
+                <div class="action-description">
+                    Cadastrar um novo modelo.
+                </div>
+
+            </button>
+
+
+            <button
+                class="action"
+                data-go="calculator"
+            >
+
+                <div class="action-icon">
+                    🧮
+                </div>
+
+                <div class="action-title">
+                    Calculadora
+                </div>
+
+                <div class="action-description">
+                    Calcular custos e preços de venda.
+                </div>
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     PRODUTOS
+========================================================= -->
+
+<section
+    class="section"
+    id="products"
+>
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <div class="card-title">
+                    Produtos
+                </div>
+
+                <div class="card-description">
+                    Produtos encontrados na pasta Modelos.
+                </div>
+
+            </div>
+
+            <button
+                class="button button-primary"
+                data-go="new-product"
+            >
+                ＋ Novo produto
+            </button>
+
+        </div>
+
+
+        <div class="toolbar">
+
+            <input
+                class="search"
+                id="productSearch"
+                placeholder="Pesquisar produto..."
+                type="search"
+            >
+
+        </div>
+
+
+        <div
+            class="product-grid"
+            id="productGrid"
+        >
+
+            <!-- Produtos serão carregados posteriormente -->
+
+            <div class="product-card">
+
+                <div class="product-category">
+                    PLANTAS E DECORAÇÃO
+                </div>
+
+                <div class="product-name">
+                    Cachepot Autoirrigável
+                </div>
+
+                <div class="product-description">
+                    Modelo disponível para produção personalizada.
+                </div>
+
+                <div class="product-data">
+
+                    <span class="badge">
+                        PLA
+                    </span>
+
+                    <span class="badge">
+                        PETG
+                    </span>
+
+                    <span class="badge">
+                        ABS
+                    </span>
+
+                    <span class="badge">
+                        dados pendentes
+                    </span>
+
+                </div>
+
+                <div class="product-actions">
+
+                    <button
+                        class="small-button"
+                        onclick="editProduct('Cachepot Autoirrigável')"
+                    >
+                        Editar
+                    </button>
+
+                    <button
+                        class="small-button"
+                        onclick="calculateProduct('Cachepot Autoirrigável')"
+                    >
+                        Calcular
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="product-card"
+                style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                min-height:220px;
+                color:var(--muted);
+                font-size:12px;
+                text-align:center;
+                "
+            >
+
+                Os demais produtos serão carregados automaticamente
+                quando conectarmos a leitura do repositório.
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     NOVO PRODUTO
+========================================================= -->
+
+<section
+    class="section"
+    id="new-product"
+>
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <div class="card-title">
+                    Novo produto
+                </div>
+
+                <div class="card-description">
+                    Cadastre as informações públicas e de produção.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <form id="productForm">
+
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Informações do produto
+                </div>
+
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Nome do produto *
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productName"
+                            required
+                            placeholder="Ex.: Cachepot Autoirrigável"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Categoria *
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productCategory"
+                            required
+                            placeholder="Ex.: PLANTAS E DECORAÇÃO"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group full">
+
+                        <label>
+                            Descrição
+                        </label>
+
+                        <textarea
+                            class="form-control"
+                            id="productDescription"
+                            placeholder="Descrição que poderá aparecer no catálogo."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Materiais
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productMaterials"
+                            placeholder="PLA • PETG • ABS"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Personalização
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productCustomization"
+                            placeholder="Cores e tamanhos sob consulta"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Tamanhos disponíveis
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productSizes"
+                            placeholder="Ex.: 10 cm, 15 cm, 20 cm"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Observações
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productNotes"
+                            placeholder="Informações adicionais"
+                        >
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Informações de produção
+                </div>
+
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Peso da peça (g)
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionWeight"
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex.: 124.6"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Metragem de filamento (m)
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionLength"
+                            type="number"
+                            step="0.01"
+                            placeholder="Ex.: 41.8"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Tempo de impressão
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionTime"
+                            placeholder="Ex.: 02:48"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Infill (%)
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionInfill"
+                            type="number"
+                            min="0"
+                            max="100"
+                            placeholder="15"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Suportes
+                        </label>
+
+                        <select
+                            class="form-control"
+                            id="productionSupports"
+                        >
+
+                            <option value="">
+                                Não informado
+                            </option>
+
+                            <option value="false">
+                                Não
+                            </option>
+
+                            <option value="true">
+                                Sim
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Material padrão
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionMaterial"
+                            placeholder="Ex.: ABS"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Altura de camada (mm)
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionLayer"
+                            type="number"
+                            step="0.01"
+                            placeholder="0.20"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Bico (mm)
+                        </label>
+
+                        <input
+                            class="form-control"
+                            id="productionNozzle"
+                            type="number"
+                            step="0.1"
+                            placeholder="0.4"
+                        >
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Cores disponíveis
+                </div>
+
+
+                <div class="colors-list">
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Branco"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#ffffff"
+                        ></span>
+
+                        Branco
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Preto"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#242424"
+                        ></span>
+
+                        Preto
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Azul"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#1748a0"
+                        ></span>
+
+                        Azul
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Vermelho"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#e53b3b"
+                        ></span>
+
+                        Vermelho
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Amarelo"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#e0b32c"
+                        ></span>
+
+                        Amarelo
+
+                    </label>
+
+
+                    <label class="color-option">
+
+                        <input
+                            type="checkbox"
+                            value="Verde"
+                        >
+
+                        <span
+                            class="color-circle"
+                            style="background:#3c9950"
+                        ></span>
+
+                        Verde
+
+                    </label>
+
+
+                </div>
+
+            </div>
+
+
+            <div class="form-section">
+
+                <div class="form-section-title">
+                    Modelo 3D
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Arquivo STL
+                    </label>
+
+                    <input
+                        class="form-control"
+                        id="stlFile"
+                        type="file"
+                        accept=".stl"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button
+                    type="button"
+                    class="button button-secondary"
+                    id="clearProduct"
+                >
+                    Limpar
+                </button>
+
+                <button
+                    type="submit"
+                    class="button button-primary"
+                >
+                    Criar produto
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     CALCULADORA
+========================================================= -->
+
+<section
+    class="section"
+    id="calculator"
+>
+
+    <div class="calculator-grid">
+
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <div class="card-title">
+                        Calculadora de preços
+                    </div>
+
+                    <div class="card-description">
+                        Calcule manualmente ou utilize um produto cadastrado.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="mode-buttons">
+
+                <button
+                    class="mode-button active"
+                    id="manualMode"
+                >
+                    Manual
+                </button>
+
+                <button
+                    class="mode-button"
+                    id="productMode"
+                >
+                    Selecionar produto
+                </button>
+
+            </div>
+
+
+            <div id="manualCalculator">
+
+
+                <div class="form-grid">
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Peso de filamento (g)
+                        </label>
+
+                        <input
+                            class="form-control calc-input"
+                            id="calcWeight"
+                            type="number"
+                            step="0.01"
+                            placeholder="0"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Tempo de máquina (horas)
+                        </label>
+
+                        <input
+                            class="form-control calc-input"
+                            id="calcHours"
+                            type="number"
+                            step="0.01"
+                            placeholder="0"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Preço do filamento (R$/kg)
+                        </label>
+
+                        <input
+                            class="form-control calc-input"
+                            id="calcFilamentPrice"
+                            type="number"
+                            step="0.01"
+                            value="89"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Custo da máquina (R$/h)
+                        </label>
+
+                        <input
+                            class="form-control calc-input"
+                            id="calcMachineCost"
+                            type="number"
+                            step="0.01"
+                            value="2"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Margem (%)
+                        </label>
+
+                        <input
+                            class="form-control calc-input"
+                            id="calcMargin"
+                            type="number"
+                            step="1"
+                            value="100"
+                        >
+
+                    </div>
+
+
+                </div>
+
+
+                <button
+                    class="button button-primary"
+                    style="margin-top:20px;"
+                    id="calculateButton"
+                >
+                    CALCULAR
+                </button>
+
+
+            </div>
+
+
+            <div
+                id="productCalculator"
+                style="display:none;"
+            >
+
+                <div class="form-group">
+
+                    <label>
+                        Produto
+                    </label>
+
+                    <select
+                        class="form-control"
+                        id="calculatorProduct"
+                    >
+
+                        <option value="">
+                            Selecione um produto
+                        </option>
+
+                        <option>
+                            Cachepot Autoirrigável
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div
+                    style="
+                    margin-top:15px;
+                    color:var(--muted);
+                    font-size:12px;
+                    "
+                    id="selectedProductInfo"
+                >
+                    Os dados serão preenchidos automaticamente
+                    a partir do dados.json.
+                </div>
+
+
+                <button
+                    class="button button-primary"
+                    style="margin-top:20px;"
+                    id="calculateProductButton"
+                >
+                    CALCULAR
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div class="result">
+
+
+            <div class="result-label">
+                Preço sugerido
+            </div>
+
+
+            <div
+                class="result-value"
+                id="resultPrice"
+            >
+                R$ 0,00
+            </div>
+
+
+            <div style="margin-top:20px;">
+
+                <div class="calculation-line">
+
+                    <span>
+                        Filamento
+                    </span>
+
+                    <strong id="resultFilament">
+                        R$ 0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="calculation-line">
+
+                    <span>
+                        Máquina
+                    </span>
+
+                    <strong id="resultMachine">
+                        R$ 0,00
+                    </strong>
+
+                </div>
+
+
+                <div class="calculation-line">
+
+                    <span>
+                        Custo total
+                    </span>
+
+                    <strong id="resultCost">
+                        R$ 0,00
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- ========================================================
+     CONFIGURAÇÕES
+========================================================= -->
+
+<section
+    class="section"
+    id="settings"
+>
+
+    <div class="card">
+
+        <div class="card-header">
+
+            <div>
+
+                <div class="card-title">
+                    Configurações
+                </div>
+
+                <div class="card-description">
+                    Valores utilizados pelo sistema e pela calculadora.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="setting">
+
+            <div class="setting-title">
+                Preço do filamento
+            </div>
+
+            <div class="setting-description">
+                Valores por quilograma.
+            </div>
+
+            <div
+                class="form-grid"
+                style="margin-top:15px;"
+            >
+
+                <div class="form-group">
+
+                    <label>
+                        PLA
+                    </label>
+
+                    <input
+                        class="form-control"
+                        value="89"
+                        type="number"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        PETG
+                    </label>
+
+                    <input
+                        class="form-control"
+                        value="89"
+                        type="number"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        ABS
+                    </label>
+
+                    <input
+                        class="form-control"
+                        value="89"
+                        type="number"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        TPU
+                    </label>
+
+                    <input
+                        class="form-control"
+                        value="89"
+                        type="number"
+                    >
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="setting">
+
+            <div class="setting-title">
+                Custo da máquina
+            </div>
+
+            <div class="setting-description">
+                Custo utilizado para cada hora de impressão.
+            </div>
+
+            <input
+                class="form-control"
+                style="
+                margin-top:12px;
+                max-width:220px;
+                "
+                value="2.00"
+                type="number"
+                step="0.01"
+            >
+
+        </div>
+
+
+        <div class="setting">
+
+            <div class="setting-title">
+                Sistema de arquivos
+            </div>
+
+            <div class="setting-description">
+                Futuramente conectado à estrutura Modelos/ e à API do GitHub.
+            </div>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+</div>
+
+</main>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   AUTENTICAÇÃO
+============================================================ */
+
+if (
+    sessionStorage.getItem("4maker_logged") !== "true"
+) {
+
+    window.location.href = "login.html";
+
+}
+
+
+/* ============================================================
+   ELEMENTOS
+============================================================ */
+
+const sidebar =
+    document.getElementById("sidebar");
+
+const sidebarToggle =
+    document.getElementById("sidebarToggle");
+
+const mobileMenu =
+    document.getElementById("mobileMenu");
+
+const overlay =
+    document.getElementById("overlay");
+
+const pageTitle =
+    document.getElementById("pageTitle");
+
+
+/* ============================================================
+   SIDEBAR DESKTOP
+============================================================ */
+
+sidebarToggle.addEventListener(
+    "click",
+    function() {
+
+        if (
+            window.innerWidth <= 700
+        ) {
+
+            sidebar.classList.toggle(
+                "mobile-open"
+            );
+
+            overlay.classList.toggle(
+                "active"
+            );
+
+        } else {
+
+            sidebar.classList.toggle(
+                "collapsed"
+            );
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   MENU MOBILE
+============================================================ */
+
+mobileMenu.addEventListener(
+    "click",
+    function() {
+
+        sidebar.classList.add(
+            "mobile-open"
+        );
+
+        overlay.classList.add(
+            "active"
+        );
+
+    }
+);
+
+
+overlay.addEventListener(
+    "click",
+    function() {
+
+        sidebar.classList.remove(
+            "mobile-open"
+        );
+
+        overlay.classList.remove(
+            "active"
+        );
+
+    }
+);
+
+
+/* ============================================================
+   NAVEGAÇÃO
+============================================================ */
+
+const titles = {
+
+    dashboard:
+        "Dashboard",
+
+    products:
+        "Produtos",
+
+    "new-product":
+        "Novo produto",
+
+    calculator:
+        "Calculadora",
+
+    settings:
+        "Configurações"
+
+};
+
+
+function showSection(
+    sectionName
+) {
+
+    document
+        .querySelectorAll(".section")
+        .forEach(
+            section => {
+
+                section.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+    const target =
+        document.getElementById(
+            sectionName
+        );
+
+    if (target) {
+
+        target.classList.add(
+            "active"
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(".menu-item")
+        .forEach(
+            item => {
+
+                item.classList.toggle(
+                    "active",
+                    item.dataset.section === sectionName
+                );
+
+            }
+        );
+
+
+    pageTitle.textContent =
+        titles[sectionName] ||
+        "Painel";
+
+
+    if (
+        window.innerWidth <= 700
+    ) {
+
+        sidebar.classList.remove(
+            "mobile-open"
+        );
+
+        overlay.classList.remove(
+            "active"
+        );
+
+    }
+
+}
+
+
+document
+    .querySelectorAll(".menu-item")
+    .forEach(
+        item => {
+
+            item.addEventListener(
+                "click",
+                function() {
+
+                    showSection(
+                        this.dataset.section
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+document
+    .querySelectorAll("[data-go]")
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    showSection(
+                        this.dataset.go
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+document
+    .getElementById("logoutButton")
+    .addEventListener(
+        "click",
+        function() {
+
+            sessionStorage.removeItem(
+                "4maker_logged"
+            );
+
+            window.location.href =
+                "login.html";
+
+        }
+    );
+
+
+/* ============================================================
+   CALCULADORA — MODOS
+============================================================ */
+
+const manualMode =
+    document.getElementById("manualMode");
+
+const productMode =
+    document.getElementById("productMode");
+
+const manualCalculator =
+    document.getElementById("manualCalculator");
+
+const productCalculator =
+    document.getElementById("productCalculator");
+
+
+manualMode.addEventListener(
+    "click",
+    function() {
+
+        manualMode.classList.add(
+            "active"
+        );
+
+        productMode.classList.remove(
+            "active"
+        );
+
+        manualCalculator.style.display =
+            "block";
+
+        productCalculator.style.display =
+            "none";
+
+    }
+);
+
+
+productMode.addEventListener(
+    "click",
+    function() {
+
+        productMode.classList.add(
+            "active"
+        );
+
+        manualMode.classList.remove(
+            "active"
+        );
+
+        manualCalculator.style.display =
+            "none";
+
+        productCalculator.style.display =
+            "block";
+
+    }
+);
+
+
+/* ============================================================
+   CALCULADORA MANUAL
+============================================================ */
+
+function money(value) {
+
+    return value.toLocaleString(
+        "pt-BR",
+        {
+            style:
+                "currency",
+            currency:
+                "BRL"
+        }
+    );
+
+}
+
+
+function calculate(
+    weight,
+    hours,
+    filamentPrice,
+    machineCost,
+    margin
+) {
+
+    const filament =
+        (
+            Number(weight) *
+            Number(filamentPrice)
+        ) / 1000;
+
+
+    const machine =
+        Number(hours) *
+        Number(machineCost);
+
+
+    const cost =
+        filament +
+        machine;
+
+
+    const price =
+        cost *
+        (
+            1 +
+            Number(margin) / 100
+        );
+
+
+    document.getElementById(
+        "resultFilament"
+    ).textContent =
+        money(filament);
+
+
+    document.getElementById(
+        "resultMachine"
+    ).textContent =
+        money(machine);
+
+
+    document.getElementById(
+        "resultCost"
+    ).textContent =
+        money(cost);
+
+
+    document.getElementById(
+        "resultPrice"
+    ).textContent =
+        money(price);
+
+}
+
+
+document
+    .getElementById("calculateButton")
+    .addEventListener(
+        "click",
+        function() {
+
+            calculate(
+
+                document.getElementById(
+                    "calcWeight"
+                ).value,
+
+                document.getElementById(
+                    "calcHours"
+                ).value,
+
+                document.getElementById(
+                    "calcFilamentPrice"
+                ).value,
+
+                document.getElementById(
+                    "calcMachineCost"
+                ).value,
+
+                document.getElementById(
+                    "calcMargin"
+                ).value
+
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   NOVO PRODUTO — PREPARAÇÃO
+============================================================ */
+
+document
+    .getElementById("productForm")
+    .addEventListener(
+        "submit",
+        function(event) {
+
+            event.preventDefault();
+
+
+            /*
+                Nesta etapa ainda NÃO gravamos no GitHub.
+
+                Futuramente esta função irá:
+
+                1. Validar os dados.
+                2. Criar a pasta do produto.
+                3. Criar produto.json.
+                4. Criar dados.json.
+                5. Enviar modelo.stl.
+                6. Fazer commit através da API.
+            */
+
+
+            alert(
+                "Cadastro preparado com sucesso!\n\n" +
+                "A gravação no GitHub será conectada na próxima etapa."
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("clearProduct")
+    .addEventListener(
+        "click",
+        function() {
+
+            document
+                .getElementById("productForm")
+                .reset();
+
+        }
+    );
+
+
+/* ============================================================
+   PRODUTOS — FUNÇÕES PREPARADAS
+============================================================ */
+
+function editProduct(
+    productName
+) {
+
+    showSection(
+        "new-product"
+    );
+
+    document.getElementById(
+        "productName"
+    ).value =
+        productName;
+
+}
+
+
+function calculateProduct(
+    productName
+) {
+
+    showSection(
+        "calculator"
+    );
+
+    productMode.click();
+
+    document.getElementById(
+        "calculatorProduct"
+    ).value =
+        productName;
+
+}
+
+
+/* ============================================================
+   PESQUISA
+============================================================ */
+
+document
+    .getElementById("productSearch")
+    .addEventListener(
+        "input",
+        function() {
+
+            const search =
+                this.value
+                    .toLowerCase()
+                    .trim();
+
+
+            document
+                .querySelectorAll(
+                    "#productGrid .product-card"
+                )
+                .forEach(
+                    card => {
+
+                        const text =
+                            card.textContent
+                                .toLowerCase();
+
+                        card.style.display =
+                            text.includes(search)
+                                ? ""
+                                : "none";
+
+                    }
+                );
+
+        }
+    );
+
+
+/* ============================================================
+   INICIALIZAÇÃO
+============================================================ */
+
+showSection(
+    "dashboard"
+);
+
+</script>
+
+</body>
+
+</html>
