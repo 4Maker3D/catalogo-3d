@@ -1,0 +1,30 @@
+{
+    "version": 1,
+    "weight_g": "",
+    "filament_length_m": "",
+    "filament_weight_g": "",
+    "print_time_h": "",
+    "infill_percent": "",
+    "supports": "",
+    "dimensions_mm": {
+        "x": "",
+        "y": "",
+        "z": ""
+    },
+    "material": "",
+    "layer_height_mm": "",
+    "nozzle_mm": "",
+    "quantity": 1,
+    "costs": {
+        "filament": 0,
+        "machine": 0,
+        "finishing": 0,
+        "painting": 0,
+        "packaging": 0,
+        "commission": 0,
+        "other": 0
+    },
+    "internal_notes": "",
+    "created_at": "2026-09-03T19:10:28.082Z",
+    "updated_at": "2026-09-03T19:10:28.082Z"
+}
