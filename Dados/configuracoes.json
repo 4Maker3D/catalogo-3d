@@ -1,7 +1,7 @@
 {
   "version": 1,
   "machine_hour_cost": 2,
-  "default_margin_percent": 30,
+  "default_margin_percent": 0,
   "default_reseller_margin_percent": 20,
   "waste_percent": 5,
   "rounding": {
@@ -69,28 +69,29 @@
     {
       "min": 1,
       "max": 4,
-      "percent": 0
+      "discount_percent": 0
     },
     {
       "min": 5,
       "max": 9,
-      "percent": 5
+      "discount_percent": 0
     },
     {
       "min": 10,
       "max": 24,
-      "percent": 10
+      "discount_percent": 0
     },
     {
       "min": 25,
       "max": 49,
-      "percent": 15
+      "discount_percent": 0
     },
     {
       "min": 50,
       "max": null,
-      "percent": 20
+      "discount_percent": 0
     }
   ],
-  "updated_at": "2026-09-04T19:41:13.932Z"
+  "updated_at": "2026-09-04T22:30:33.056Z",
+  "minimum_margin_percent": 20
 }
