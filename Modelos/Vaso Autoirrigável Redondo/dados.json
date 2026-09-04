@@ -2,7 +2,7 @@
     "version": 1,
     "weight_g": 200.26,
     "filament_length_m": 67.14,
-    "filament_weight_g": "",
+    "filament_weight_g": 200.26,
     "print_time_h": 16.31,
     "infill_percent": 8,
     "supports": "Sim",
@@ -26,5 +26,5 @@
     },
     "internal_notes": "",
     "created_at": "2026-09-03T19:10:47.855Z",
-    "updated_at": "2026-09-04T14:10:54.909Z"
+    "updated_at": "2026-09-04T17:06:57.367Z"
 }
