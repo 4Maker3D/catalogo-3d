@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "e91094c8-521d-4d1a-8242-636ffdcd2585",
+    "order_id": "f98859b3-41c5-48f8-99c3-a377950edd66",
+    "order_number": "PED-1788552272244",
+    "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+    "customer_snapshot": {
+      "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+      "name": "Teste",
+      "document": "99999999999",
+      "email": "teste@gmail.com",
+      "phone": "99999999999",
+      "address": "",
+      "city": "",
+      "state": "",
+      "notes": "",
+      "created_at": "2026-09-04T19:41:40.798Z",
+      "updated_at": "2026-09-04T19:41:40.798Z"
+    },
+    "total": 0,
+    "estimated_cost": 0,
+    "estimated_profit": 0,
+    "status": "Em produção",
+    "payment": {
+      "method": "",
+      "status": "",
+      "paid": false
+    },
+    "date": "2026-09-04T20:04:32.244Z",
+    "updated_at": "2026-09-04T20:04:33.472Z"
+  }
+]
