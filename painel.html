@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -14,28 +15,41 @@
     <style>
 
         :root {
+
             --bg: #08090d;
             --panel: #111318;
             --panel2: #15171d;
             --line: #292c34;
+
             --text: #f2f3f5;
             --muted: #9297a3;
+
             --blue: #2d7cff;
             --blue2: #1b5ed0;
+
             --danger: #ff6262;
             --ok: #63d49a;
-            --shadow: 0 20px 60px #0007;
+            --warning: #ffcb6b;
+
+            --shadow:
+                0 20px 60px #0007;
+
         }
+
 
         * {
             box-sizing: border-box;
         }
 
+
         html,
         body {
+
             margin: 0;
+
             min-height: 100%;
             width: 100%;
+
             overflow-x: hidden;
 
             font-family:
@@ -55,61 +69,98 @@
                 );
 
             color: var(--text);
+
         }
+
 
         button,
         input,
         select,
         textarea {
+
             font: inherit;
+
         }
+
 
         button {
+
             cursor: pointer;
+
         }
+
 
         .app {
+
             min-height: 100vh;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            SIDEBAR
-        ========================= */
+        ===================================================== */
 
         .sidebar {
+
             position: fixed;
+
             z-index: 50;
 
             inset: 0 auto 0 0;
 
             width: 290px;
 
-            background: rgba(15, 17, 22, 0.97);
+            background:
+                rgba(
+                    15,
+                    17,
+                    22,
+                    0.97
+                );
 
-            border-right: 1px solid var(--line);
+            border-right:
+                1px solid var(--line);
 
-            transform: translateX(0);
+            transform:
+                translateX(0);
 
             transition:
-                transform 0.25s ease;
+                transform .25s ease;
 
-            display: flex;
-            flex-direction: column;
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
         }
+
 
         .side-top {
+
             height: 150px;
 
-            border-bottom: 1px solid var(--line);
+            border-bottom:
+                1px solid var(--line);
 
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            display:
+                flex;
 
-            padding: 25px 22px;
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            padding:
+                25px 22px;
+
         }
 
+
         .side-top img {
+
             width: 92px;
             height: 92px;
 
@@ -118,13 +169,17 @@
             background: #fff;
 
             border-radius: 3px;
+
         }
 
+
         .close-side {
+
             width: 48px;
             height: 48px;
 
-            border: 1px solid var(--line);
+            border:
+                1px solid var(--line);
 
             border-radius: 15px;
 
@@ -133,23 +188,37 @@
             color: #d9dce2;
 
             font-size: 28px;
+
         }
+
 
         .nav {
-            padding: 26px 15px;
-            overflow: auto;
+
+            padding:
+                26px 15px;
+
+            overflow:
+                auto;
+
         }
 
+
         .nav-label {
+
             font-size: 11px;
+
             letter-spacing: 2px;
 
             color: #707681;
 
-            margin: 11px 12px;
+            margin:
+                11px 12px;
+
         }
 
+
         .nav button {
+
             width: 100%;
 
             border: 0;
@@ -162,178 +231,304 @@
 
             border-radius: 15px;
 
-            padding: 15px 14px;
+            padding:
+                15px 14px;
 
             font-size: 16px;
 
-            margin: 3px 0;
+            margin:
+                3px 0;
 
-            display: flex;
+            display:
+                flex;
+
             gap: 14px;
-            align-items: center;
+
+            align-items:
+                center;
+
         }
 
-        .nav button.active {
-            background: #162746;
 
-            color: #69a4ff;
+        .nav button.active {
+
+            background:
+                #162746;
+
+            color:
+                #69a4ff;
 
             box-shadow:
                 inset 0 0 0 1px #2d7cff44;
+
         }
+
 
         .ico {
+
             width: 22px;
+
             text-align: center;
+
             color: inherit;
+
         }
+
 
         .logout {
-            margin-top: auto;
 
-            padding: 15px;
+            margin-top:
+                auto;
 
-            border-top: 1px solid var(--line);
+            padding:
+                15px;
+
+            border-top:
+                1px solid var(--line);
+
         }
+
 
         .logout button {
+
             width: 100%;
+
             height: 45px;
 
-            border: 1px solid #363943;
+            border:
+                1px solid #363943;
 
-            background: #17191f;
+            background:
+                #17191f;
 
-            color: #c7cad1;
+            color:
+                #c7cad1;
 
-            border-radius: 13px;
+            border-radius:
+                13px;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            MAIN
-        ========================= */
+        ===================================================== */
 
         .main {
-            margin-left: 290px;
-            min-height: 100vh;
+
+            margin-left:
+                290px;
+
+            min-height:
+                100vh;
+
         }
+
 
         .topbar {
-            height: 96px;
 
-            border-bottom: 1px solid var(--line);
+            height:
+                96px;
 
-            display: flex;
-            align-items: center;
+            border-bottom:
+                1px solid var(--line);
 
-            gap: 17px;
+            display:
+                flex;
 
-            padding: 0 30px;
+            align-items:
+                center;
 
-            background: #090a0eaa;
+            gap:
+                17px;
 
-            backdrop-filter: blur(14px);
+            padding:
+                0 30px;
 
-            position: sticky;
-            top: 0;
+            background:
+                #090a0eaa;
 
-            z-index: 20;
+            backdrop-filter:
+                blur(14px);
+
+            position:
+                sticky;
+
+            top:
+                0;
+
+            z-index:
+                20;
+
         }
 
+
+        /*
+         * No desktop o menu não precisa aparecer porque
+         * a sidebar já permanece aberta.
+         */
+
         .menu {
+
+            display:
+                none;
+
             width: 50px;
             height: 50px;
 
-            border: 1px solid var(--line);
+            border:
+                1px solid var(--line);
 
-            border-radius: 15px;
+            border-radius:
+                15px;
 
-            background: #14161c;
+            background:
+                #14161c;
 
-            color: #e7e9ed;
+            color:
+                #e7e9ed;
 
-            font-size: 25px;
+            font-size:
+                25px;
+
         }
+
 
         .top-title h1 {
-            font-size: 25px;
-            margin: 0 0 3px;
+
+            font-size:
+                25px;
+
+            margin:
+                0 0 3px;
+
         }
+
 
         .top-title p {
-            font-size: 14px;
 
-            color: var(--muted);
+            font-size:
+                14px;
 
-            margin: 0;
+            color:
+                var(--muted);
+
+            margin:
+                0;
+
         }
+
 
         .content {
-            padding: 32px;
 
-            max-width: 1180px;
+            padding:
+                32px;
 
-            margin: auto;
+            max-width:
+                1280px;
+
+            margin:
+                auto;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            PAGES
-        ========================= */
+        ===================================================== */
 
         .page {
-            display: none;
 
-            animation: fade 0.22s ease;
+            display:
+                none;
+
+            animation:
+                fade .22s ease;
+
         }
+
 
         .page.active {
-            display: block;
+
+            display:
+                block;
+
         }
+
 
         .hero {
-            display: flex;
 
-            justify-content: space-between;
+            display:
+                flex;
 
-            gap: 18px;
+            justify-content:
+                space-between;
 
-            align-items: flex-start;
+            gap:
+                18px;
 
-            margin-bottom: 24px;
+            align-items:
+                flex-start;
+
+            margin-bottom:
+                24px;
+
         }
+
 
         .hero h2 {
-            font-size: 27px;
 
-            margin: 0 0 5px;
+            font-size:
+                27px;
+
+            margin:
+                0 0 5px;
+
         }
+
 
         .hero p {
-            margin: 0;
 
-            color: var(--muted);
+            margin:
+                0;
+
+            color:
+                var(--muted);
+
         }
 
-        /* =========================
+
+        /* =====================================================
            BUTTONS
-        ========================= */
+        ===================================================== */
 
         .btn {
-            border: 1px solid var(--line);
 
-            background: #17191f;
+            border:
+                1px solid var(--line);
 
-            color: #e5e7eb;
+            background:
+                #17191f;
 
-            border-radius: 13px;
+            color:
+                #e5e7eb;
 
-            padding: 13px 17px;
+            border-radius:
+                13px;
 
-            font-weight: 650;
+            padding:
+                13px 17px;
+
+            font-weight:
+                650;
+
         }
 
+
         .btn.primary {
-            border: 0;
+
+            border:
+                0;
 
             background:
                 linear-gradient(
@@ -344,476 +539,1324 @@
 
             box-shadow:
                 0 12px 28px #2d7cff20;
+
         }
+
 
         .btn.danger {
-            color: #ff9a9a;
+
+            color:
+                #ff9a9a;
+
         }
 
-        /* =========================
+
+        .btn.small {
+
+            padding:
+                8px 11px;
+
+            font-size:
+                13px;
+
+        }
+
+
+        /* =====================================================
            DASHBOARD
-        ========================= */
+        ===================================================== */
 
         .grid {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(3, 1fr);
 
-            gap: 16px;
+            gap:
+                16px;
+
         }
+
 
         .card {
-            background: rgba(17, 19, 24, 0.84);
 
-            border: 1px solid var(--line);
+            background:
+                rgba(
+                    17,
+                    19,
+                    24,
+                    .84
+                );
 
-            border-radius: 22px;
+            border:
+                1px solid var(--line);
 
-            padding: 23px;
+            border-radius:
+                22px;
 
-            box-shadow: var(--shadow);
+            padding:
+                23px;
+
+            box-shadow:
+                var(--shadow);
+
         }
+
 
         .metric strong {
-            display: block;
 
-            font-size: 31px;
+            display:
+                block;
 
-            margin-top: 8px;
+            font-size:
+                31px;
+
+            margin-top:
+                8px;
+
         }
+
 
         .metric span {
-            color: var(--muted);
 
-            font-size: 13px;
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
         }
+
 
         .section {
-            margin-top: 20px;
+
+            margin-top:
+                20px;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            TOOLBAR
-        ========================= */
+        ===================================================== */
 
         .toolbar {
-            display: flex;
 
-            gap: 12px;
+            display:
+                flex;
 
-            margin-bottom: 18px;
+            gap:
+                12px;
 
-            width: 100%;
+            margin-bottom:
+                18px;
 
-            min-width: 0;
+            width:
+                100%;
+
+            min-width:
+                0;
+
         }
+
 
         .toolbar > * {
-            min-width: 0;
+
+            min-width:
+                0;
+
         }
+
 
         .search {
-            flex: 1;
 
-            height: 48px;
+            flex:
+                1;
 
-            border: 1px solid var(--line);
+            height:
+                48px;
 
-            border-radius: 13px;
+            border:
+                1px solid var(--line);
 
-            background: #0d0f14;
+            border-radius:
+                13px;
 
-            color: var(--text);
+            background:
+                #0d0f14;
 
-            padding: 0 15px;
+            color:
+                var(--text);
 
-            outline: 0;
+            padding:
+                0 15px;
+
+            outline:
+                0;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            PRODUCTS
-        ========================= */
+        ===================================================== */
 
         .products {
-            display: grid;
 
-            gap: 14px;
+            display:
+                grid;
+
+            gap:
+                14px;
+
         }
+
 
         .product {
-            padding: 20px;
 
-            border: 1px solid var(--line);
+            padding:
+                20px;
 
-            border-radius: 20px;
+            border:
+                1px solid var(--line);
 
-            background: #111319;
+            border-radius:
+                20px;
+
+            background:
+                #111319;
+
         }
+
 
         .product h3 {
-            margin: 5px 0 7px;
 
-            font-size: 20px;
+            margin:
+                5px 0 7px;
+
+            font-size:
+                20px;
+
         }
+
 
         .category {
-            color: #63a0ff;
 
-            font-size: 12px;
+            color:
+                #63a0ff;
 
-            letter-spacing: 1.5px;
+            font-size:
+                12px;
+
+            letter-spacing:
+                1.5px;
+
         }
+
 
         .product p {
-            color: var(--muted);
 
-            margin: 0 0 15px;
+            color:
+                var(--muted);
+
+            margin:
+                0 0 15px;
+
         }
+
 
         .chips {
-            display: flex;
 
-            flex-wrap: wrap;
+            display:
+                flex;
 
-            gap: 7px;
+            flex-wrap:
+                wrap;
 
-            margin-bottom: 16px;
+            gap:
+                7px;
+
+            margin-bottom:
+                16px;
+
         }
+
 
         .chip {
-            padding: 7px 10px;
 
-            border-radius: 9px;
+            padding:
+                7px 10px;
 
-            background: #1a1c23;
+            border-radius:
+                9px;
 
-            color: #bfc3cc;
+            background:
+                #1a1c23;
 
-            font-size: 12px;
+            color:
+                #bfc3cc;
+
+            font-size:
+                12px;
+
         }
+
 
         .actions {
-            display: flex;
 
-            gap: 10px;
+            display:
+                flex;
+
+            gap:
+                10px;
+
         }
+
 
         .actions .btn {
-            flex: 1;
+
+            flex:
+                1;
+
         }
+
 
         .empty {
-            text-align: center;
 
-            color: var(--muted);
+            text-align:
+                center;
 
-            padding: 45px 20px;
+            color:
+                var(--muted);
+
+            padding:
+                45px 20px;
+
         }
 
-        /* =========================
+
+        /* =====================================================
            FORMS
-        ========================= */
+        ===================================================== */
 
         .form-grid {
-            display: grid;
+
+            display:
+                grid;
 
             grid-template-columns:
                 repeat(2, 1fr);
 
-            gap: 16px;
+            gap:
+                16px;
+
         }
+
 
         .field {
-            display: flex;
 
-            flex-direction: column;
+            display:
+                flex;
 
-            gap: 7px;
+            flex-direction:
+                column;
+
+            gap:
+                7px;
+
         }
+
 
         .field.full {
-            grid-column: 1 / -1;
+
+            grid-column:
+                1 / -1;
+
         }
+
 
         .field label {
-            font-size: 13px;
 
-            color: #aeb3bd;
+            font-size:
+                13px;
+
+            color:
+                #aeb3bd;
+
         }
+
 
         .field input,
         .field select,
         .field textarea {
-            width: 100%;
 
-            border: 1px solid var(--line);
+            width:
+                100%;
 
-            background: #0d0f14;
+            border:
+                1px solid var(--line);
 
-            color: var(--text);
+            background:
+                #0d0f14;
 
-            border-radius: 12px;
+            color:
+                var(--text);
 
-            padding: 12px 13px;
+            border-radius:
+                12px;
 
-            outline: 0;
+            padding:
+                12px 13px;
+
+            outline:
+                0;
+
         }
+
 
         .field textarea {
-            min-height: 100px;
 
-            resize: vertical;
+            min-height:
+                100px;
+
+            resize:
+                vertical;
+
         }
+
 
         .field input:focus,
         .field select:focus,
         .field textarea:focus {
-            border-color: var(--blue);
+
+            border-color:
+                var(--blue);
 
             box-shadow:
                 0 0 0 3px #2d7cff18;
+
         }
 
-        /* =========================
+
+        .field small {
+
+            color:
+                var(--muted);
+
+        }
+
+
+        /* =====================================================
            COLORS
-        ========================= */
+        ===================================================== */
 
         .color-list {
-            display: flex;
 
-            flex-wrap: wrap;
+            display:
+                flex;
 
-            gap: 9px;
+            flex-wrap:
+                wrap;
+
+            gap:
+                9px;
+
         }
+
 
         .color-row {
-            display: flex;
 
-            align-items: center;
+            display:
+                flex;
 
-            gap: 8px;
+            align-items:
+                center;
 
-            border: 1px solid var(--line);
+            gap:
+                8px;
 
-            background: #0d0f14;
+            border:
+                1px solid var(--line);
 
-            border-radius: 11px;
+            background:
+                #0d0f14;
 
-            padding: 7px;
+            border-radius:
+                11px;
+
+            padding:
+                7px;
+
         }
+
 
         .color-row input[type="color"] {
-            width: 30px;
-            height: 30px;
 
-            padding: 0;
+            width:
+                30px;
 
-            border: 0;
+            height:
+                30px;
 
-            background: none;
+            padding:
+                0;
+
+            border:
+                0;
+
+            background:
+                none;
+
         }
 
-        /* =========================
+
+        /* =====================================================
+           SELECT MULTIPLE / MATERIALS
+        ===================================================== */
+
+        .multi-select {
+
+            min-height:
+                130px;
+
+        }
+
+
+        .selection-box {
+
+            display:
+                flex;
+
+            flex-wrap:
+                wrap;
+
+            gap:
+                8px;
+
+            margin-top:
+                5px;
+
+        }
+
+
+        .selection-chip {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            background:
+                #17233a;
+
+            border:
+                1px solid #2d7cff44;
+
+            color:
+                #9fc3ff;
+
+            border-radius:
+                10px;
+
+            padding:
+                7px 10px;
+
+            font-size:
+                12px;
+
+        }
+
+
+        /* =====================================================
            CALCULATOR
-        ========================= */
+        ===================================================== */
+
+        .mode-buttons {
+
+            display:
+                flex;
+
+            gap:
+                9px;
+
+            flex-wrap:
+                wrap;
+
+            margin-bottom:
+                20px;
+
+        }
+
+
+        .calc-section {
+
+            margin-top:
+                18px;
+
+            padding-top:
+                18px;
+
+            border-top:
+                1px solid var(--line);
+
+        }
+
+
+        .calc-result-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap:
+                14px;
+
+        }
+
 
         .result {
-            border: 1px solid #21457f;
 
-            background: #0e1a2d;
+            border:
+                1px solid #21457f;
 
-            border-radius: 20px;
+            background:
+                #0e1a2d;
 
-            padding: 24px;
+            border-radius:
+                20px;
 
-            margin-top: 18px;
+            padding:
+                24px;
+
+            margin-top:
+                18px;
+
         }
+
 
         .result .price {
-            font-size: 38px;
 
-            font-weight: 800;
+            font-size:
+                38px;
 
-            margin: 5px 0 20px;
+            font-weight:
+                800;
+
+            margin:
+                5px 0 20px;
+
         }
+
 
         .line {
-            display: flex;
 
-            justify-content: space-between;
+            display:
+                flex;
 
-            border-top: 1px solid #263044;
+            justify-content:
+                space-between;
 
-            padding: 12px 0;
+            border-top:
+                1px solid #263044;
 
-            color: #c6cad2;
+            padding:
+                12px 0;
+
+            color:
+                #c6cad2;
+
+            gap:
+                20px;
+
         }
 
-        /* =========================
-           MESSAGES
-        ========================= */
+
+        .line b {
+
+            text-align:
+                right;
+
+        }
+
+
+        .highlight {
+
+            border:
+                1px solid #315d9f;
+
+            background:
+                #122642;
+
+            border-radius:
+                15px;
+
+            padding:
+                15px;
+
+            margin-top:
+                12px;
+
+        }
+
+
+        /* =====================================================
+           CLIENTS
+        ===================================================== */
+
+        .client-list {
+
+            display:
+                grid;
+
+            gap:
+                12px;
+
+        }
+
+
+        .client-card {
+
+            border:
+                1px solid var(--line);
+
+            background:
+                #111319;
+
+            border-radius:
+                18px;
+
+            padding:
+                18px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+        }
+
+
+        .client-info h3 {
+
+            margin:
+                0 0 5px;
+
+        }
+
+
+        .client-info p {
+
+            margin:
+                0;
+
+            color:
+                var(--muted);
+
+            font-size:
+                13px;
+
+        }
+
+
+        /* =====================================================
+           ORDERS
+        ===================================================== */
+
+        .order-product {
+
+            border:
+                1px solid var(--line);
+
+            background:
+                #101218;
+
+            border-radius:
+                18px;
+
+            padding:
+                18px;
+
+            margin-top:
+                14px;
+
+        }
+
+
+        .order-product-head {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                15px;
+
+            margin-bottom:
+                14px;
+
+        }
+
+
+        .order-product-head h3 {
+
+            margin:
+                0;
+
+            font-size:
+                18px;
+
+        }
+
+
+        .variation-list {
+
+            display:
+                grid;
+
+            gap:
+                9px;
+
+        }
+
+
+        .variation-row {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1.1fr
+                1.1fr
+                .6fr
+                .8fr
+                auto;
+
+            gap:
+                8px;
+
+            align-items:
+                center;
+
+        }
+
+
+        .variation-row input,
+        .variation-row select {
+
+            width:
+                100%;
+
+            border:
+                1px solid var(--line);
+
+            background:
+                #0d0f14;
+
+            color:
+                var(--text);
+
+            border-radius:
+                10px;
+
+            padding:
+                9px;
+
+        }
+
+
+        .order-total-box {
+
+            margin-top:
+                18px;
+
+            padding:
+                18px;
+
+            border:
+                1px solid #29456e;
+
+            background:
+                #0e1828;
+
+            border-radius:
+                17px;
+
+        }
+
+
+        /* =====================================================
+           BILLING
+        ===================================================== */
+
+        .status {
+
+            display:
+                inline-flex;
+
+            align-items:
+                center;
+
+            border-radius:
+                999px;
+
+            padding:
+                6px 10px;
+
+            font-size:
+                12px;
+
+            background:
+                #1b1d24;
+
+        }
+
+
+        .status.paid {
+
+            color:
+                var(--ok);
+
+        }
+
+
+        .status.pending {
+
+            color:
+                var(--warning);
+
+        }
+
+
+        .status.cancelled {
+
+            color:
+                #ff9090;
+
+        }
+
+
+        .financial-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap:
+                16px;
+
+        }
+
+
+        /* =====================================================
+           VOLUME
+        ===================================================== */
+
+        .volume-row {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                1fr
+                1fr
+                auto;
+
+            gap:
+                10px;
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .volume-row input {
+
+            border:
+                1px solid var(--line);
+
+            background:
+                #0d0f14;
+
+            color:
+                var(--text);
+
+            border-radius:
+                10px;
+
+            padding:
+                10px;
+
+        }
+
+
+        /* =====================================================
+           NOTICES
+        ===================================================== */
 
         .notice {
-            padding: 12px 14px;
 
-            border: 1px solid #32445f;
+            padding:
+                12px 14px;
 
-            background: #0d1728;
+            border:
+                1px solid #32445f;
 
-            color: #aebbd0;
+            background:
+                #0d1728;
 
-            border-radius: 12px;
+            color:
+                #aebbd0;
 
-            font-size: 13px;
+            border-radius:
+                12px;
 
-            margin-bottom: 16px;
+            font-size:
+                13px;
+
+            margin-bottom:
+                16px;
+
         }
+
 
         .ok {
-            color: var(--ok);
+
+            color:
+                var(--ok);
+
         }
+
 
         .pending {
-            color: #ffcb6b;
+
+            color:
+                var(--warning);
+
         }
+
 
         .loading {
-            opacity: 0.55;
 
-            pointer-events: none;
+            opacity:
+                .55;
+
+            pointer-events:
+                none;
+
         }
 
+
         @keyframes fade {
+
             from {
-                opacity: 0;
-                transform: translateY(5px);
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(5px);
+
             }
 
             to {
-                opacity: 1;
-                transform: none;
+
+                opacity:
+                    1;
+
+                transform:
+                    none;
+
             }
+
         }
 
-        /* =========================
+
+        /* =====================================================
            MOBILE
-        ========================= */
+        ===================================================== */
 
         @media (max-width: 850px) {
 
             .sidebar {
-                width: min(330px, 88vw);
 
-                transform: translateX(-102%);
+                width:
+                    min(
+                        330px,
+                        88vw
+                    );
+
+                transform:
+                    translateX(-102%);
 
                 box-shadow:
                     30px 0 70px #0008;
+
             }
+
 
             .sidebar.open {
-                transform: translateX(0);
+
+                transform:
+                    translateX(0);
+
             }
+
 
             .main {
-                margin-left: 0;
+
+                margin-left:
+                    0;
+
             }
+
 
             .topbar {
-                height: 92px;
 
-                padding: 0 20px;
+                height:
+                    92px;
+
+                padding:
+                    0 20px;
+
             }
+
+
+            .menu {
+
+                display:
+                    block;
+
+            }
+
+
+            .close-side {
+
+                display:
+                    block;
+
+            }
+
 
             .content {
-                padding: 22px 16px;
 
-                width: 100%;
+                padding:
+                    22px 16px;
 
-                min-width: 0;
+                width:
+                    100%;
+
+                min-width:
+                    0;
+
             }
 
-            .grid {
-                grid-template-columns: 1fr;
+
+            .grid,
+            .financial-grid {
+
+                grid-template-columns:
+                    1fr;
+
             }
+
 
             .form-grid {
-                grid-template-columns: 1fr;
+
+                grid-template-columns:
+                    1fr;
+
             }
+
 
             .hero {
-                flex-direction: column;
+
+                flex-direction:
+                    column;
+
             }
+
 
             .hero .btn {
-                width: 100%;
+
+                width:
+                    100%;
+
             }
+
 
             .overlay {
-                display: none;
 
-                position: fixed;
+                display:
+                    none;
 
-                z-index: 40;
+                position:
+                    fixed;
 
-                inset: 0;
+                z-index:
+                    40;
 
-                background: #0008;
+                inset:
+                    0;
+
+                background:
+                    #0008;
+
             }
+
 
             .overlay.show {
-                display: block;
+
+                display:
+                    block;
+
             }
 
+
             .toolbar {
-                flex-direction: column;
+
+                flex-direction:
+                    column;
+
             }
+
 
             .toolbar .search,
             .toolbar .btn {
-                width: 100%;
 
-                flex: 0 0 auto;
+                width:
+                    100%;
+
+                flex:
+                    0 0 auto;
+
             }
+
 
             .card {
-                max-width: 100%;
 
-                min-width: 0;
+                max-width:
+                    100%;
+
+                min-width:
+                    0;
+
             }
+
 
             .products,
             .product {
-                min-width: 0;
 
-                max-width: 100%;
+                min-width:
+                    0;
 
-                overflow-wrap: anywhere;
+                max-width:
+                    100%;
+
+                overflow-wrap:
+                    anywhere;
+
             }
+
 
             .actions {
-                flex-wrap: wrap;
+
+                flex-wrap:
+                    wrap;
+
             }
 
+
             .actions .btn {
-                min-width: 0;
+
+                min-width:
+                    0;
+
             }
+
+
+            .calc-result-grid {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .client-card {
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+
+            }
+
+
+            .variation-row {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .volume-row {
+
+                grid-template-columns:
+                    1fr
+                    1fr;
+
+            }
+
         }
 
     </style>
+
 </head>
+
 
 <body>
 
 <div class="app">
 
-    <div class="overlay" id="overlay"></div>
+    <div
+        class="overlay"
+        id="overlay"
+    ></div>
 
-    <!-- =========================
+
+    <!-- =====================================================
          SIDEBAR
-    ========================== -->
+    ====================================================== -->
 
-    <aside class="sidebar" id="sidebar">
+    <aside
+        class="sidebar"
+        id="sidebar"
+    >
 
         <div class="side-top">
 
@@ -831,30 +1874,71 @@
 
         </div>
 
+
         <nav class="nav">
 
             <div class="nav-label">
                 PRINCIPAL
             </div>
 
+
             <button data-route="dashboard">
-                <span class="ico">⌂</span>
+
+                <span class="ico">
+                    ⌂
+                </span>
+
                 Dashboard
+
             </button>
 
 
             <div class="nav-label">
-                PRODUTOS
+                COMERCIAL
             </div>
 
+
             <button data-route="produtos">
-                <span class="ico">▦</span>
+
+                <span class="ico">
+                    ▦
+                </span>
+
                 Produtos
+
             </button>
 
-            <button data-route="novo">
-                <span class="ico">＋</span>
-                Novo produto
+
+            <button data-route="clientes">
+
+                <span class="ico">
+                    ♙
+                </span>
+
+                Clientes
+
+            </button>
+
+
+            <button data-route="pedidos">
+
+                <span class="ico">
+                    ▤
+                </span>
+
+                Pedidos
+
+            </button>
+
+
+            <button data-route="faturamento">
+
+                <span class="ico">
+                    $
+                </span>
+
+                Faturamento
+
             </button>
 
 
@@ -862,9 +1946,31 @@
                 FERRAMENTAS
             </div>
 
+
             <button data-route="calculadora">
-                <span class="ico">⌁</span>
+
+                <span class="ico">
+                    ⌁
+                </span>
+
                 Calculadora
+
+            </button>
+
+
+            <div class="nav-label">
+                PRODUTOS
+            </div>
+
+
+            <button data-route="novo">
+
+                <span class="ico">
+                    ＋
+                </span>
+
+                Novo produto
+
             </button>
 
 
@@ -872,12 +1978,19 @@
                 SISTEMA
             </div>
 
+
             <button data-route="configuracoes">
-                <span class="ico">⚙</span>
+
+                <span class="ico">
+                    ⚙
+                </span>
+
                 Configurações
+
             </button>
 
         </nav>
+
 
         <div class="logout">
 
@@ -890,11 +2003,12 @@
     </aside>
 
 
-    <!-- =========================
+    <!-- =====================================================
          MAIN
-    ========================== -->
+    ====================================================== -->
 
     <main class="main">
+
 
         <header class="topbar">
 
@@ -904,6 +2018,7 @@
             >
                 ☰
             </button>
+
 
             <div class="top-title">
 
@@ -922,9 +2037,10 @@
 
         <div class="content">
 
-            <!-- =========================
+
+            <!-- =================================================
                  DASHBOARD
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -940,7 +2056,7 @@
                         </h2>
 
                         <p>
-                            Resumo do catálogo e da produção.
+                            Resumo comercial, catálogo e produção.
                         </p>
 
                     </div>
@@ -949,6 +2065,7 @@
 
 
                 <div class="grid">
+
 
                     <div class="card metric">
 
@@ -966,11 +2083,50 @@
                     <div class="card metric">
 
                         <span>
-                            Com dados de produção
+                            Clientes
                         </span>
 
-                        <strong id="mData">
+                        <strong id="mClients">
                             —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Pedidos
+                        </span>
+
+                        <strong id="mOrders">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Faturamento
+                        </span>
+
+                        <strong id="mRevenue">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Recebido
+                        </span>
+
+                        <strong id="mReceived">
+                            R$ 0,00
                         </strong>
 
                     </div>
@@ -1009,9 +2165,9 @@
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
                  PRODUTOS
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -1027,10 +2183,11 @@
                         </h2>
 
                         <p>
-                            Leitura real da pasta <b>Modelos</b>.
+                            Catálogo e dados internos de produção.
                         </p>
 
                     </div>
+
 
                     <button
                         class="btn primary"
@@ -1052,6 +2209,7 @@
                             placeholder="Pesquisar produto..."
                         >
 
+
                         <button
                             class="btn"
                             id="refresh"
@@ -1072,9 +2230,9 @@
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
                  NOVO PRODUTO
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -1104,7 +2262,7 @@
 
                         O token do GitHub nunca fica no navegador.
                         O painel envia os dados para a API segura,
-                        que grava no repositório.
+                        que grava os arquivos no repositório.
 
                     </div>
 
@@ -1112,6 +2270,7 @@
                     <form id="newForm">
 
                         <div class="form-grid">
+
 
                             <div class="field">
 
@@ -1154,16 +2313,22 @@
                             </div>
 
 
-                            <div class="field">
+                            <div class="field full">
 
                                 <label>
-                                    Materiais
+                                    Materiais disponíveis
                                 </label>
 
-                                <input
-                                    id="newMaterials"
-                                    placeholder="PLA • PETG • ABS"
-                                >
+                                <select
+                                    id="newMaterialsSelect"
+                                    multiple
+                                    class="multi-select"
+                                ></select>
+
+                                <div
+                                    class="selection-box"
+                                    id="newMaterialPreview"
+                                ></div>
 
                             </div>
 
@@ -1218,9 +2383,9 @@
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
                  EDITAR PRODUTO
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -1241,6 +2406,7 @@
 
                     </div>
 
+
                     <button
                         class="btn"
                         data-route="produtos"
@@ -1253,7 +2419,10 @@
 
                 <form id="editForm">
 
-                    <!-- INFORMAÇÕES PÚBLICAS -->
+
+                    <!-- =========================================
+                         INFORMAÇÕES PÚBLICAS
+                    ========================================== -->
 
                     <div class="card">
 
@@ -1263,6 +2432,7 @@
 
 
                         <div class="form-grid">
+
 
                             <div class="field">
 
@@ -1304,15 +2474,23 @@
                             </div>
 
 
-                            <div class="field">
+                            <div class="field full">
 
                                 <label>
-                                    Materiais
+                                    Materiais disponíveis
                                 </label>
 
-                                <input
-                                    id="eMaterials"
-                                >
+                                <select
+                                    id="eMaterialsSelect"
+                                    multiple
+                                    class="multi-select"
+                                ></select>
+
+
+                                <div
+                                    class="selection-box"
+                                    id="editMaterialPreview"
+                                ></div>
 
                             </div>
 
@@ -1341,6 +2519,7 @@
                                     id="colors"
                                 ></div>
 
+
                                 <button
                                     type="button"
                                     class="btn"
@@ -1357,7 +2536,9 @@
                     </div>
 
 
-                    <!-- DADOS DE PRODUÇÃO -->
+                    <!-- =========================================
+                         PRODUÇÃO
+                    ========================================== -->
 
                     <div class="card section">
 
@@ -1368,10 +2549,11 @@
 
                         <div class="form-grid">
 
+
                             <div class="field">
 
                                 <label>
-                                    Peso (g)
+                                    Peso da peça (g)
                                 </label>
 
                                 <input
@@ -1379,6 +2561,10 @@
                                     type="number"
                                     step="0.01"
                                 >
+
+                                <small>
+                                    Peso físico da peça pronta.
+                                </small>
 
                             </div>
 
@@ -1401,7 +2587,7 @@
                             <div class="field">
 
                                 <label>
-                                    Peso do filamento (g)
+                                    Peso de filamento utilizado (g)
                                 </label>
 
                                 <input
@@ -1409,6 +2595,10 @@
                                     type="number"
                                     step="0.01"
                                 >
+
+                                <small>
+                                    Este valor será usado preferencialmente na calculadora.
+                                </small>
 
                             </div>
 
@@ -1449,9 +2639,21 @@
                                     Suportes
                                 </label>
 
-                                <input
-                                    id="dSupports"
-                                >
+                                <select id="dSupports">
+
+                                    <option value="">
+                                        Selecione
+                                    </option>
+
+                                    <option value="Sim">
+                                        Sim
+                                    </option>
+
+                                    <option value="Não">
+                                        Não
+                                    </option>
+
+                                </select>
 
                             </div>
 
@@ -1459,12 +2661,16 @@
                             <div class="field">
 
                                 <label>
-                                    Material
+                                    Material principal
                                 </label>
 
-                                <input
-                                    id="dMaterial"
-                                >
+                                <select id="dMaterial">
+
+                                    <option value="">
+                                        Selecione
+                                    </option>
+
+                                </select>
 
                             </div>
 
@@ -1580,6 +2786,7 @@
                                 margin-top:18px;
                                 display:flex;
                                 gap:10px;
+                                flex-wrap:wrap;
                             "
                         >
 
@@ -1590,12 +2797,22 @@
                                 SALVAR ALTERAÇÕES
                             </button>
 
+
                             <button
                                 type="button"
                                 class="btn"
-                                data-route="calculadora"
+                                id="editCalculate"
                             >
                                 CALCULAR
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn"
+                                data-route="produtos"
+                            >
+                                VOLTAR
                             </button>
 
                         </div>
@@ -1607,9 +2824,619 @@
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
+                 CLIENTES
+            ================================================== -->
+
+            <section
+                class="page"
+                data-page="clientes"
+            >
+
+                <div class="hero">
+
+                    <div>
+
+                        <h2>
+                            Clientes
+                        </h2>
+
+                        <p>
+                            Cadastro e condições comerciais.
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        class="btn primary"
+                        id="newClientButton"
+                    >
+                        ＋ Novo cliente
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="card"
+                    id="clientFormCard"
+                    style="display:none"
+                >
+
+                    <h3>
+                        Cadastro de cliente
+                    </h3>
+
+
+                    <form id="clientForm">
+
+                        <div class="form-grid">
+
+
+                            <div class="field">
+
+                                <label>
+                                    Nome / Razão social
+                                </label>
+
+                                <input
+                                    id="clientName"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    CPF / CNPJ
+                                </label>
+
+                                <input
+                                    id="clientDocument"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Telefone
+                                </label>
+
+                                <input
+                                    id="clientPhone"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    E-mail
+                                </label>
+
+                                <input
+                                    id="clientEmail"
+                                    type="email"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Tipo
+                                </label>
+
+                                <select id="clientType">
+
+                                    <option value="final">
+                                        Cliente final
+                                    </option>
+
+                                    <option value="revendedor">
+                                        Revendedor
+                                    </option>
+
+                                    <option value="empresa">
+                                        Empresa
+                                    </option>
+
+                                    <option value="floricultura">
+                                        Floricultura
+                                    </option>
+
+                                    <option value="outro">
+                                        Outro
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Margem / condição negociada (%)
+                                </label>
+
+                                <input
+                                    id="clientMargin"
+                                    type="number"
+                                    step="0.1"
+                                >
+
+                            </div>
+
+
+                            <div class="field full">
+
+                                <label>
+                                    Observações
+                                </label>
+
+                                <textarea
+                                    id="clientNotes"
+                                ></textarea>
+
+                            </div>
+
+                        </div>
+
+
+                        <div style="margin-top:18px">
+
+                            <button
+                                class="btn primary"
+                                type="submit"
+                            >
+                                SALVAR CLIENTE
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn"
+                                id="cancelClient"
+                            >
+                                Cancelar
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+
+                <div
+                    class="card section"
+                >
+
+                    <div class="toolbar">
+
+                        <input
+                            class="search"
+                            id="clientSearch"
+                            placeholder="Pesquisar cliente..."
+                        >
+
+                        <button
+                            class="btn"
+                            id="refreshClients"
+                        >
+                            Atualizar
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        class="client-list"
+                        id="clients"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PEDIDOS
+            ================================================== -->
+
+            <section
+                class="page"
+                data-page="pedidos"
+            >
+
+                <div class="hero">
+
+                    <div>
+
+                        <h2>
+                            Pedidos
+                        </h2>
+
+                        <p>
+                            Monte pedidos com múltiplos produtos e variações.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="form-grid">
+
+
+                        <div class="field">
+
+                            <label>
+                                Cliente
+                            </label>
+
+                            <select id="orderClient">
+
+                                <option value="">
+                                    Selecione um cliente
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Status
+                            </label>
+
+                            <select id="orderStatus">
+
+                                <option value="Orçamento">
+                                    Orçamento
+                                </option>
+
+                                <option value="Confirmado">
+                                    Confirmado
+                                </option>
+
+                                <option value="Em produção">
+                                    Em produção
+                                </option>
+
+                                <option value="Pronto">
+                                    Pronto
+                                </option>
+
+                                <option value="Entregue">
+                                    Entregue
+                                </option>
+
+                                <option value="Cancelado">
+                                    Cancelado
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Forma de pagamento
+                            </label>
+
+                            <select id="orderPayment">
+
+                                <option value="">
+                                    Não definida
+                                </option>
+
+                                <option value="PIX">
+                                    PIX
+                                </option>
+
+                                <option value="Dinheiro">
+                                    Dinheiro
+                                </option>
+
+                                <option value="Cartão">
+                                    Cartão
+                                </option>
+
+                                <option value="Transferência">
+                                    Transferência
+                                </option>
+
+                                <option value="Boleto">
+                                    Boleto
+                                </option>
+
+                                <option value="Outro">
+                                    Outro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Vencimento
+                            </label>
+
+                            <input
+                                id="orderDueDate"
+                                type="date"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="calc-section">
+
+                        <h3>
+                            Produtos do pedido
+                        </h3>
+
+
+                        <div id="orderProducts"></div>
+
+
+                        <button
+                            type="button"
+                            class="btn"
+                            id="addOrderProduct"
+                            style="margin-top:12px"
+                        >
+                            ＋ Adicionar produto
+                        </button>
+
+                    </div>
+
+
+                    <div class="order-total-box">
+
+                        <div class="line">
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <b id="orderSubtotal">
+                                R$ 0,00
+                            </b>
+
+                        </div>
+
+
+                        <div class="line">
+
+                            <span>
+                                Desconto por volume
+                            </span>
+
+                            <b id="orderDiscount">
+                                R$ 0,00
+                            </b>
+
+                        </div>
+
+
+                        <div class="line">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <b id="orderTotal">
+                                R$ 0,00
+                            </b>
+
+                        </div>
+
+                    </div>
+
+
+                    <div style="margin-top:18px">
+
+                        <button
+                            class="btn primary"
+                            id="saveOrder"
+                        >
+                            SALVAR PEDIDO
+                        </button>
+
+
+                        <button
+                            class="btn"
+                            id="clearOrder"
+                        >
+                            LIMPAR
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card section">
+
+                    <h3>
+                        Histórico de pedidos
+                    </h3>
+
+
+                    <div
+                        id="orders"
+                        class="products"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 FATURAMENTO
+            ================================================== -->
+
+            <section
+                class="page"
+                data-page="faturamento"
+            >
+
+                <div class="hero">
+
+                    <div>
+
+                        <h2>
+                            Faturamento
+                        </h2>
+
+                        <p>
+                            Controle comercial e financeiro dos pedidos.
+                            A emissão fiscal permanece no emissor apropriado.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="financial-grid">
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Faturamento
+                        </span>
+
+                        <strong id="fRevenue">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Recebido
+                        </span>
+
+                        <strong id="fReceived">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            A receber
+                        </span>
+
+                        <strong id="fReceivable">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Pedidos
+                        </span>
+
+                        <strong id="fOrders">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Ticket médio
+                        </span>
+
+                        <strong id="fAverage">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="card metric">
+
+                        <span>
+                            Lucro estimado
+                        </span>
+
+                        <strong id="fProfit">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="card section">
+
+                    <div class="toolbar">
+
+                        <input
+                            class="search"
+                            id="billingSearch"
+                            placeholder="Pesquisar pedido, cliente..."
+                        >
+
+
+                        <button
+                            class="btn"
+                            id="refreshBilling"
+                        >
+                            Atualizar
+                        </button>
+
+                    </div>
+
+
+                    <div
+                        id="billing"
+                        class="products"
+                    ></div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
                  CALCULADORA
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -1625,7 +3452,7 @@
                         </h2>
 
                         <p>
-                            Manual ou usando um produto cadastrado.
+                            Custo, preço final e preço para revendedor.
                         </p>
 
                     </div>
@@ -1635,7 +3462,36 @@
 
                 <div class="card">
 
-                    <div class="toolbar">
+
+                    <div class="mode-buttons">
+
+                        <button
+                            class="btn primary"
+                            id="calcCostMode"
+                        >
+                            Custo
+                        </button>
+
+
+                        <button
+                            class="btn"
+                            id="calcFinalMode"
+                        >
+                            Preço final
+                        </button>
+
+
+                        <button
+                            class="btn"
+                            id="calcResellerMode"
+                        >
+                            Revendedor
+                        </button>
+
+                    </div>
+
+
+                    <div class="mode-buttons">
 
                         <button
                             class="btn primary"
@@ -1643,6 +3499,7 @@
                         >
                             Selecionar produto
                         </button>
+
 
                         <button
                             class="btn"
@@ -1654,6 +3511,10 @@
                     </div>
 
 
+                    <!-- =========================================
+                         PRODUTO
+                    ========================================== -->
+
                     <div
                         id="calcProductBox"
                         class="field"
@@ -1663,6 +3524,7 @@
                             Produto
                         </label>
 
+
                         <select id="calcProduct">
 
                             <option value="">
@@ -1671,14 +3533,17 @@
 
                         </select>
 
-                        <small style="color:var(--muted)">
 
-                            Os dados serão preenchidos a partir do dados.json.
-
+                        <small>
+                            Os dados são carregados do dados.json.
                         </small>
 
                     </div>
 
+
+                    <!-- =========================================
+                         MANUAL
+                    ========================================== -->
 
                     <div
                         id="calcManualBox"
@@ -1687,10 +3552,11 @@
 
                         <div class="form-grid">
 
+
                             <div class="field">
 
                                 <label>
-                                    Peso/filamento (g)
+                                    Filamento utilizado (g)
                                 </label>
 
                                 <input
@@ -1705,7 +3571,7 @@
                             <div class="field">
 
                                 <label>
-                                    Tempo (h)
+                                    Tempo de impressão (h)
                                 </label>
 
                                 <input
@@ -1720,14 +3586,124 @@
                             <div class="field">
 
                                 <label>
-                                    Preço do material (R$/kg)
+                                    Material
+                                </label>
+
+                                <select id="cMaterialSelect"></select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CUSTOS ADICIONAIS
+                    ========================================== -->
+
+                    <div class="calc-section">
+
+                        <h3>
+                            Custos adicionais
+                        </h3>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="field">
+
+                                <label>
+                                    Acabamento (R$)
                                 </label>
 
                                 <input
-                                    id="cMaterial"
+                                    id="cFinishing"
                                     type="number"
                                     step="0.01"
-                                    value="89"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Pintura (R$)
+                                </label>
+
+                                <input
+                                    id="cPainting"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Embalagem (R$)
+                                </label>
+
+                                <input
+                                    id="cPackaging"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Outros custos (R$)
+                                </label>
+
+                                <input
+                                    id="cOther"
+                                    type="number"
+                                    step="0.01"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Comissão (%)
+                                </label>
+
+                                <input
+                                    id="cCommission"
+                                    type="number"
+                                    step="0.1"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Quantidade
+                                </label>
+
+                                <input
+                                    id="cQuantity"
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value="1"
                                 >
 
                             </div>
@@ -1737,10 +3713,133 @@
                     </div>
 
 
+                    <!-- =========================================
+                         PREÇO
+                    ========================================== -->
+
+                    <div
+                        class="calc-section"
+                        id="finalPriceSection"
+                    >
+
+                        <h3>
+                            Formação do preço
+                        </h3>
+
+
+                        <div class="form-grid">
+
+
+                            <div class="field">
+
+                                <label>
+                                    Margem 4Maker (%)
+                                </label>
+
+                                <input
+                                    id="cMargin"
+                                    type="number"
+                                    step="0.1"
+                                >
+
+                            </div>
+
+
+                            <div
+                                class="field"
+                                id="resellerMarginField"
+                                style="display:none"
+                            >
+
+                                <label>
+                                    Margem desejada do revendedor (%)
+                                </label>
+
+                                <input
+                                    id="cResellerMargin"
+                                    type="number"
+                                    step="0.1"
+                                    value="30"
+                                >
+
+                            </div>
+
+
+                            <div
+                                class="field"
+                                id="targetPriceField"
+                                style="display:none"
+                            >
+
+                                <label>
+                                    Preço final desejado (R$)
+                                </label>
+
+                                <input
+                                    id="cTargetPrice"
+                                    type="number"
+                                    step="0.01"
+                                >
+
+                            </div>
+
+
+                            <div class="field">
+
+                                <label>
+                                    Arredondamento
+                                </label>
+
+                                <select id="cRounding">
+
+                                    <option value="0">
+                                        Sem arredondamento
+                                    </option>
+
+                                    <option value="0.10">
+                                        R$ 0,10
+                                    </option>
+
+                                    <option value="0.50">
+                                        R$ 0,50
+                                    </option>
+
+                                    <option value="1">
+                                        R$ 1,00
+                                    </option>
+
+                                    <option value="5">
+                                        R$ 5,00
+                                    </option>
+
+                                    <option value="10">
+                                        R$ 10,00
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="highlight"
+                            id="volumeInfo"
+                        >
+                            Desconto por volume será aplicado conforme as faixas configuradas.
+                        </div>
+
+                    </div>
+
+
                     <button
                         class="btn primary"
                         id="calculate"
-                        style="width:100%;margin-top:18px"
+                        style="
+                            width:100%;
+                            margin-top:18px
+                        "
                     >
                         CALCULAR
                     </button>
@@ -1748,11 +3847,17 @@
                 </div>
 
 
+                <!-- =============================================
+                     RESULTADO
+                ============================================== -->
+
                 <div class="result">
 
+
                     <span style="color:var(--muted)">
-                        Preço sugerido
+                        Resultado
                     </span>
+
 
                     <div
                         class="price"
@@ -1791,6 +3896,71 @@
                     <div class="line">
 
                         <span>
+                            Acabamento
+                        </span>
+
+                        <b id="rFinishing">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div class="line">
+
+                        <span>
+                            Pintura
+                        </span>
+
+                        <b id="rPainting">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div class="line">
+
+                        <span>
+                            Embalagem
+                        </span>
+
+                        <b id="rPackaging">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div class="line">
+
+                        <span>
+                            Comissão
+                        </span>
+
+                        <b id="rCommission">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div class="line">
+
+                        <span>
+                            Outros
+                        </span>
+
+                        <b id="rOther">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div class="line">
+
+                        <span>
                             Custo total
                         </span>
 
@@ -1800,14 +3970,75 @@
 
                     </div>
 
+
+                    <div
+                        class="line"
+                        id="rResellerLine"
+                        style="display:none"
+                    >
+
+                        <span>
+                            Preço do revendedor
+                        </span>
+
+                        <b id="rReseller">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div
+                        class="line"
+                        id="rCustomerLine"
+                    >
+
+                        <span>
+                            Preço final
+                        </span>
+
+                        <b id="rCustomer">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div
+                        class="line"
+                        id="rProfitLine"
+                    >
+
+                        <span>
+                            Lucro 4Maker
+                        </span>
+
+                        <b id="rProfit">
+                            R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <button
+                        class="btn primary"
+                        id="savePrice"
+                        style="
+                            width:100%;
+                            margin-top:18px;
+                        "
+                    >
+                        SALVAR PREÇO NEGOCIADO
+                    </button>
+
                 </div>
 
             </section>
 
 
-            <!-- =========================
+            <!-- =================================================
                  CONFIGURAÇÕES
-            ========================== -->
+            ================================================== -->
 
             <section
                 class="page"
@@ -1823,7 +4054,7 @@
                         </h2>
 
                         <p>
-                            Parâmetros gerais da calculadora.
+                            Materiais, custos, margens e descontos.
                         </p>
 
                     </div>
@@ -1833,7 +4064,14 @@
 
                 <div class="card">
 
+
+                    <h3>
+                        Custos gerais
+                    </h3>
+
+
                     <div class="form-grid">
+
 
                         <div class="field">
 
@@ -1854,62 +4092,14 @@
                         <div class="field">
 
                             <label>
-                                Margem padrão (%)
+                                Margem padrão 4Maker (%)
                             </label>
 
                             <input
                                 id="setMargin"
                                 type="number"
                                 step="0.1"
-                                value="100"
-                            >
-
-                        </div>
-
-
-                        <div class="field">
-
-                            <label>
-                                PLA (R$/kg)
-                            </label>
-
-                            <input
-                                id="setPLA"
-                                type="number"
-                                step="0.01"
-                                value="89"
-                            >
-
-                        </div>
-
-
-                        <div class="field">
-
-                            <label>
-                                PETG (R$/kg)
-                            </label>
-
-                            <input
-                                id="setPETG"
-                                type="number"
-                                step="0.01"
-                                value="89"
-                            >
-
-                        </div>
-
-
-                        <div class="field">
-
-                            <label>
-                                ABS (R$/kg)
-                            </label>
-
-                            <input
-                                id="setABS"
-                                type="number"
-                                step="0.01"
-                                value="89"
+                                value="50"
                             >
 
                         </div>
@@ -1925,7 +4115,27 @@
                                 id="setWaste"
                                 type="number"
                                 step="0.1"
-                                value="0"
+                                value="5"
+                            >
+
+                            <small>
+                                Aplicado sobre o filamento utilizado.
+                            </small>
+
+                        </div>
+
+
+                        <div class="field">
+
+                            <label>
+                                Margem mínima 4Maker (%)
+                            </label>
+
+                            <input
+                                id="setMinimumMargin"
+                                type="number"
+                                step="0.1"
+                                value="20"
                             >
 
                         </div>
@@ -1933,13 +4143,70 @@
                     </div>
 
 
-                    <button
-                        class="btn primary"
-                        id="saveSettings"
-                        style="margin-top:18px"
-                    >
-                        SALVAR CONFIGURAÇÕES
-                    </button>
+                    <div class="calc-section">
+
+
+                        <h3>
+                            Materiais
+                        </h3>
+
+
+                        <div
+                            id="materialsSettings"
+                        ></div>
+
+
+                        <button
+                            type="button"
+                            class="btn"
+                            id="addMaterial"
+                            style="margin-top:12px"
+                        >
+                            ＋ Adicionar material
+                        </button>
+
+                    </div>
+
+
+                    <div class="calc-section">
+
+
+                        <h3>
+                            Desconto por volume
+                        </h3>
+
+
+                        <p style="color:var(--muted)">
+                            Configure as faixas de quantidade e o desconto correspondente.
+                        </p>
+
+
+                        <div
+                            id="volumeSettings"
+                        ></div>
+
+
+                        <button
+                            type="button"
+                            class="btn"
+                            id="addVolume"
+                        >
+                            ＋ Adicionar faixa
+                        </button>
+
+                    </div>
+
+
+                    <div style="margin-top:20px">
+
+                        <button
+                            class="btn primary"
+                            id="saveSettings"
+                        >
+                            SALVAR CONFIGURAÇÕES
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -1954,9 +4221,9 @@
 
 <script>
 
-    /* =========================
+    /* =========================================================
        CONFIGURAÇÃO
-    ========================== */
+    ========================================================= */
 
     const API_URL =
         'https://4maker3d-admin-api.4makerimpressoes.workers.dev';
@@ -1966,36 +4233,127 @@
 
 
     const state = {
+
         products: [],
+
+        clients: [],
+
+        orders: [],
+
+        billing: [],
+
         current: null,
-        calcMode: 'product'
+
+        calcMode: 'cost',
+
+        calcInputMode: 'product',
+
+        settings: {
+
+            machine: 2,
+
+            margin: 50,
+
+            minimumMargin: 20,
+
+            waste: 5,
+
+            materials: [
+
+                {
+                    name: 'PLA',
+                    price: 89
+                },
+
+                {
+                    name: 'PETG',
+                    price: 89
+                },
+
+                {
+                    name: 'ABS',
+                    price: 89
+                }
+
+            ],
+
+            volume: [
+
+                {
+                    min: 1,
+                    max: 4,
+                    discount: 0
+                },
+
+                {
+                    min: 5,
+                    max: 9,
+                    discount: 5
+                },
+
+                {
+                    min: 10,
+                    max: 24,
+                    discount: 10
+                },
+
+                {
+                    min: 25,
+                    max: 49,
+                    discount: 15
+                },
+
+                {
+                    min: 50,
+                    max: null,
+                    discount: 20
+                }
+
+            ]
+
+        }
+
     };
 
 
-    const $ = selector =>
-        document.querySelector(selector);
+    const $ =
+        selector =>
+            document.querySelector(selector);
 
 
-    const $$ = selector =>
-        [...document.querySelectorAll(selector)];
+    const $$ =
+        selector =>
+            [
+                ...document.querySelectorAll(selector)
+            ];
 
 
-    /* =========================
-       AUTENTICAÇÃO
-    ========================== */
+    /* =========================================================
+       API
+    ========================================================= */
 
     function token() {
 
-        return sessionStorage.getItem(TOKEN_KEY);
+        return sessionStorage.getItem(
+            TOKEN_KEY
+        );
 
     }
 
 
-    async function api(path, options = {}) {
+    async function api(
+        path,
+        options = {}
+    ) {
 
         const headers = {
+
             ...(options.headers || {}),
-            Authorization: 'Bearer ' + token()
+
+            Authorization:
+                'Bearer ' +
+                token()
+
         };
 
 
@@ -2008,21 +4366,26 @@
                 'application/json';
 
             options.body =
-                JSON.stringify(options.body);
+                JSON.stringify(
+                    options.body
+                );
 
         }
 
 
-        const r = await fetch(
-            API_URL + path,
-            {
-                ...options,
-                headers
-            }
-        );
+        const r =
+            await fetch(
+                API_URL + path,
+                {
+                    ...options,
+                    headers
+                }
+            );
 
 
-        if (r.status === 401) {
+        if (
+            r.status === 401
+        ) {
 
             sessionStorage.removeItem(
                 TOKEN_KEY
@@ -2040,24 +4403,36 @@
 
 
         const d =
-            await r.json().catch(
-                () => ({})
-            );
+            await r.json()
+                .catch(
+                    () => ({})
+                );
 
 
         if (!r.ok) {
 
             throw new Error(
+
                 d.detail
-                    ? (
-                        (d.error || 'Erro na API.') +
+
+                    ?
+
+                    (
+                        (
+                            d.error ||
+                            'Erro na API.'
+                        ) +
                         ' — ' +
                         d.detail
                     )
-                    : (
+
+                    :
+
+                    (
                         d.error ||
                         'Erro na API.'
                     )
+
             );
 
         }
@@ -2098,56 +4473,78 @@
     }
 
 
-    /* =========================
+    /* =========================================================
        NAVEGAÇÃO
-    ========================== */
+    ========================================================= */
 
     function route() {
 
         let r =
-            location.hash.replace(
-                '#',
-                ''
-            ) || 'dashboard';
+            location.hash
+                .replace(
+                    '#',
+                    ''
+                ) ||
+            'dashboard';
 
 
         const validRoutes = [
+
             'dashboard',
             'produtos',
             'novo',
             'editar',
+            'clientes',
+            'pedidos',
+            'faturamento',
             'calculadora',
             'configuracoes'
+
         ];
 
 
-        if (!validRoutes.includes(r)) {
+        if (
+            !validRoutes.includes(r)
+        ) {
 
-            r = 'dashboard';
+            r =
+                'dashboard';
 
         }
 
 
-        $$('.page').forEach(page => {
+        $$('.page')
+            .forEach(
+                page => {
 
-            page.classList.toggle(
-                'active',
-                page.dataset.page === r
+                    page.classList.toggle(
+
+                        'active',
+
+                        page.dataset.page === r
+
+                    );
+
+                }
             );
-
-        });
 
 
         $$(
             '.nav button[data-route]'
-        ).forEach(button => {
+        )
+            .forEach(
+                button => {
 
-            button.classList.toggle(
-                'active',
-                button.dataset.route === r
+                    button.classList.toggle(
+
+                        'active',
+
+                        button.dataset.route === r
+
+                    );
+
+                }
             );
-
-        });
 
 
         const titles = {
@@ -2163,6 +4560,15 @@
 
             editar:
                 'Editar produto',
+
+            clientes:
+                'Clientes',
+
+            pedidos:
+                'Pedidos',
+
+            faturamento:
+                'Faturamento',
 
             calculadora:
                 'Calculadora',
@@ -2180,16 +4586,60 @@
         closeSide();
 
 
-        if (r === 'produtos') {
+        if (
+            r === 'produtos'
+        ) {
 
             renderProducts();
 
         }
 
 
-        if (r === 'calculadora') {
+        if (
+            r === 'clientes'
+        ) {
+
+            renderClients();
+
+        }
+
+
+        if (
+            r === 'pedidos'
+        ) {
+
+            fillOrderSelectors();
+
+            renderOrders();
+
+        }
+
+
+        if (
+            r === 'faturamento'
+        ) {
+
+            renderBilling();
+
+        }
+
+
+        if (
+            r === 'calculadora'
+        ) {
 
             fillCalcProducts();
+
+            fillCalcMaterials();
+
+        }
+
+
+        if (
+            r === 'configuracoes'
+        ) {
+
+            renderSettings();
 
         }
 
@@ -2199,7 +4649,8 @@
     function go(r) {
 
         if (
-            location.hash === '#' + r
+            location.hash ===
+            '#' + r
         ) {
 
             route();
@@ -2210,13 +4661,17 @@
 
 
         history.pushState(
+
             {
                 route: r
             },
+
             '',
+
             location.pathname +
             '#' +
             r
+
         );
 
 
@@ -2225,9 +4680,40 @@
     }
 
 
-    /* =========================
+    window.addEventListener(
+        'hashchange',
+        route
+    );
+
+
+    window.addEventListener(
+        'popstate',
+        route
+    );
+
+
+    $$('[data-route]')
+        .forEach(
+            button => {
+
+                button.addEventListener(
+
+                    'click',
+
+                    () =>
+                        go(
+                            button.dataset.route
+                        )
+
+                );
+
+            }
+        );
+
+
+    /* =========================================================
        SIDEBAR
-    ========================== */
+    ========================================================= */
 
     function openSide() {
 
@@ -2267,49 +4753,23 @@
         closeSide;
 
 
-    $$('[data-route]').forEach(
-        button => {
+    $('#logout').onclick =
+        () => {
 
-            button.addEventListener(
-                'click',
-                () =>
-                    go(
-                        button.dataset.route
-                    )
+            sessionStorage.removeItem(
+                TOKEN_KEY
             );
 
-        }
-    );
+            location.replace(
+                'login.html'
+            );
+
+        };
 
 
-    window.addEventListener(
-        'hashchange',
-        route
-    );
-
-
-    window.addEventListener(
-        'popstate',
-        route
-    );
-
-
-    $('#logout').onclick = () => {
-
-        sessionStorage.removeItem(
-            TOKEN_KEY
-        );
-
-        location.replace(
-            'login.html'
-        );
-
-    };
-
-
-    /* =========================
+    /* =========================================================
        PRODUTOS
-    ========================== */
+    ========================================================= */
 
     async function loadProducts() {
 
@@ -2333,15 +4793,10 @@
                 state.products.length;
 
 
-            $('#mData').textContent =
-                state.products.filter(
-                    p => p.hasData
-                ).length;
-
-
             $('#mPending').textContent =
                 state.products.filter(
-                    p => !p.hasData
+                    p =>
+                        !p.hasData
                 ).length;
 
 
@@ -2349,12 +4804,20 @@
 
             fillCalcProducts();
 
+            fillOrderSelectors();
+
 
             $('#apiState').innerHTML =
+
                 '<span class="ok">' +
+
                 'API conectada e dados.json ' +
                 'verificados/criados quando ausentes.' +
+
                 '</span>';
+
+
+            updateDashboard();
 
         } catch (e) {
 
@@ -2363,8 +4826,11 @@
 
 
             $('#products').innerHTML =
+
                 '<div class="empty">' +
+
                 'Não foi possível carregar os produtos.' +
+
                 '</div>';
 
         }
@@ -2372,31 +4838,23 @@
     }
 
 
-    /*
-     * CORREÇÃO IMPORTANTE:
-     *
-     * Antes os botões usavam:
-     *
-     * onclick="editProduct("Nome")"
-     *
-     * O JSON.stringify() gerava aspas dentro
-     * do atributo HTML e quebrava o onclick.
-     *
-     * Agora os botões recebem eventos diretamente
-     * pelo JavaScript.
-     */
-
     function renderProducts() {
 
         const q =
+
             (
-                $('#search')?.value || ''
-            ).toLowerCase();
+                $('#search')?.value ||
+                ''
+            )
+                .toLowerCase();
 
 
         const list =
+
             state.products.filter(
+
                 p =>
+
                     (
                         p.name +
                         ' ' +
@@ -2404,14 +4862,18 @@
                     )
                         .toLowerCase()
                         .includes(q)
+
             );
 
 
         if (!list.length) {
 
             $('#products').innerHTML =
+
                 '<div class="empty">' +
+
                 'Nenhum produto encontrado.' +
+
                 '</div>';
 
             return;
@@ -2420,7 +4882,9 @@
 
 
         $('#products').innerHTML =
+
             list.map(
+
                 p => {
 
                     const index =
@@ -2430,30 +4894,40 @@
 
 
                     return `
+
                         <article
                             class="product"
                             data-product-index="${index}"
                         >
 
                             <span class="category">
+
                                 ${esc(
                                     p.category ||
                                     'SEM CATEGORIA'
                                 )}
+
                             </span>
 
+
                             <h3>
+
                                 ${esc(
                                     p.name
                                 )}
+
                             </h3>
 
+
                             <p>
+
                                 ${esc(
                                     p.description ||
                                     ''
                                 )}
+
                             </p>
+
 
                             <div class="chips">
 
@@ -2469,14 +4943,17 @@
                                         )
                                         .map(
                                             x =>
+
                                                 `
                                                 <span class="chip">
                                                     ${esc(x)}
                                                 </span>
                                                 `
+
                                         )
                                         .join('')
                                 }
+
 
                                 <span
                                     class="chip ${
@@ -2485,11 +4962,13 @@
                                             : 'pending'
                                     }"
                                 >
+
                                     ${
                                         p.hasData
                                             ? 'dados.json OK'
                                             : 'dados pendentes'
                                     }
+
                                 </span>
 
                             </div>
@@ -2515,61 +4994,64 @@
                             </div>
 
                         </article>
+
                     `;
 
                 }
+
             ).join('');
 
 
-        /*
-         * Liga os eventos depois que os cards
-         * foram inseridos no DOM.
-         */
-
         document
-            .querySelectorAll('.product')
-            .forEach(card => {
+            .querySelectorAll(
+                '.product'
+            )
+            .forEach(
+                card => {
 
-                const index =
-                    Number(
-                        card.dataset.productIndex
-                    );
-
-
-                const product =
-                    state.products[index];
-
-
-                const editButton =
-                    card.querySelector(
-                        '.edit-btn'
-                    );
+                    const index =
+                        Number(
+                            card.dataset.productIndex
+                        );
 
 
-                const calcButton =
-                    card.querySelector(
-                        '.calc-btn'
-                    );
+                    const product =
+                        state.products[index];
 
 
-                editButton.addEventListener(
-                    'click',
-                    () =>
-                        editProduct(
-                            product.folder
+                    card
+                        .querySelector(
+                            '.edit-btn'
                         )
-                );
+                        .addEventListener(
+
+                            'click',
+
+                            () =>
+                                editProduct(
+                                    product.folder
+                                )
+
+                        );
 
 
-                calcButton.addEventListener(
-                    'click',
-                    () =>
-                        calcProduct(
-                            product.folder
+                    card
+                        .querySelector(
+                            '.calc-btn'
                         )
-                );
+                        .addEventListener(
 
-            });
+                            'click',
+
+                            () =>
+                                calcProduct(
+                                    product.folder
+                                )
+
+                        );
+
+                }
+            );
 
     }
 
@@ -2579,22 +5061,229 @@
         return String(
             v ?? ''
         ).replace(
+
             /[&<>'"]/g,
+
             m => ({
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                "'": '&#39;',
-                '"': '&quot;'
+
+                '&':
+                    '&amp;',
+
+                '<':
+                    '&lt;',
+
+                '>':
+                    '&gt;',
+
+                "'":
+                    '&#39;',
+
+                '"':
+                    '&quot;'
+
             }[m])
+
         );
 
     }
 
 
-    /* =========================
-       EDITAR PRODUTO
-    ========================== */
+    /* =========================================================
+       MATERIAIS
+    ========================================================= */
+
+    function materialNames() {
+
+        return state.settings.materials
+            .map(
+                m =>
+                    m.name
+            )
+            .filter(
+                Boolean
+            );
+
+    }
+
+
+    function renderMaterialOptions(
+        select,
+        selected = []
+    ) {
+
+        if (!select) {
+
+            return;
+
+        }
+
+
+        select.innerHTML =
+            '';
+
+
+        materialNames()
+            .forEach(
+                material => {
+
+                    const option =
+                        document.createElement(
+                            'option'
+                        );
+
+
+                    option.value =
+                        material;
+
+                    option.textContent =
+                        material;
+
+                    option.selected =
+                        selected
+                            .map(
+                                x =>
+                                    String(x)
+                                        .toUpperCase()
+                            )
+                            .includes(
+                                String(material)
+                                    .toUpperCase()
+                            );
+
+
+                    select.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+    }
+
+
+    function getSelectedMaterials(
+        select
+    ) {
+
+        return [
+            ...select
+                .selectedOptions
+        ]
+            .map(
+                option =>
+                    option.value
+            );
+
+    }
+
+
+    function updateMaterialPreview(
+        select,
+        target
+    ) {
+
+        if (!select || !target) {
+
+            return;
+
+        }
+
+
+        const values =
+            getSelectedMaterials(
+                select
+            );
+
+
+        target.innerHTML =
+
+            values.map(
+
+                value =>
+
+                    `
+                    <span class="selection-chip">
+                        ${esc(value)}
+                    </span>
+                    `
+
+            ).join('');
+
+    }
+
+
+    function publicMaterials(
+        values
+    ) {
+
+        return values.join(
+            ' • '
+        );
+
+    }
+
+
+    function setupMaterialSelectors() {
+
+        renderMaterialOptions(
+            $('#newMaterialsSelect')
+        );
+
+
+        renderMaterialOptions(
+            $('#eMaterialsSelect')
+        );
+
+
+        renderMaterialOptions(
+            $('#dMaterial')
+        );
+
+
+        renderMaterialOptions(
+            $('#cMaterialSelect')
+        );
+
+
+        $('#newMaterialsSelect')
+            .addEventListener(
+
+                'change',
+
+                () =>
+                    updateMaterialPreview(
+
+                        $('#newMaterialsSelect'),
+
+                        $('#newMaterialPreview')
+
+                    )
+
+            );
+
+
+        $('#eMaterialsSelect')
+            .addEventListener(
+
+                'change',
+
+                () =>
+                    updateMaterialPreview(
+
+                        $('#eMaterialsSelect'),
+
+                        $('#editMaterialPreview')
+
+                    )
+
+            );
+
+    }
+
+
+    /* =========================================================
+       EDITAR
+    ========================================================= */
 
     async function editProduct(
         folder
@@ -2604,8 +5293,12 @@
 
             const d =
                 await api(
+
                     '/api/product?folder=' +
-                    encodeURIComponent(folder)
+                    encodeURIComponent(
+                        folder
+                    )
+
                 );
 
 
@@ -2632,14 +5325,43 @@
                 '';
 
 
-            $('#eMaterials').value =
-                d.produto.materials ||
-                '';
-
-
             $('#eCustomization').value =
                 d.produto.customization ||
                 '';
+
+
+            const materials =
+
+                String(
+                    d.produto.materials ||
+                    ''
+                )
+                    .split('•')
+                    .map(
+                        x =>
+                            x.trim()
+                    )
+                    .filter(
+                        Boolean
+                    );
+
+
+            renderMaterialOptions(
+
+                $('#eMaterialsSelect'),
+
+                materials
+
+            );
+
+
+            updateMaterialPreview(
+
+                $('#eMaterialsSelect'),
+
+                $('#editMaterialPreview')
+
+            );
 
 
             renderColors(
@@ -2675,8 +5397,15 @@
                 x.supports ?? '';
 
 
-            $('#dMaterial').value =
-                x.material ?? '';
+            renderMaterialOptions(
+
+                $('#dMaterial'),
+
+                x.material
+                    ? [x.material]
+                    : []
+
+            );
 
 
             $('#dLayer').value =
@@ -2707,7 +5436,9 @@
                 x.internal_notes ?? '';
 
 
-            go('editar');
+            go(
+                'editar'
+            );
 
         } catch (e) {
 
@@ -2724,9 +5455,9 @@
         editProduct;
 
 
-    /* =========================
+    /* =========================================================
        CORES
-    ========================== */
+    ========================================================= */
 
     function renderColors(
         colors
@@ -2737,18 +5468,25 @@
 
 
         colors.forEach(
+
             c => {
 
                 addColorRow(
+
                     c.name || '',
+
                     decimalToHex(
+
                         c.swatch ??
                         c.hex ??
                         0xffffff
+
                     )
+
                 );
 
             }
+
         );
 
 
@@ -2765,8 +5503,11 @@
 
 
     function addColorRow(
+
         name = '',
+
         hex = '#ffffff'
+
     ) {
 
         const row =
@@ -2780,10 +5521,12 @@
 
 
         row.innerHTML = `
+
             <input
                 type="color"
                 value="${hex}"
             >
+
 
             <input
                 value="${esc(name)}"
@@ -2797,6 +5540,7 @@
                 "
             >
 
+
             <button
                 type="button"
                 class="btn danger"
@@ -2806,36 +5550,49 @@
             >
                 ×
             </button>
+
         `;
 
 
         row
-            .querySelector('button')
-            .onclick = () =>
-                row.remove();
+            .querySelector(
+                'button'
+            )
+            .onclick =
+                () =>
+                    row.remove();
 
 
         $('#colors')
-            .appendChild(row);
+            .appendChild(
+                row
+            );
 
     }
 
 
-    function decimalToHex(n) {
+    function decimalToHex(
+        n
+    ) {
 
         let x =
             Number(n);
 
 
-        if (!Number.isFinite(x)) {
+        if (
+            !Number.isFinite(x)
+        ) {
 
-            x = 16777215;
+            x =
+                16777215;
 
         }
 
 
         return (
+
             '#' +
+
             Math.max(
                 0,
                 Math.min(
@@ -2848,6 +5605,7 @@
                     6,
                     '0'
                 )
+
         );
 
     }
@@ -2858,12 +5616,15 @@
     ) {
 
         return parseInt(
+
             String(hex)
                 .replace(
                     '#',
                     ''
                 ),
+
             16
+
         );
 
     }
@@ -2874,86 +5635,114 @@
             addColorRow();
 
 
-    /* =========================
+    /* =========================================================
        SALVAR PRODUTO
-    ========================== */
+    ========================================================= */
 
     $('#editForm')
         .addEventListener(
+
             'submit',
+
             async e => {
 
                 e.preventDefault();
 
 
-                if (!state.current) {
+                if (
+                    !state.current
+                ) {
 
                     return;
 
                 }
 
 
+                const selectedMaterials =
+                    getSelectedMaterials(
+                        $('#eMaterialsSelect')
+                    );
+
+
                 const p = {
+
                     ...state.current.produto,
+
 
                     name:
                         $('#eName')
                             .value
                             .trim(),
 
+
                     category:
                         $('#eCategory')
                             .value
                             .trim(),
 
+
                     description:
                         $('#eDescription')
                             .value,
 
+
                     materials:
-                        $('#eMaterials')
-                            .value,
+                        publicMaterials(
+                            selectedMaterials
+                        ),
+
 
                     customization:
                         $('#eCustomization')
                             .value,
 
+
                     colors:
+
                         [
                             ...$('#colors')
                                 .querySelectorAll(
                                     '.color-row'
                                 )
-                        ].map(
-                            r => {
+                        ]
+                            .map(
 
-                                const h =
-                                    r.querySelector(
-                                        'input[type=color]'
-                                    ).value;
+                                r => {
+
+                                    const h =
+                                        r
+                                            .querySelector(
+                                                'input[type=color]'
+                                            )
+                                            .value;
 
 
-                                return {
+                                    return {
 
-                                    name:
-                                        r.querySelectorAll(
-                                            'input'
-                                        )[1].value,
+                                        name:
+                                            r
+                                                .querySelectorAll(
+                                                    'input'
+                                                )[1]
+                                                .value,
 
-                                    hex:
-                                        hexToDecimal(
-                                            h
-                                        ),
 
-                                    swatch:
-                                        hexToDecimal(
-                                            h
-                                        )
+                                        hex:
+                                            hexToDecimal(
+                                                h
+                                            ),
 
-                                };
 
-                            }
-                        )
+                                        swatch:
+                                            hexToDecimal(
+                                                h
+                                            )
+
+                                    };
+
+                                }
+
+                            )
 
                 };
 
@@ -2962,54 +5751,64 @@
 
                     ...state.current.dados,
 
+
                     weight_g:
                         num(
                             $('#dWeight')
                         ),
+
 
                     filament_length_m:
                         num(
                             $('#dLength')
                         ),
 
+
                     filament_weight_g:
                         num(
                             $('#dFilament')
                         ),
+
 
                     print_time_h:
                         num(
                             $('#dTime')
                         ),
 
+
                     infill_percent:
                         num(
                             $('#dInfill')
                         ),
 
+
                     supports:
                         $('#dSupports')
                             .value,
 
+
                     material:
                         $('#dMaterial')
                             .value,
+
 
                     layer_height_mm:
                         num(
                             $('#dLayer')
                         ),
 
+
                     nozzle_mm:
                         num(
                             $('#dNozzle')
                         ),
 
+
                     quantity:
                         num(
-                            $('#dQuantity'
-                            )
+                            $('#dQuantity')
                         ) || 1,
+
 
                     dimensions_mm: {
 
@@ -3030,9 +5829,11 @@
 
                     },
 
+
                     internal_notes:
                         $('#dNotes')
                             .value,
+
 
                     updated_at:
                         new Date()
@@ -3044,19 +5845,30 @@
                 try {
 
                     await api(
+
                         '/api/product',
+
                         {
-                            method: 'PUT',
+
+                            method:
+                                'PUT',
+
 
                             body: {
+
                                 folder:
                                     state.current.folder,
 
-                                produto: p,
+                                produto:
+                                    p,
 
-                                dados: d
+                                dados:
+                                    d
+
                             }
+
                         }
+
                     );
 
 
@@ -3081,10 +5893,36 @@
                 }
 
             }
+
         );
 
 
-    function num(el) {
+    $('#editCalculate')
+        .onclick =
+            () => {
+
+                if (
+                    state.current?.folder
+                ) {
+
+                    calcProduct(
+                        state.current.folder
+                    );
+
+                } else {
+
+                    go(
+                        'calculadora'
+                    );
+
+                }
+
+            };
+
+
+    function num(
+        el
+    ) {
 
         const v =
             parseFloat(
@@ -3099,13 +5937,15 @@
     }
 
 
-    /* =========================
+    /* =========================================================
        NOVO PRODUTO
-    ========================== */
+    ========================================================= */
 
     $('#newForm')
         .addEventListener(
+
             'submit',
+
             async e => {
 
                 e.preventDefault();
@@ -3135,6 +5975,17 @@
                         .trim();
 
 
+                const materials =
+                    getSelectedMaterials(
+                        $('#newMaterialsSelect')
+                    );
+
+
+                const now =
+                    new Date()
+                        .toISOString();
+
+
                 const produto = {
 
                     name,
@@ -3149,19 +6000,29 @@
                             .value,
 
                     materials:
-                        $('#newMaterials')
-                            .value,
+                        publicMaterials(
+                            materials
+                        ),
 
                     customization:
                         $('#newCustomization')
                             .value,
 
                     colors: [
+
                         {
-                            name: 'Branco',
-                            hex: 16777215,
-                            swatch: 16777215
+
+                            name:
+                                'Branco',
+
+                            hex:
+                                16777215,
+
+                            swatch:
+                                16777215
+
                         }
+
                     ]
 
                 };
@@ -3170,81 +6031,132 @@
                 try {
 
                     await api(
+
                         '/api/product',
+
                         {
-                            method: 'POST',
+
+                            method:
+                                'POST',
+
 
                             body: {
 
-                                folder: name,
+                                folder:
+                                    name,
+
 
                                 produto,
 
+
                                 dados: {
 
-                                    version: 1,
+                                    version:
+                                        1,
 
-                                    weight_g: '',
 
-                                    filament_length_m: '',
+                                    weight_g:
+                                        '',
 
-                                    filament_weight_g: '',
 
-                                    print_time_h: '',
+                                    filament_length_m:
+                                        '',
 
-                                    infill_percent: '',
 
-                                    supports: '',
+                                    filament_weight_g:
+                                        '',
+
+
+                                    print_time_h:
+                                        '',
+
+
+                                    infill_percent:
+                                        '',
+
+
+                                    supports:
+                                        '',
+
 
                                     dimensions_mm: {
-                                        x: '',
-                                        y: '',
-                                        z: ''
+
+                                        x:
+                                            '',
+
+                                        y:
+                                            '',
+
+                                        z:
+                                            ''
+
                                     },
 
-                                    material: '',
 
-                                    layer_height_mm: '',
+                                    material:
+                                        materials[0] ||
+                                        '',
 
-                                    nozzle_mm: '',
 
-                                    quantity: 1,
+                                    layer_height_mm:
+                                        '',
+
+
+                                    nozzle_mm:
+                                        '',
+
+
+                                    quantity:
+                                        1,
+
 
                                     costs: {
 
-                                        filament: 0,
+                                        filament:
+                                            0,
 
-                                        machine: 0,
+                                        machine:
+                                            0,
 
-                                        finishing: 0,
+                                        finishing:
+                                            0,
 
-                                        painting: 0,
+                                        painting:
+                                            0,
 
-                                        packaging: 0,
+                                        packaging:
+                                            0,
 
-                                        commission: 0,
+                                        commission:
+                                            0,
 
-                                        other: 0
+                                        other:
+                                            0
 
                                     },
 
-                                    internal_notes: '',
+
+                                    internal_notes:
+                                        '',
+
 
                                     created_at:
-                                        new Date()
-                                            .toISOString(),
+                                        now,
+
 
                                     updated_at:
-                                        new Date()
-                                            .toISOString()
+                                        now
 
                                 },
 
-                                stlBase64: b64
+
+                                stlBase64:
+                                    b64
 
                             }
 
                         }
+
                     );
 
 
@@ -3272,6 +6184,7 @@
                 }
 
             }
+
         );
 
 
@@ -3280,23 +6193,29 @@
     ) {
 
         return new Promise(
+
             (res, rej) => {
 
                 const r =
                     new FileReader();
 
 
-                r.onload = () =>
-                    res(
-                        String(
-                            r.result
-                        ).split(
-                            ','
-                        )[1]
-                    );
+                r.onload =
+                    () =>
+                        res(
+
+                            String(
+                                r.result
+                            )
+                                .split(
+                                    ','
+                                )[1]
+
+                        );
 
 
-                r.onerror = rej;
+                r.onerror =
+                    rej;
 
 
                 r.readAsDataURL(
@@ -3304,14 +6223,11 @@
                 );
 
             }
+
         );
 
     }
 
-
-    /* =========================
-       PESQUISA / ATUALIZAÇÃO
-    ========================== */
 
     $('#search')
         .addEventListener(
@@ -3325,9 +6241,177 @@
             loadProducts;
 
 
-    /* =========================
-       CALCULADORA
-    ========================== */
+    /* =========================================================
+       CALCULADORA — MODOS
+    ========================================================= */
+
+    function setCalcMode(
+        mode
+    ) {
+
+        state.calcMode =
+            mode;
+
+
+        $('#calcCostMode')
+            .classList
+            .toggle(
+                'primary',
+                mode === 'cost'
+            );
+
+
+        $('#calcFinalMode')
+            .classList
+            .toggle(
+                'primary',
+                mode === 'final'
+            );
+
+
+        $('#calcResellerMode')
+            .classList
+            .toggle(
+                'primary',
+                mode === 'reseller'
+            );
+
+
+        $('#resellerMarginField')
+            .style
+            .display =
+                mode === 'reseller'
+                    ? 'flex'
+                    : 'none';
+
+
+        $('#targetPriceField')
+            .style
+            .display =
+                mode === 'reseller'
+                    ? 'flex'
+                    : 'none';
+
+
+        $('#rResellerLine')
+            .style
+            .display =
+                mode === 'reseller'
+                    ? 'flex'
+                    : 'none';
+
+
+        $('#rCustomerLine')
+            .style
+            .display =
+                mode === 'cost'
+                    ? 'none'
+                    : 'flex';
+
+
+        $('#rProfitLine')
+            .style
+            .display =
+                mode === 'cost'
+                    ? 'none'
+                    : 'flex';
+
+    }
+
+
+    $('#calcCostMode')
+        .onclick =
+            () =>
+                setCalcMode(
+                    'cost'
+                );
+
+
+    $('#calcFinalMode')
+        .onclick =
+            () =>
+                setCalcMode(
+                    'final'
+                );
+
+
+    $('#calcResellerMode')
+        .onclick =
+            () =>
+                setCalcMode(
+                    'reseller'
+                );
+
+
+    $('#calcProductMode')
+        .onclick = () => {
+
+            state.calcInputMode =
+                'product';
+
+
+            $('#calcProductBox')
+                .style
+                .display =
+                    'flex';
+
+
+            $('#calcManualBox')
+                .style
+                .display =
+                    'none';
+
+
+            $('#calcProductMode')
+                .classList
+                .add(
+                    'primary'
+                );
+
+
+            $('#calcManualMode')
+                .classList
+                .remove(
+                    'primary'
+                );
+
+        };
+
+
+    $('#calcManualMode')
+        .onclick = () => {
+
+            state.calcInputMode =
+                'manual';
+
+
+            $('#calcProductBox')
+                .style
+                .display =
+                    'none';
+
+
+            $('#calcManualBox')
+                .style
+                .display =
+                    'block';
+
+
+            $('#calcManualMode')
+                .classList
+                .add(
+                    'primary'
+                );
+
+
+            $('#calcProductMode')
+                .classList
+                .remove(
+                    'primary'
+                );
+
+        };
+
 
     function fillCalcProducts() {
 
@@ -3335,26 +6419,46 @@
             $('#calcProduct');
 
 
+        if (!s) {
+
+            return;
+
+        }
+
+
         const old =
             s.value;
 
 
         s.innerHTML =
+
             '<option value="">' +
+
             'Selecione um produto' +
+
             '</option>' +
 
+
             state.products
+
                 .map(
+
                     p =>
+
                         `
+
                         <option
                             value="${esc(p.folder)}"
                         >
+
                             ${esc(p.name)}
+
                         </option>
+
                         `
+
                 )
+
                 .join('');
 
 
@@ -3373,6 +6477,15 @@
     }
 
 
+    function fillCalcMaterials() {
+
+        renderMaterialOptions(
+            $('#cMaterialSelect')
+        );
+
+    }
+
+
     async function calcProduct(
         folder
     ) {
@@ -3380,6 +6493,10 @@
         go(
             'calculadora'
         );
+
+
+        $('#calcProductMode')
+            .click();
 
 
         fillCalcProducts();
@@ -3398,80 +6515,32 @@
         calcProduct;
 
 
-    $('#calcProductMode')
-        .onclick = () => {
-
-            state.calcMode =
-                'product';
-
-
-            $('#calcProductBox')
-                .style
-                .display = 'flex';
-
-
-            $('#calcManualBox')
-                .style
-                .display = 'none';
-
-
-            $('#calcProductMode')
-                .classList
-                .add('primary');
-
-
-            $('#calcManualMode')
-                .classList
-                .remove('primary');
-
-        };
-
-
-    $('#calcManualMode')
-        .onclick = () => {
-
-            state.calcMode =
-                'manual';
-
-
-            $('#calcProductBox')
-                .style
-                .display = 'none';
-
-
-            $('#calcManualBox')
-                .style
-                .display = 'block';
-
-
-            $('#calcManualMode')
-                .classList
-                .add('primary');
-
-
-            $('#calcProductMode')
-                .classList
-                .remove('primary');
-
-        };
-
-
     $('#calculate')
         .onclick =
             calculate;
 
 
+    /* =========================================================
+       CÁLCULO
+    ========================================================= */
+
     async function calculate() {
 
-        let weight = 0;
+        let weight =
+            0;
 
-        let time = 0;
+        let time =
+            0;
 
-        let material = 89;
+        let material =
+            89;
+
+        let materialName =
+            'PLA';
 
 
         if (
-            state.calcMode ===
+            state.calcInputMode ===
             'product'
         ) {
 
@@ -3491,36 +6560,48 @@
 
                 const d =
                     await api(
+
                         '/api/product?folder=' +
                         encodeURIComponent(
                             folder
                         )
+
                     );
 
 
                 weight =
+
                     parseFloat(
                         d.dados
                             .filament_weight_g
                     ) ||
+
                     parseFloat(
                         d.dados
                             .weight_g
                     ) ||
+
                     0;
 
 
                 time =
+
                     parseFloat(
                         d.dados
                             .print_time_h
                     ) ||
+
                     0;
+
+
+                materialName =
+                    d.dados.material ||
+                    'PLA';
 
 
                 material =
                     materialPrice(
-                        d.dados.material
+                        materialName
                     );
 
             } catch (e) {
@@ -3537,26 +6618,65 @@
 
             weight =
                 parseFloat(
-                    $('#cWeight').value
+                    $('#cWeight')
+                        .value
                 ) || 0;
 
 
             time =
                 parseFloat(
-                    $('#cTime').value
+                    $('#cTime')
+                        .value
                 ) || 0;
 
 
+            materialName =
+                $('#cMaterialSelect')
+                    .value ||
+                'PLA';
+
+
             material =
-                parseFloat(
-                    $('#cMaterial').value
-                ) || 89;
+                materialPrice(
+                    materialName
+                );
 
         }
 
 
-        const filament =
+        const quantity =
+            Math.max(
+
+                1,
+
+                parseInt(
+                    $('#cQuantity')
+                        .value
+                ) || 1
+
+            );
+
+
+        const waste =
+            Math.max(
+
+                0,
+
+                parseFloat(
+                    $('#setWaste')
+                        .value
+                ) || 0
+
+            ) / 100;
+
+
+        const effectiveWeight =
             weight *
+            (1 + waste);
+
+
+        const filament =
+            effectiveWeight *
             material /
             1000;
 
@@ -3571,26 +6691,377 @@
             );
 
 
-        const total =
+        const finishing =
+            parseFloat(
+                $('#cFinishing')
+                    .value
+            ) || 0;
+
+
+        const painting =
+            parseFloat(
+                $('#cPainting')
+                    .value
+            ) || 0;
+
+
+        const packaging =
+            parseFloat(
+                $('#cPackaging')
+                    .value
+            ) || 0;
+
+
+        const other =
+            parseFloat(
+                $('#cOther')
+                    .value
+            ) || 0;
+
+
+        const baseCosts =
             filament +
-            machine;
+            machine +
+            finishing +
+            painting +
+            packaging +
+            other;
 
 
-        const margin =
+        const commissionPercent =
             (
                 parseFloat(
-                    $('#setMargin')
+                    $('#cCommission')
                         .value
                 ) || 0
             ) / 100;
 
 
-        const price =
-            total *
+        /*
+         * Comissão é tratada como percentual do preço de venda.
+         * Portanto o preço precisa ser calculado considerando
+         * a comissão na equação da margem.
+         */
+
+        const margin =
             (
-                1 +
-                margin
+                parseFloat(
+                    $('#cMargin')
+                        .value
+                ) || 0
+            ) / 100;
+
+
+        const minimumMargin =
+            (
+                parseFloat(
+                    $('#setMinimumMargin')
+                        .value
+                ) || 0
+            ) / 100;
+
+
+        let unitCost =
+            baseCosts;
+
+
+        let unitPrice =
+            unitCost;
+
+
+        let resellerPrice =
+            0;
+
+
+        let customerPrice =
+            0;
+
+
+        if (
+            state.calcMode ===
+            'cost'
+        ) {
+
+            unitPrice =
+                unitCost;
+
+        }
+
+
+        if (
+            state.calcMode ===
+            'final'
+        ) {
+
+            const effectiveMargin =
+                Math.max(
+                    margin,
+                    minimumMargin
+                );
+
+
+            unitPrice =
+
+                commissionPercent < 1
+
+                    ?
+
+                    unitCost /
+                    (
+                        1 -
+                        effectiveMargin
+                    ) /
+                    (
+                        1 -
+                        commissionPercent
+                    )
+
+                    :
+
+                    unitCost;
+
+        }
+
+
+        if (
+            state.calcMode ===
+            'reseller'
+        ) {
+
+            const effective4MakerMargin =
+                Math.max(
+                    margin,
+                    minimumMargin
+                );
+
+
+            resellerPrice =
+
+                unitCost /
+                (
+                    1 -
+                    effective4MakerMargin
+                );
+
+
+            const resellerMargin =
+
+                (
+                    parseFloat(
+                        $('#cResellerMargin')
+                            .value
+                    ) || 0
+                ) / 100;
+
+
+            const targetPrice =
+
+                parseFloat(
+                    $('#cTargetPrice')
+                        .value
+                ) || 0;
+
+
+            if (
+                targetPrice > 0
+            ) {
+
+                customerPrice =
+                    Math.max(
+                        targetPrice,
+                        resellerPrice
+                    );
+
+            } else {
+
+                customerPrice =
+
+                    resellerPrice /
+                    (
+                        1 -
+                        resellerMargin
+                    );
+
+            }
+
+
+            unitPrice =
+                resellerPrice;
+
+        }
+
+
+        /*
+         * Desconto por volume.
+         *
+         * O desconto é aplicado somente ao preço comercial,
+         * nunca ao custo.
+         */
+
+        const volumeDiscount =
+            getVolumeDiscount(
+                quantity
             );
+
+
+        if (
+            volumeDiscount > 0
+        ) {
+
+            if (
+                state.calcMode ===
+                'reseller'
+            ) {
+
+                customerPrice *=
+                    1 -
+                    volumeDiscount;
+
+
+                /*
+                 * Nunca deixa o preço final cair abaixo
+                 * do preço necessário para preservar
+                 * a margem mínima da 4Maker.
+                 */
+
+                const minimum4MakerPrice =
+
+                    unitCost /
+                    (
+                        1 -
+                        minimumMargin
+                    );
+
+
+                customerPrice =
+                    Math.max(
+                        customerPrice,
+                        minimum4MakerPrice
+                    );
+
+            } else {
+
+                unitPrice *=
+                    1 -
+                    volumeDiscount;
+
+
+                const minimum4MakerPrice =
+
+                    unitCost /
+                    (
+                        1 -
+                        minimumMargin
+                    );
+
+
+                unitPrice =
+                    Math.max(
+                        unitPrice,
+                        minimum4MakerPrice
+                    );
+
+            }
+
+        }
+
+
+        const rounding =
+            parseFloat(
+                $('#cRounding')
+                    .value
+            ) || 0;
+
+
+        if (
+            rounding > 0
+        ) {
+
+            if (
+                state.calcMode ===
+                'reseller'
+            ) {
+
+                resellerPrice =
+                    roundUp(
+                        resellerPrice,
+                        rounding
+                    );
+
+
+                customerPrice =
+                    roundUp(
+                        customerPrice,
+                        rounding
+                    );
+
+            } else {
+
+                unitPrice =
+                    roundUp(
+                        unitPrice,
+                        rounding
+                    );
+
+            }
+
+        }
+
+
+        const commission =
+            (
+                state.calcMode ===
+                'cost'
+            )
+
+                ?
+
+                0
+
+                :
+
+                (
+                    state.calcMode ===
+                    'reseller'
+
+                        ?
+
+                        resellerPrice
+
+                        :
+
+                        unitPrice
+                ) *
+                commissionPercent;
+
+
+        const totalCost =
+            baseCosts +
+            commission;
+
+
+        const finalUnitPrice =
+
+            state.calcMode ===
+            'reseller'
+
+                ?
+
+                customerPrice
+
+                :
+
+                unitPrice;
+
+
+        const finalTotal =
+            finalUnitPrice *
+            quantity;
+
+
+        const profit =
+            finalUnitPrice -
+            totalCost;
 
 
         $('#rFilament')
@@ -3607,18 +7078,130 @@
                 );
 
 
+        $('#rFinishing')
+            .textContent =
+                money(
+                    finishing
+                );
+
+
+        $('#rPainting')
+            .textContent =
+                money(
+                    painting
+                );
+
+
+        $('#rPackaging')
+            .textContent =
+                money(
+                    packaging
+                );
+
+
+        $('#rCommission')
+            .textContent =
+                money(
+                    commission
+                );
+
+
+        $('#rOther')
+            .textContent =
+                money(
+                    other
+                );
+
+
         $('#rTotal')
             .textContent =
                 money(
-                    total
+                    totalCost
+                );
+
+
+        $('#rReseller')
+            .textContent =
+                money(
+                    resellerPrice
+                );
+
+
+        $('#rCustomer')
+            .textContent =
+                money(
+                    finalUnitPrice
+                );
+
+
+        $('#rProfit')
+            .textContent =
+                money(
+                    profit
                 );
 
 
         $('#price')
             .textContent =
                 money(
-                    price
+                    finalUnitPrice
                 );
+
+
+        const discountText =
+            volumeDiscount > 0
+
+                ?
+
+                `Desconto por volume aplicado: ${volumeDiscount}%`
+
+                :
+
+                'Sem desconto por volume para esta quantidade.';
+
+
+        $('#volumeInfo')
+            .textContent =
+                discountText;
+
+
+        state.lastCalculation = {
+
+            product:
+                $('#calcProduct')
+                    ?.value ||
+                '',
+
+            material:
+                materialName,
+
+            weight,
+            effectiveWeight,
+
+            time,
+
+            quantity,
+
+            cost:
+                totalCost,
+
+            resellerPrice,
+
+            finalPrice:
+                finalUnitPrice,
+
+            total:
+                finalTotal,
+
+            volumeDiscount,
+
+            profit,
+
+            calculatedAt:
+                new Date()
+                    .toISOString()
+
+        };
 
     }
 
@@ -3627,144 +7210,2139 @@
         mat
     ) {
 
-        const m =
+        const target =
             String(
-                mat || 'PLA'
-            ).toUpperCase();
+                mat ||
+                'PLA'
+            )
+                .toUpperCase();
 
 
-        return parseFloat(
+        const found =
+            state.settings.materials
+                .find(
 
-            $(
-                '#set' +
-                (
-                    m.includes('PETG')
-                        ? 'PETG'
-                        : m.includes('ABS')
-                            ? 'ABS'
-                            : 'PLA'
-                )
-            ).value
+                    m =>
+                        String(
+                            m.name
+                        )
+                            .toUpperCase() ===
+                        target
 
-        ) || 89;
+                );
+
+
+        return found
+            ? parseFloat(found.price) || 0
+            : 0;
 
     }
 
 
-    function money(v) {
+    function getVolumeDiscount(
+        quantity
+    ) {
 
-        return v.toLocaleString(
+        const q =
+            Number(
+                quantity
+            ) || 1;
+
+
+        const tier =
+            state.settings.volume
+                .find(
+
+                    v =>
+
+                        q >=
+                        Number(v.min || 1) &&
+
+                        (
+                            v.max === null ||
+                            v.max === '' ||
+                            q <=
+                            Number(v.max)
+                        )
+
+                );
+
+
+        return tier
+            ? Number(
+                tier.discount
+            ) || 0
+            : 0;
+
+    }
+
+
+    function roundUp(
+        value,
+        increment
+    ) {
+
+        return Math.ceil(
+            value /
+            increment
+        ) *
+        increment;
+
+    }
+
+
+    function money(
+        v
+    ) {
+
+        return Number(
+            v || 0
+        ).toLocaleString(
+
             'pt-BR',
+
             {
-                style: 'currency',
-                currency: 'BRL'
+
+                style:
+                    'currency',
+
+                currency:
+                    'BRL'
+
             }
+
         );
 
     }
 
 
-    /* =========================
-       CONFIGURAÇÕES
-    ========================== */
+    /* =========================================================
+       CLIENTES
+    ========================================================= */
 
-    $('#saveSettings')
-        .onclick = () => {
-
-            localStorage.setItem(
-                '4maker_settings',
-
-                JSON.stringify({
-
-                    machine:
-                        $('#setMachine')
-                            .value,
-
-                    margin:
-                        $('#setMargin')
-                            .value,
-
-                    PLA:
-                        $('#setPLA')
-                            .value,
-
-                    PETG:
-                        $('#setPETG')
-                            .value,
-
-                    ABS:
-                        $('#setABS')
-                            .value,
-
-                    waste:
-                        $('#setWaste')
-                            .value
-
-                })
-            );
-
-
-            alert(
-                'Configurações salvas neste dispositivo.'
-            );
-
-        };
-
-
-    function loadSettings() {
+    async function loadClients() {
 
         try {
 
-            const s =
-                JSON.parse(
-                    localStorage.getItem(
-                        '4maker_settings'
-                    )
+            const d =
+                await api(
+                    '/api/clients'
                 );
 
 
-            if (!s) {
-
-                return;
-
-            }
+            state.clients =
+                d.clients || [];
 
 
-            $('#setMachine').value =
-                s.machine ?? 2;
+            renderClients();
 
 
-            $('#setMargin').value =
-                s.margin ?? 100;
+            fillOrderSelectors();
 
 
-            $('#setPLA').value =
-                s.PLA ?? 89;
-
-
-            $('#setPETG').value =
-                s.PETG ?? 89;
-
-
-            $('#setABS').value =
-                s.ABS ?? 89;
-
-
-            $('#setWaste').value =
-                s.waste ?? 0;
+            updateDashboard();
 
         } catch {
 
-            /* Ignora configuração inválida */
+            /*
+             * O endpoint será disponibilizado
+             * na atualização do Worker.
+             */
+
+            state.clients =
+                state.clients || [];
+
+            renderClients();
 
         }
 
     }
 
 
-    /* =========================
+    function renderClients() {
+
+        const q =
+            (
+                $('#clientSearch')
+                    ?.value ||
+                ''
+            )
+                .toLowerCase();
+
+
+        const list =
+            state.clients
+                .filter(
+
+                    c =>
+
+                        (
+                            c.name +
+                            ' ' +
+                            c.document +
+                            ' ' +
+                            c.phone
+                        )
+                            .toLowerCase()
+                            .includes(q)
+
+                );
+
+
+        if (!list.length) {
+
+            $('#clients').innerHTML =
+
+                '<div class="empty">' +
+
+                'Nenhum cliente cadastrado.' +
+
+                '</div>';
+
+            return;
+
+        }
+
+
+        $('#clients').innerHTML =
+
+            list.map(
+
+                c => `
+
+                    <article class="client-card">
+
+                        <div class="client-info">
+
+                            <h3>
+                                ${esc(c.name)}
+                            </h3>
+
+                            <p>
+                                ${esc(c.document || '')}
+                                ${c.phone ? ' • ' + esc(c.phone) : ''}
+                            </p>
+
+                            <p>
+                                ${esc(c.type || 'Cliente')}
+                            </p>
+
+                        </div>
+
+                    </article>
+
+                `
+
+            ).join('');
+
+    }
+
+
+    $('#newClientButton')
+        .onclick =
+            () => {
+
+                $('#clientFormCard')
+                    .style
+                    .display =
+                        'block';
+
+            };
+
+
+    $('#cancelClient')
+        .onclick =
+            () => {
+
+                $('#clientFormCard')
+                    .style
+                    .display =
+                        'none';
+
+            };
+
+
+    $('#clientSearch')
+        .addEventListener(
+            'input',
+            renderClients
+        );
+
+
+    $('#refreshClients')
+        .onclick =
+            loadClients;
+
+
+    $('#clientForm')
+        .addEventListener(
+
+            'submit',
+
+            async e => {
+
+                e.preventDefault();
+
+
+                const client = {
+
+                    name:
+                        $('#clientName')
+                            .value
+                            .trim(),
+
+                    document:
+                        $('#clientDocument')
+                            .value
+                            .trim(),
+
+                    phone:
+                        $('#clientPhone')
+                            .value
+                            .trim(),
+
+                    email:
+                        $('#clientEmail')
+                            .value
+                            .trim(),
+
+                    type:
+                        $('#clientType')
+                            .value,
+
+                    margin:
+                        num(
+                            $('#clientMargin')
+                        ),
+
+                    notes:
+                        $('#clientNotes')
+                            .value
+
+                };
+
+
+                try {
+
+                    await api(
+
+                        '/api/client',
+
+                        {
+
+                            method:
+                                'POST',
+
+                            body:
+                                client
+
+                        }
+
+                    );
+
+
+                    alert(
+                        'Cliente salvo com sucesso.'
+                    );
+
+
+                    e.target.reset();
+
+
+                    $('#clientFormCard')
+                        .style
+                        .display =
+                            'none';
+
+
+                    await loadClients();
+
+                } catch (err) {
+
+                    alert(
+                        err.message
+                    );
+
+                }
+
+            }
+
+        );
+
+
+    /* =========================================================
+       PEDIDOS
+    ========================================================= */
+
+    function fillOrderSelectors() {
+
+        const clientSelect =
+            $('#orderClient');
+
+
+        if (clientSelect) {
+
+            const old =
+                clientSelect.value;
+
+
+            clientSelect.innerHTML =
+
+                '<option value="">' +
+
+                'Selecione um cliente' +
+
+                '</option>' +
+
+
+                state.clients
+                    .map(
+
+                        c =>
+
+                            `
+
+                            <option
+                                value="${esc(c.id || c.document || c.name)}"
+                            >
+                                ${esc(c.name)}
+                            </option>
+
+                            `
+
+                    )
+                    .join('');
+
+
+            if (
+                state.clients.some(
+
+                    c =>
+                        String(
+                            c.id ||
+                            c.document ||
+                            c.name
+                        ) ===
+                        old
+
+                )
+            ) {
+
+                clientSelect.value =
+                    old;
+
+            }
+
+        }
+
+    }
+
+
+    function addOrderProductCard(
+        productFolder = ''
+    ) {
+
+        const wrapper =
+            document.createElement(
+                'div'
+            );
+
+
+        wrapper.className =
+            'order-product';
+
+
+        wrapper.innerHTML = `
+
+            <div class="order-product-head">
+
+                <h3>
+                    Produto
+                </h3>
+
+                <button
+                    type="button"
+                    class="btn danger small remove-order-product"
+                >
+                    Remover
+                </button>
+
+            </div>
+
+
+            <div class="field">
+
+                <label>
+                    Produto
+                </label>
+
+                <select class="order-product-select">
+
+                    <option value="">
+                        Selecione um produto
+                    </option>
+
+                    ${
+                        state.products
+                            .map(
+
+                                p =>
+
+                                    `
+
+                                    <option
+                                        value="${esc(p.folder)}"
+                                        ${
+                                            p.folder ===
+                                            productFolder
+                                                ? 'selected'
+                                                : ''
+                                        }
+                                    >
+                                        ${esc(p.name)}
+                                    </option>
+
+                                    `
+
+                            )
+                            .join('')
+                    }
+
+                </select>
+
+            </div>
+
+
+            <div class="variation-list"></div>
+
+
+            <button
+                type="button"
+                class="btn small add-variation"
+                style="margin-top:10px"
+            >
+                ＋ Material / cor / quantidade
+            </button>
+
+
+            <div
+                class="highlight product-card-total"
+                style="margin-top:12px"
+            >
+                Total do produto: R$ 0,00
+            </div>
+
+        `;
+
+
+        wrapper
+            .querySelector(
+                '.remove-order-product'
+            )
+            .onclick =
+                () => {
+
+                    wrapper.remove();
+
+                    calculateOrder();
+
+                };
+
+
+        wrapper
+            .querySelector(
+                '.add-variation'
+            )
+            .onclick =
+                () =>
+                    addVariationRow(
+                        wrapper
+                    );
+
+
+        wrapper
+            .querySelector(
+                '.order-product-select'
+            )
+            .addEventListener(
+                'change',
+                () =>
+                    calculateOrder()
+            );
+
+
+        $('#orderProducts')
+            .appendChild(
+                wrapper
+            );
+
+
+        addVariationRow(
+            wrapper
+        );
+
+    }
+
+
+    function addVariationRow(
+        productCard
+    ) {
+
+        const list =
+            productCard
+                .querySelector(
+                    '.variation-list'
+                );
+
+
+        const row =
+            document.createElement(
+                'div'
+            );
+
+
+        row.className =
+            'variation-row';
+
+
+        const colors =
+            productCard
+                .dataset
+                .colors || '';
+
+
+        row.innerHTML = `
+
+            <select class="variation-material">
+
+                ${
+                    materialNames()
+                        .map(
+
+                            m =>
+
+                                `
+                                <option value="${esc(m)}">
+                                    ${esc(m)}
+                                </option>
+                                `
+
+                        )
+                        .join('')
+                }
+
+            </select>
+
+
+            <input
+                class="variation-color"
+                placeholder="Cor"
+            >
+
+
+            <input
+                class="variation-quantity"
+                type="number"
+                min="1"
+                step="1"
+                value="1"
+            >
+
+
+            <input
+                class="variation-price"
+                type="number"
+                step="0.01"
+                placeholder="Preço unit."
+            >
+
+
+            <button
+                type="button"
+                class="btn danger small remove-variation"
+            >
+                ×
+            </button>
+
+        `;
+
+
+        row
+            .querySelector(
+                '.remove-variation'
+            )
+            .onclick =
+                () => {
+
+                    row.remove();
+
+                    calculateOrder();
+
+                };
+
+
+        row
+            .querySelectorAll(
+                'input,select'
+            )
+            .forEach(
+
+                element =>
+
+                    element.addEventListener(
+                        'input',
+                        calculateOrder
+                    )
+
+            );
+
+
+        list.appendChild(
+            row
+        );
+
+    }
+
+
+    $('#addOrderProduct')
+        .onclick =
+            () =>
+                addOrderProductCard();
+
+
+    function calculateOrder() {
+
+        let subtotal =
+            0;
+
+
+        $$('.order-product')
+            .forEach(
+
+                card => {
+
+                    let productTotal =
+                        0;
+
+
+                    card
+                        .querySelectorAll(
+                            '.variation-row'
+                        )
+                        .forEach(
+
+                            row => {
+
+                                const quantity =
+                                    parseInt(
+                                        row
+                                            .querySelector(
+                                                '.variation-quantity'
+                                            )
+                                            .value
+                                    ) || 0;
+
+
+                                const price =
+                                    parseFloat(
+                                        row
+                                            .querySelector(
+                                                '.variation-price'
+                                            )
+                                            .value
+                                    ) || 0;
+
+
+                                productTotal +=
+                                    quantity *
+                                    price;
+
+                            }
+
+                        );
+
+
+                    const totalBox =
+                        card
+                            .querySelector(
+                                '.product-card-total'
+                            );
+
+
+                    if (totalBox) {
+
+                        totalBox.textContent =
+
+                            'Total do produto: ' +
+
+                            money(
+                                productTotal
+                            );
+
+                    }
+
+
+                    subtotal +=
+                        productTotal;
+
+                }
+
+            );
+
+
+        const quantity =
+            $$('.variation-quantity')
+                .reduce(
+
+                    (
+                        total,
+                        input
+                    ) =>
+
+                        total +
+                        (
+                            parseInt(
+                                input.value
+                            ) || 0
+                        ),
+
+                    0
+
+                ) || 1;
+
+
+        const discount =
+            getVolumeDiscount(
+                quantity
+            );
+
+
+        const discountValue =
+            subtotal *
+            discount /
+            100;
+
+
+        const total =
+            subtotal -
+            discountValue;
+
+
+        $('#orderSubtotal')
+            .textContent =
+                money(
+                    subtotal
+                );
+
+
+        $('#orderDiscount')
+            .textContent =
+                money(
+                    discountValue
+                );
+
+
+        $('#orderTotal')
+            .textContent =
+                money(
+                    total
+                );
+
+
+        return {
+
+            subtotal,
+
+            discount,
+
+            discountValue,
+
+            total,
+
+            quantity
+
+        };
+
+    }
+
+
+    $('#saveOrder')
+        .onclick =
+            async () => {
+
+                const result =
+                    calculateOrder();
+
+
+                const products =
+
+                    $$('.order-product')
+                        .map(
+
+                            card => {
+
+                                const product =
+                                    card
+                                        .querySelector(
+                                            '.order-product-select'
+                                        )
+                                        .value;
+
+
+                                const variations =
+
+                                    [
+                                        ...card
+                                            .querySelectorAll(
+                                                '.variation-row'
+                                            )
+                                    ]
+                                        .map(
+
+                                            row => ({
+
+                                                material:
+                                                    row
+                                                        .querySelector(
+                                                            '.variation-material'
+                                                        )
+                                                        .value,
+
+                                                color:
+                                                    row
+                                                        .querySelector(
+                                                            '.variation-color'
+                                                        )
+                                                        .value,
+
+                                                quantity:
+                                                    parseInt(
+                                                        row
+                                                            .querySelector(
+                                                                '.variation-quantity'
+                                                            )
+                                                            .value
+                                                    ) || 0,
+
+                                                unitPrice:
+                                                    parseFloat(
+                                                        row
+                                                            .querySelector(
+                                                                '.variation-price'
+                                                            )
+                                                            .value
+                                                    ) || 0
+
+                                            })
+
+                                        );
+
+
+                                return {
+
+                                    product,
+
+                                    variations
+
+                                };
+
+                            }
+
+                        );
+
+
+                const order = {
+
+                    client:
+                        $('#orderClient')
+                            .value,
+
+                    status:
+                        $('#orderStatus')
+                            .value,
+
+                    paymentMethod:
+                        $('#orderPayment')
+                            .value,
+
+                    dueDate:
+                        $('#orderDueDate')
+                            .value,
+
+                    products,
+
+                    totals: result
+
+                };
+
+
+                try {
+
+                    await api(
+
+                        '/api/order',
+
+                        {
+
+                            method:
+                                'POST',
+
+                            body:
+                                order
+
+                        }
+
+                    );
+
+
+                    alert(
+                        'Pedido salvo com sucesso.'
+                    );
+
+
+                    clearOrder();
+
+                    await loadOrders();
+
+                } catch (err) {
+
+                    alert(
+                        err.message
+                    );
+
+                }
+
+            };
+
+
+    function clearOrder() {
+
+        $('#orderClient')
+            .value =
+                '';
+
+
+        $('#orderStatus')
+            .value =
+                'Orçamento';
+
+
+        $('#orderPayment')
+            .value =
+                '';
+
+
+        $('#orderDueDate')
+            .value =
+                '';
+
+
+        $('#orderProducts')
+            .innerHTML =
+                '';
+
+
+        calculateOrder();
+
+    }
+
+
+    $('#clearOrder')
+        .onclick =
+            clearOrder;
+
+
+    /* =========================================================
+       LOAD ORDERS
+    ========================================================= */
+
+    async function loadOrders() {
+
+        try {
+
+            const d =
+                await api(
+                    '/api/orders'
+                );
+
+
+            state.orders =
+                d.orders || [];
+
+
+            renderOrders();
+
+
+            updateDashboard();
+
+        } catch {
+
+            renderOrders();
+
+        }
+
+    }
+
+
+    function renderOrders() {
+
+        if (
+            !state.orders.length
+        ) {
+
+            $('#orders').innerHTML =
+
+                '<div class="empty">' +
+
+                'Nenhum pedido cadastrado.' +
+
+                '</div>';
+
+            return;
+
+        }
+
+
+        $('#orders').innerHTML =
+
+            state.orders
+                .map(
+
+                    o => `
+
+                        <article class="product">
+
+                            <span class="category">
+                                ${esc(o.status || 'Orçamento')}
+                            </span>
+
+                            <h3>
+                                Pedido ${esc(o.number || o.id || '')}
+                            </h3>
+
+                            <p>
+                                Cliente:
+                                ${esc(o.clientName || o.client || '')}
+                            </p>
+
+                            <div class="line">
+
+                                <span>
+                                    Total
+                                </span>
+
+                                <b>
+                                    ${money(
+                                        o.total ||
+                                        o.totals?.total ||
+                                        0
+                                    )}
+                                </b>
+
+                            </div>
+
+                        </article>
+
+                    `
+
+                )
+                .join('');
+
+    }
+
+
+    /* =========================================================
+       FATURAMENTO
+    ========================================================= */
+
+    async function loadBilling() {
+
+        try {
+
+            const d =
+                await api(
+                    '/api/billing'
+                );
+
+
+            state.billing =
+                d.billing || [];
+
+
+            renderBilling();
+
+
+            updateDashboard();
+
+        } catch {
+
+            renderBilling();
+
+        }
+
+    }
+
+
+    function renderBilling() {
+
+        const q =
+            (
+                $('#billingSearch')
+                    ?.value ||
+                ''
+            )
+                .toLowerCase();
+
+
+        const list =
+            state.billing
+                .filter(
+
+                    item =>
+
+                        (
+                            item.orderNumber ||
+                            '' +
+                            ' ' +
+                            (
+                                item.clientName ||
+                                ''
+                            ) +
+                            ' ' +
+                            (
+                                item.status ||
+                                ''
+                            )
+                        )
+                            .toLowerCase()
+                            .includes(q)
+
+                );
+
+
+        let revenue =
+            0;
+
+        let received =
+            0;
+
+        let profit =
+            0;
+
+
+        list.forEach(
+
+            item => {
+
+                revenue +=
+                    Number(
+                        item.total ||
+                        0
+                    );
+
+
+                received +=
+                    Number(
+                        item.received ||
+                        0
+                    );
+
+
+                profit +=
+                    Number(
+                        item.profit ||
+                        0
+                    );
+
+            }
+
+        );
+
+
+        const receivable =
+            revenue -
+            received;
+
+
+        $('#fRevenue')
+            .textContent =
+                money(
+                    revenue
+                );
+
+
+        $('#fReceived')
+            .textContent =
+                money(
+                    received
+                );
+
+
+        $('#fReceivable')
+            .textContent =
+                money(
+                    receivable
+                );
+
+
+        $('#fOrders')
+            .textContent =
+                list.length;
+
+
+        $('#fAverage')
+            .textContent =
+                money(
+                    list.length
+                        ? revenue /
+                          list.length
+                        : 0
+                );
+
+
+        $('#fProfit')
+            .textContent =
+                money(
+                    profit
+                );
+
+
+        if (!list.length) {
+
+            $('#billing').innerHTML =
+
+                '<div class="empty">' +
+
+                'Nenhum registro financeiro encontrado.' +
+
+                '</div>';
+
+            return;
+
+        }
+
+
+        $('#billing').innerHTML =
+
+            list.map(
+
+                item => `
+
+                    <article class="product">
+
+                        <div
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                gap:15px;
+                                align-items:flex-start;
+                            "
+                        >
+
+                            <div>
+
+                                <span class="category">
+                                    ${esc(
+                                        item.status ||
+                                        'Pendente'
+                                    )}
+                                </span>
+
+                                <h3>
+                                    Pedido ${esc(
+                                        item.orderNumber ||
+                                        item.orderId ||
+                                        ''
+                                    )}
+                                </h3>
+
+                                <p>
+                                    ${esc(
+                                        item.clientName ||
+                                        ''
+                                    )}
+                                </p>
+
+                            </div>
+
+
+                            <span class="status ${
+                                item.paymentStatus ===
+                                'Pago'
+                                    ? 'paid'
+                                    : item.paymentStatus ===
+                                      'Cancelado'
+                                        ? 'cancelled'
+                                        : 'pending'
+                            }">
+
+                                ${esc(
+                                    item.paymentStatus ||
+                                    'Pendente'
+                                )}
+
+                            </span>
+
+                        </div>
+
+
+                        <div class="line">
+
+                            <span>
+                                Total
+                            </span>
+
+                            <b>
+                                ${money(
+                                    item.total ||
+                                    0
+                                )}
+                            </b>
+
+                        </div>
+
+
+                        <div class="line">
+
+                            <span>
+                                Recebido
+                            </span>
+
+                            <b>
+                                ${money(
+                                    item.received ||
+                                    0
+                                )}
+                            </b>
+
+                        </div>
+
+
+                        <div class="line">
+
+                            <span>
+                                A receber
+                            </span>
+
+                            <b>
+                                ${money(
+                                    (
+                                        item.total ||
+                                        0
+                                    ) -
+                                    (
+                                        item.received ||
+                                        0
+                                    )
+                                )}
+                            </b>
+
+                        </div>
+
+                    </article>
+
+                `
+
+            ).join('');
+
+    }
+
+
+    $('#billingSearch')
+        .addEventListener(
+            'input',
+            renderBilling
+        );
+
+
+    $('#refreshBilling')
+        .onclick =
+            loadBilling;
+
+
+    /* =========================================================
+       PREÇO NEGOCIADO
+    ========================================================= */
+
+    $('#savePrice')
+        .onclick =
+            async () => {
+
+                if (
+                    !state.lastCalculation
+                ) {
+
+                    alert(
+                        'Faça um cálculo primeiro.'
+                    );
+
+                    return;
+
+                }
+
+
+                const customer =
+                    $('#orderClient')
+                        ?.value ||
+                    '';
+
+
+                try {
+
+                    await api(
+
+                        '/api/price',
+
+                        {
+
+                            method:
+                                'POST',
+
+                            body: {
+
+                                customer,
+
+                                calculation:
+                                    state.lastCalculation
+
+                            }
+
+                        }
+
+                    );
+
+
+                    alert(
+                        'Preço negociado salvo com sucesso.'
+                    );
+
+                } catch (err) {
+
+                    alert(
+                        err.message
+                    );
+
+                }
+
+            };
+
+
+    /* =========================================================
+       CONFIGURAÇÕES
+    ========================================================= */
+
+    function renderSettings() {
+
+        $('#setMachine')
+            .value =
+                state.settings.machine;
+
+
+        $('#setMargin')
+            .value =
+                state.settings.margin;
+
+
+        $('#setMinimumMargin')
+            .value =
+                state.settings.minimumMargin;
+
+
+        $('#setWaste')
+            .value =
+                state.settings.waste;
+
+
+        renderMaterialsSettings();
+
+        renderVolumeSettings();
+
+        setupMaterialSelectors();
+
+    }
+
+
+    function renderMaterialsSettings() {
+
+        $('#materialsSettings')
+            .innerHTML =
+
+
+                state.settings.materials
+                    .map(
+
+                        (material, index) => `
+
+                            <div
+                                class="volume-row"
+                                data-material-index="${index}"
+                            >
+
+                                <input
+                                    class="material-name"
+                                    value="${esc(material.name)}"
+                                    placeholder="Material"
+                                >
+
+
+                                <input
+                                    class="material-price"
+                                    type="number"
+                                    step="0.01"
+                                    value="${esc(material.price)}"
+                                    placeholder="R$/kg"
+                                >
+
+
+                                <button
+                                    type="button"
+                                    class="btn danger small remove-material"
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+
+                        `
+
+                    )
+                    .join('');
+
+
+        $$('.remove-material')
+            .forEach(
+
+                button => {
+
+                    button.onclick = () => {
+
+                        const row =
+                            button
+                                .closest(
+                                    '[data-material-index]'
+                                );
+
+
+                        const index =
+                            Number(
+                                row
+                                    .dataset
+                                    .materialIndex
+                            );
+
+
+                        state.settings.materials
+                            .splice(
+                                index,
+                                1
+                            );
+
+
+                        renderSettings();
+
+                    };
+
+                }
+
+            );
+
+    }
+
+
+    $('#addMaterial')
+        .onclick =
+            () => {
+
+                state.settings.materials
+                    .push({
+
+                        name:
+                            'Novo material',
+
+                        price:
+                            0
+
+                    });
+
+
+                renderSettings();
+
+            };
+
+
+    function renderVolumeSettings() {
+
+        $('#volumeSettings')
+            .innerHTML =
+
+
+                state.settings.volume
+                    .map(
+
+                        (tier, index) => `
+
+                            <div
+                                class="volume-row"
+                                data-volume-index="${index}"
+                            >
+
+                                <input
+                                    class="volume-min"
+                                    type="number"
+                                    min="1"
+                                    value="${esc(tier.min)}"
+                                    placeholder="Mínimo"
+                                >
+
+
+                                <input
+                                    class="volume-max"
+                                    type="number"
+                                    min="1"
+                                    value="${
+                                        tier.max === null
+                                            ? ''
+                                            : esc(tier.max)
+                                    }"
+                                    placeholder="Máximo"
+                                >
+
+
+                                <input
+                                    class="volume-discount"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    value="${esc(tier.discount)}"
+                                    placeholder="%"
+                                >
+
+
+                                <button
+                                    type="button"
+                                    class="btn danger small remove-volume"
+                                >
+                                    ×
+                                </button>
+
+                            </div>
+
+                        `
+
+                    )
+                    .join('');
+
+
+        $$('.remove-volume')
+            .forEach(
+
+                button => {
+
+                    button.onclick = () => {
+
+                        const row =
+                            button
+                                .closest(
+                                    '[data-volume-index]'
+                                );
+
+
+                        const index =
+                            Number(
+                                row
+                                    .dataset
+                                    .volumeIndex
+                            );
+
+
+                        state.settings.volume
+                            .splice(
+                                index,
+                                1
+                            );
+
+
+                        renderSettings();
+
+                    };
+
+                }
+
+            );
+
+    }
+
+
+    $('#addVolume')
+        .onclick =
+            () => {
+
+                state.settings.volume
+                    .push({
+
+                        min:
+                            1,
+
+                        max:
+                            null,
+
+                        discount:
+                            0
+
+                    });
+
+
+                renderSettings();
+
+            };
+
+
+    $('#saveSettings')
+        .onclick =
+            async () => {
+
+                const materials =
+
+                    $$('#materialsSettings [data-material-index]')
+                        .map(
+
+                            row => ({
+
+                                name:
+                                    row
+                                        .querySelector(
+                                            '.material-name'
+                                        )
+                                        .value
+                                        .trim(),
+
+                                price:
+                                    parseFloat(
+                                        row
+                                            .querySelector(
+                                                '.material-price'
+                                            )
+                                            .value
+                                    ) || 0
+
+                            })
+
+                        )
+                        .filter(
+                            m =>
+                                m.name
+                        );
+
+
+                const volume =
+
+                    $$('#volumeSettings [data-volume-index]')
+                        .map(
+
+                            row => {
+
+                                const max =
+                                    row
+                                        .querySelector(
+                                            '.volume-max'
+                                        )
+                                        .value;
+
+
+                                return {
+
+                                    min:
+                                        parseInt(
+                                            row
+                                                .querySelector(
+                                                    '.volume-min'
+                                                )
+                                                .value
+                                        ) || 1,
+
+                                    max:
+                                        max === ''
+                                            ? null
+                                            : parseInt(
+                                                max
+                                            ),
+
+                                    discount:
+                                        parseFloat(
+                                            row
+                                                .querySelector(
+                                                    '.volume-discount'
+                                                )
+                                                .value
+                                        ) || 0
+
+                                };
+
+                            }
+
+                        );
+
+
+                state.settings = {
+
+                    machine:
+                        parseFloat(
+                            $('#setMachine')
+                                .value
+                        ) || 0,
+
+
+                    margin:
+                        parseFloat(
+                            $('#setMargin')
+                                .value
+                        ) || 0,
+
+
+                    minimumMargin:
+                        parseFloat(
+                            $('#setMinimumMargin')
+                                .value
+                        ) || 0,
+
+
+                    waste:
+                        parseFloat(
+                            $('#setWaste')
+                                .value
+                        ) || 0,
+
+
+                    materials,
+
+                    volume
+
+                };
+
+
+                localStorage.setItem(
+
+                    '4maker_settings',
+
+                    JSON.stringify(
+                        state.settings
+                    )
+
+                );
+
+
+                /*
+                 * O Worker V3.1 poderá persistir essas
+                 * configurações no repositório.
+                 *
+                 * Enquanto ele ainda não foi atualizado,
+                 * o painel continua funcionando localmente.
+                 */
+
+                try {
+
+                    await api(
+
+                        '/api/settings',
+
+                        {
+
+                            method:
+                                'PUT',
+
+                            body:
+                                state.settings
+
+                        }
+
+                    );
+
+                } catch {
+
+                    /*
+                     * Endpoint será disponibilizado
+                     * na atualização do Worker.
+                     */
+
+                }
+
+
+                setupMaterialSelectors();
+
+
+                alert(
+                    'Configurações salvas.'
+                );
+
+            };
+
+
+    function loadSettings() {
+
+        try {
+
+            const local =
+                JSON.parse(
+
+                    localStorage.getItem(
+                        '4maker_settings'
+                    )
+
+                );
+
+
+            if (
+                local
+            ) {
+
+                state.settings = {
+
+                    ...state.settings,
+
+                    ...local
+
+                };
+
+            }
+
+        } catch {
+
+            /*
+             * Mantém os valores padrão.
+             */
+
+        }
+
+    }
+
+
+    async function loadRemoteSettings() {
+
+        try {
+
+            const d =
+                await api(
+                    '/api/settings'
+                );
+
+
+            if (
+                d.settings
+            ) {
+
+                state.settings = {
+
+                    ...state.settings,
+
+                    ...d.settings
+
+                };
+
+            }
+
+        } catch {
+
+            /*
+             * O Worker será atualizado posteriormente.
+             */
+
+        }
+
+    }
+
+
+    /* =========================================================
+       DASHBOARD
+    ========================================================= */
+
+    function updateDashboard() {
+
+        $('#mProducts')
+            .textContent =
+                state.products.length;
+
+
+        $('#mClients')
+            .textContent =
+                state.clients.length;
+
+
+        $('#mOrders')
+            .textContent =
+                state.orders.length;
+
+
+        const revenue =
+            state.billing
+                .reduce(
+
+                    (
+                        total,
+                        item
+                    ) =>
+
+                        total +
+                        Number(
+                            item.total ||
+                            0
+                        ),
+
+                    0
+
+                );
+
+
+        const received =
+            state.billing
+                .reduce(
+
+                    (
+                        total,
+                        item
+                    ) =>
+
+                        total +
+                        Number(
+                            item.received ||
+                            0
+                        ),
+
+                    0
+
+                );
+
+
+        $('#mRevenue')
+            .textContent =
+                money(
+                    revenue
+                );
+
+
+        $('#mReceived')
+            .textContent =
+                money(
+                    received
+                );
+
+
+        $('#mPending')
+            .textContent =
+
+                state.products
+                    .filter(
+                        p =>
+                            !p.hasData
+                    )
+                    .length;
+
+    }
+
+
+    /* =========================================================
        INICIALIZAÇÃO
-    ========================== */
+    ========================================================= */
 
     (async () => {
 
@@ -3774,9 +9352,37 @@
 
             loadSettings();
 
+
+            await loadRemoteSettings();
+
+
+            renderSettings();
+
+
+            setupMaterialSelectors();
+
+
+            setCalcMode(
+                'cost'
+            );
+
+
             route();
 
+
             await loadProducts();
+
+
+            await loadClients();
+
+
+            await loadOrders();
+
+
+            await loadBilling();
+
+
+            updateDashboard();
 
         }
 
@@ -3785,4 +9391,5 @@
 </script>
 
 </body>
+
 </html>
