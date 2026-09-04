@@ -4,16 +4,16 @@
     "filament_length_m": 67.14,
     "filament_weight_g": "",
     "print_time_h": 16.31,
-    "infill_percent": "",
-    "supports": "",
+    "infill_percent": 8,
+    "supports": "Sim",
     "dimensions_mm": {
         "x": "",
         "y": "",
         "z": ""
     },
     "material": "PLA",
-    "layer_height_mm": "",
-    "nozzle_mm": "",
+    "layer_height_mm": 0.2,
+    "nozzle_mm": 0.04,
     "quantity": 1,
     "costs": {
         "filament": 0,
@@ -26,5 +26,5 @@
     },
     "internal_notes": "",
     "created_at": "2026-09-03T19:10:47.855Z",
-    "updated_at": "2026-09-03T21:14:39.902Z"
+    "updated_at": "2026-09-04T14:10:54.909Z"
 }
