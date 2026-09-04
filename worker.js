@@ -5,9 +5,23 @@ const JSON_HEADERS = {
 
 const DEFAULT_CORS = "https://4maker3d.github.io";
 
+const ADMIN_FILES = {
+  settings: "Dados/configuracoes.json",
+  clients: "Dados/clientes.json",
+  prices: "Dados/precos.json",
+  orders: "Dados/pedidos.json",
+  billing: "Dados/faturamento.json"
+};
+
+
+/* =========================================================
+   ENTRADA PRINCIPAL
+   ========================================================= */
+
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get("Origin") || "";
+    const origin =
+      request.headers.get("Origin") || "";
 
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -17,19 +31,44 @@ export default {
     }
 
     try {
-      const url = new URL(request.url);
-      const path = url.pathname.replace(/\/+$/, "") || "/";
+      const url =
+        new URL(request.url);
 
-      if (path === "/api/login" && request.method === "POST") {
-        return handleLogin(request, env, origin);
+      const path =
+        url.pathname.replace(/\/+$/, "") || "/";
+
+
+      /* =====================================================
+         LOGIN / SESSÃO
+         ===================================================== */
+
+      if (
+        path === "/api/login" &&
+        request.method === "POST"
+      ) {
+        return handleLogin(
+          request,
+          env,
+          origin
+        );
       }
 
-      if (path === "/api/session" && request.method === "GET") {
-        const session = await authenticate(request, env);
+
+      if (
+        path === "/api/session" &&
+        request.method === "GET"
+      ) {
+        const session =
+          await authenticate(
+            request,
+            env
+          );
 
         if (!session) {
           return json(
-            { authenticated: false },
+            {
+              authenticated: false
+            },
             401,
             origin,
             env
@@ -48,33 +87,77 @@ export default {
         );
       }
 
-      if (path === "/api/logout" && request.method === "POST") {
-        return json({ ok: true }, 200, origin, env);
+
+      if (
+        path === "/api/logout" &&
+        request.method === "POST"
+      ) {
+        return json(
+          {
+            ok: true
+          },
+          200,
+          origin,
+          env
+        );
       }
 
-      const session = await authenticate(request, env);
+
+      /* =====================================================
+         TODAS AS ROTAS ABAIXO EXIGEM LOGIN
+         ===================================================== */
+
+      const session =
+        await authenticate(
+          request,
+          env
+        );
 
       if (!session) {
         return json(
-          { error: "Não autenticado." },
+          {
+            error:
+              "Não autenticado."
+          },
           401,
           origin,
           env
         );
       }
 
-      if (path === "/api/products" && request.method === "GET") {
-        return await listProducts(env, origin);
+
+      /* =====================================================
+         PRODUTOS
+         ===================================================== */
+
+      if (
+        path === "/api/products" &&
+        request.method === "GET"
+      ) {
+        return await listProducts(
+          env,
+          origin
+        );
       }
 
-      if (path === "/api/product" && request.method === "GET") {
-        const folder = safeFolder(
-          new URL(request.url).searchParams.get("folder")
-        );
+
+      if (
+        path === "/api/product" &&
+        request.method === "GET"
+      ) {
+        const folder =
+          safeFolder(
+            url.searchParams.get(
+              "folder"
+            )
+          );
 
         if (!folder) {
           return json(
-            { error: "Produto inválido." },
+            {
+              error:
+                "Produto inválido."
+            },
             400,
             origin,
             env
@@ -89,7 +172,11 @@ export default {
         );
       }
 
-      if (path === "/api/product" && request.method === "PUT") {
+
+      if (
+        path === "/api/product" &&
+        request.method === "PUT"
+      ) {
         return await updateProduct(
           request,
           env,
@@ -97,7 +184,11 @@ export default {
         );
       }
 
-      if (path === "/api/product" && request.method === "POST") {
+
+      if (
+        path === "/api/product" &&
+        request.method === "POST"
+      ) {
         return await createProduct(
           request,
           env,
@@ -105,8 +196,162 @@ export default {
         );
       }
 
+
+      /* =====================================================
+         CONFIGURAÇÕES
+         ===================================================== */
+
+      if (
+        path === "/api/settings" &&
+        request.method === "GET"
+      ) {
+        return await getSettings(
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/settings" &&
+        request.method === "PUT"
+      ) {
+        return await updateSettings(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      /* =====================================================
+         CLIENTES
+         ===================================================== */
+
+      if (
+        path === "/api/clients" &&
+        request.method === "GET"
+      ) {
+        return await listClients(
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/client" &&
+        request.method === "POST"
+      ) {
+        return await createClient(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/client" &&
+        request.method === "PUT"
+      ) {
+        return await updateClient(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      /* =====================================================
+         PREÇOS NEGOCIADOS
+         ===================================================== */
+
+      if (
+        path === "/api/prices" &&
+        request.method === "GET"
+      ) {
+        return await listPrices(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/price" &&
+        request.method === "POST"
+      ) {
+        return await savePrice(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      /* =====================================================
+         PEDIDOS
+         ===================================================== */
+
+      if (
+        path === "/api/orders" &&
+        request.method === "GET"
+      ) {
+        return await listOrders(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/order" &&
+        request.method === "POST"
+      ) {
+        return await createOrder(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      if (
+        path === "/api/order" &&
+        request.method === "PUT"
+      ) {
+        return await updateOrder(
+          request,
+          env,
+          origin
+        );
+      }
+
+
+      /* =====================================================
+         FATURAMENTO
+         ===================================================== */
+
+      if (
+        path === "/api/billing" &&
+        request.method === "GET"
+      ) {
+        return await getBilling(
+          request,
+          env,
+          origin
+        );
+      }
+
+
       return json(
-        { error: "Rota não encontrada." },
+        {
+          error:
+            "Rota não encontrada."
+        },
         404,
         origin,
         env
@@ -129,7 +374,8 @@ export default {
               ? "Erro interno da API."
               : "Falha ao acessar o GitHub.",
 
-          detail: error?.message || "",
+          detail:
+            error?.message || "",
 
           githubPath:
             error?.githubPath || null
@@ -143,8 +389,16 @@ export default {
 };
 
 
-function corsHeaders(origin, env) {
-  const allowed = getAllowedOrigins(env);
+/* =========================================================
+   CORS
+   ========================================================= */
+
+function corsHeaders(
+  origin,
+  env
+) {
+  const allowed =
+    getAllowedOrigins(env);
 
   const allowOrigin =
     allowed.includes(origin)
@@ -152,21 +406,35 @@ function corsHeaders(origin, env) {
       : DEFAULT_CORS;
 
   return {
-    "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Credentials": "false",
+    "Access-Control-Allow-Origin":
+      allowOrigin,
+
+    "Access-Control-Allow-Credentials":
+      "false",
+
     "Access-Control-Allow-Headers":
       "Content-Type, Authorization",
+
     "Access-Control-Allow-Methods":
       "GET, POST, PUT, OPTIONS",
-    "Vary": "Origin"
+
+    "Vary":
+      "Origin"
   };
 }
 
 
-function getAllowedOrigins(env) {
-  return (env.ALLOWED_ORIGINS || DEFAULT_CORS)
+function getAllowedOrigins(
+  env
+) {
+  return (
+    env.ALLOWED_ORIGINS ||
+    DEFAULT_CORS
+  )
     .split(",")
-    .map(s => s.trim())
+    .map(
+      s => s.trim()
+    )
     .filter(Boolean);
 }
 
@@ -184,7 +452,10 @@ function json(
       status,
       headers: {
         ...JSON_HEADERS,
-        ...corsHeaders(origin, env),
+        ...corsHeaders(
+          origin,
+          env
+        ),
         ...extraHeaders
       }
     }
@@ -192,14 +463,19 @@ function json(
 }
 
 
+/* =========================================================
+   LOGIN
+   ========================================================= */
+
 async function handleLogin(
   request,
   env,
   origin
 ) {
   const ip =
-    request.headers.get("CF-Connecting-IP") ||
-    "unknown";
+    request.headers.get(
+      "CF-Connecting-IP"
+    ) || "unknown";
 
   if (!rateAllowed(ip)) {
     return json(
@@ -214,13 +490,19 @@ async function handleLogin(
   }
 
   const body =
-    await request.json().catch(() => null);
+    await request
+      .json()
+      .catch(() => null);
 
   const username =
-    String(body?.username || "");
+    String(
+      body?.username || ""
+    );
 
   const password =
-    String(body?.password || "");
+    String(
+      body?.password || ""
+    );
 
   if (
     !env.ADMIN_USER ||
@@ -251,7 +533,10 @@ async function handleLogin(
       env.ADMIN_PASSWORD
     );
 
-  if (!userOk || !passOk) {
+  if (
+    !userOk ||
+    !passOk
+  ) {
     return json(
       {
         error:
@@ -264,10 +549,13 @@ async function handleLogin(
   }
 
   const now =
-    Math.floor(Date.now() / 1000);
+    Math.floor(
+      Date.now() / 1000
+    );
 
   const exp =
-    now + 8 * 60 * 60;
+    now +
+    8 * 60 * 60;
 
   const token =
     await signSession(
@@ -292,20 +580,31 @@ async function handleLogin(
 }
 
 
+/* =========================================================
+   AUTENTICAÇÃO
+   ========================================================= */
+
 async function authenticate(
   request,
   env
 ) {
   const auth =
-    request.headers.get("Authorization") ||
-    "";
+    request.headers.get(
+      "Authorization"
+    ) || "";
 
-  if (!auth.startsWith("Bearer ")) {
+  if (
+    !auth.startsWith(
+      "Bearer "
+    )
+  ) {
     return null;
   }
 
   const token =
-    auth.slice(7).trim();
+    auth
+      .slice(7)
+      .trim();
 
   if (
     !token ||
@@ -335,7 +634,9 @@ async function signSession(
 
   const body =
     base64url(
-      JSON.stringify(payload)
+      JSON.stringify(
+        payload
+      )
     );
 
   const data =
@@ -347,7 +648,9 @@ async function signSession(
       secret
     );
 
-  return `${data}.${signature}`;
+  return (
+    `${data}.${signature}`
+  );
 }
 
 
@@ -358,7 +661,9 @@ async function verifySession(
   const parts =
     token.split(".");
 
-  if (parts.length !== 3) {
+  if (
+    parts.length !== 3
+  ) {
     return null;
   }
 
@@ -388,7 +693,9 @@ async function verifySession(
   try {
     payload =
       JSON.parse(
-        fromBase64url(body)
+        fromBase64url(
+          body
+        )
       );
   } catch {
     return null;
@@ -403,7 +710,9 @@ async function verifySession(
 
   if (
     Number(payload.exp) <=
-    Math.floor(Date.now() / 1000)
+    Math.floor(
+      Date.now() / 1000
+    )
   ) {
     return null;
   }
@@ -419,7 +728,9 @@ async function hmac(
   const key =
     await crypto.subtle.importKey(
       "raw",
-      new TextEncoder().encode(secret),
+      new TextEncoder().encode(
+        secret
+      ),
       {
         name: "HMAC",
         hash: "SHA-256"
@@ -432,7 +743,9 @@ async function hmac(
     await crypto.subtle.sign(
       "HMAC",
       key,
-      new TextEncoder().encode(data)
+      new TextEncoder().encode(
+        data
+      )
     );
 
   return base64urlBytes(
@@ -448,17 +761,23 @@ async function constantTimeEqual(
   const enc =
     new TextEncoder();
 
-  const [ha, hb] =
-    await Promise.all([
-      crypto.subtle.digest(
-        "SHA-256",
-        enc.encode(String(a))
-      ),
-      crypto.subtle.digest(
-        "SHA-256",
-        enc.encode(String(b))
+  const [
+    ha,
+    hb
+  ] = await Promise.all([
+    crypto.subtle.digest(
+      "SHA-256",
+      enc.encode(
+        String(a)
       )
-    ]);
+    ),
+    crypto.subtle.digest(
+      "SHA-256",
+      enc.encode(
+        String(b)
+      )
+    )
+  ]);
 
   const aa =
     new Uint8Array(ha);
@@ -473,12 +792,17 @@ async function constantTimeEqual(
     i < aa.length;
     i++
   ) {
-    diff |= aa[i] ^ bb[i];
+    diff |=
+      aa[i] ^ bb[i];
   }
 
   return diff === 0;
 }
 
+
+/* =========================================================
+   RATE LIMIT
+   ========================================================= */
 
 const attempts =
   new Map();
@@ -514,14 +838,15 @@ function rateAllowed(ip) {
 
   item.count++;
 
-  return item.count <= max;
+  return (
+    item.count <= max
+  );
 }
 
 
 /* =========================================================
    GITHUB
    ========================================================= */
-
 
 async function github(
   path,
@@ -530,9 +855,12 @@ async function github(
 ) {
   const url =
     `https://api.github.com/repos/` +
-    `${encodeURIComponent(env.GITHUB_OWNER)}/` +
-    `${encodeURIComponent(env.GITHUB_REPO)}/` +
-    `contents/${path}`;
+    `${encodeURIComponent(
+      env.GITHUB_OWNER
+    )}/` +
+    `${encodeURIComponent(
+      env.GITHUB_REPO
+    )}/contents/${path}`;
 
   const headers = {
     "Accept":
@@ -551,16 +879,13 @@ async function github(
     ...(options?.headers || {})
   };
 
-  const response =
-    await fetch(
-      url,
-      {
-        ...options,
-        headers
-      }
-    );
-
-  return response;
+  return fetch(
+    url,
+    {
+      ...options,
+      headers
+    }
+  );
 }
 
 
@@ -571,7 +896,8 @@ async function getGitHubJson(
   const response =
     await github(
       `${path}?ref=${encodeURIComponent(
-        env.GITHUB_BRANCH || "main"
+        env.GITHUB_BRANCH ||
+        "main"
       )}`,
       {
         method: "GET"
@@ -611,7 +937,8 @@ async function getFile(
   const response =
     await github(
       `${path}?ref=${encodeURIComponent(
-        env.GITHUB_BRANCH || "main"
+        env.GITHUB_BRANCH ||
+        "main"
       )}`,
       {
         method: "GET"
@@ -619,7 +946,9 @@ async function getFile(
       env
     );
 
-  if (response.status === 404) {
+  if (
+    response.status === 404
+  ) {
     return null;
   }
 
@@ -696,7 +1025,9 @@ async function putFile(
         },
 
         body:
-          JSON.stringify(body)
+          JSON.stringify(
+            body
+          )
       },
       env
     );
@@ -729,7 +1060,6 @@ async function putFile(
 /* =========================================================
    PRODUTOS
    ========================================================= */
-
 
 async function listProducts(
   env,
@@ -800,20 +1130,31 @@ async function listProducts(
 
     if (!dataFile) {
       const starter =
-        defaultDados(product);
-
-      dataFile =
-        await putFile(
-          `Modelos/${encodeURIComponent(
-            folder
-          )}/dados.json`,
-          encodeUtf8(starter),
-          `4Maker 3D: criar dados.json de ${folder}`,
-          env
+        defaultDados(
+          product
         );
+
+      await putFile(
+        `Modelos/${encodeURIComponent(
+          folder
+        )}/dados.json`,
+        encodeUtf8(
+          starter
+        ),
+        `4Maker 3D: criar dados.json de ${folder}`,
+        env
+      );
 
       dataCreated =
         true;
+
+      dataFile =
+        await getFile(
+          `Modelos/${encodeURIComponent(
+            folder
+          )}/dados.json`,
+          env
+        );
     }
 
     products.push({
@@ -835,6 +1176,13 @@ async function listProducts(
         product.materials ||
         "",
 
+      available_materials:
+        Array.isArray(
+          product.available_materials
+        )
+          ? product.available_materials
+          : [],
+
       customization:
         product.customization ||
         "",
@@ -846,7 +1194,8 @@ async function listProducts(
           ? product.colors
           : [],
 
-      hasData: true,
+      hasData:
+        true,
 
       dataCreated
     });
@@ -926,13 +1275,17 @@ async function getProduct(
     ensureData
   ) {
     const starter =
-      defaultDados(product);
+      defaultDados(
+        product
+      );
 
     await putFile(
       `Modelos/${encodeURIComponent(
         folder
       )}/dados.json`,
-      encodeUtf8(starter),
+      encodeUtf8(
+        starter
+      ),
       `4Maker 3D: criar dados.json de ${folder}`,
       env
     );
@@ -954,7 +1307,9 @@ async function getProduct(
       ? JSON.parse(
           dataFile.content
         )
-      : defaultDados(product);
+      : defaultDados(
+          product
+        );
 
   return json(
     {
@@ -985,14 +1340,14 @@ async function getProduct(
    ATUALIZAR PRODUTO
    ========================================================= */
 
-
 async function updateProduct(
   request,
   env,
   origin
 ) {
   const body =
-    await request.json()
+    await request
+      .json()
       .catch(() => null);
 
   const folder =
@@ -1020,9 +1375,11 @@ async function updateProduct(
 
   if (
     !produto ||
-    typeof produto !== "object" ||
+    typeof produto !==
+      "object" ||
     !dados ||
-    typeof dados !== "object"
+    typeof dados !==
+      "object"
   ) {
     return json(
       {
@@ -1043,7 +1400,7 @@ async function updateProduct(
       env
     );
 
-  const dataFile =
+  let dataFile =
     await getFile(
       `Modelos/${encodeURIComponent(
         folder
@@ -1067,20 +1424,36 @@ async function updateProduct(
     `Modelos/${encodeURIComponent(
       folder
     )}/produto.json`,
-    encodeUtf8(produto),
+    encodeUtf8(
+      produto
+    ),
     `4Maker 3D: atualizar produto ${folder}`,
     env,
     productFile.sha
   );
 
+  const now =
+    new Date().toISOString();
+
+  dados.updated_at =
+    now;
+
+  if (!dados.created_at) {
+    dados.created_at =
+      now;
+  }
+
   await putFile(
     `Modelos/${encodeURIComponent(
       folder
     )}/dados.json`,
-    encodeUtf8(dados),
+    encodeUtf8(
+      dados
+    ),
     `4Maker 3D: atualizar dados ${folder}`,
     env,
-    dataFile?.sha || null
+    dataFile?.sha ||
+      null
   );
 
   return json(
@@ -1099,14 +1472,14 @@ async function updateProduct(
    CRIAR PRODUTO
    ========================================================= */
 
-
 async function createProduct(
   request,
   env,
   origin
 ) {
   const body =
-    await request.json()
+    await request
+      .json()
       .catch(() => null);
 
   const folder =
@@ -1142,7 +1515,8 @@ async function createProduct(
 
   if (
     !produto ||
-    typeof produto !== "object"
+    typeof produto !==
+      "object"
   ) {
     return json(
       {
@@ -1206,7 +1580,9 @@ async function createProduct(
     `Modelos/${encodeURIComponent(
       folder
     )}/produto.json`,
-    encodeUtf8(produto),
+    encodeUtf8(
+      produto
+    ),
     `4Maker 3D: criar produto ${folder}`,
     env
   );
@@ -1215,7 +1591,9 @@ async function createProduct(
     `Modelos/${encodeURIComponent(
       folder
     )}/dados.json`,
-    encodeUtf8(dados),
+    encodeUtf8(
+      dados
+    ),
     `4Maker 3D: criar dados ${folder}`,
     env
   );
@@ -1242,13 +1620,15 @@ async function createProduct(
 
 
 /* =========================================================
-   DADOS INTERNOS
+   DADOS INTERNOS DOS PRODUTOS
    ========================================================= */
-
 
 function defaultDados(
   produto = {}
 ) {
+  const now =
+    new Date().toISOString();
+
   return {
     version: 1,
 
@@ -1290,12 +1670,2016 @@ function defaultDados(
 
     internal_notes: "",
 
+    created_at: now,
+
+    updated_at: now
+  };
+}
+
+
+/* =========================================================
+   CONFIGURAÇÕES
+   ========================================================= */
+
+function defaultSettings() {
+  return {
+    version: 1,
+
+    machine_hour_cost: 2,
+
+    default_margin_percent: 30,
+
+    default_reseller_margin_percent: 20,
+
+    waste_percent: 5,
+
+    rounding: {
+      enabled: false,
+      increment: 0.5
+    },
+
+    materials: [
+      {
+        name: "PLA",
+        price_per_kg: 89
+      },
+      {
+        name: "PETG",
+        price_per_kg: 89
+      },
+      {
+        name: "ABS",
+        price_per_kg: 89
+      },
+      {
+        name: "ASA",
+        price_per_kg: 99
+      },
+      {
+        name: "TPU",
+        price_per_kg: 119
+      },
+      {
+        name: "TPE",
+        price_per_kg: 129
+      },
+      {
+        name: "PA",
+        price_per_kg: 149
+      },
+      {
+        name: "Nylon",
+        price_per_kg: 149
+      },
+      {
+        name: "PC",
+        price_per_kg: 159
+      },
+      {
+        name: "Fibra de Carbono",
+        price_per_kg: 179
+      },
+      {
+        name: "Fibra de Vidro",
+        price_per_kg: 169
+      },
+      {
+        name: "HIPS",
+        price_per_kg: 99
+      }
+    ],
+
+    costs: {
+      finishing: 0,
+      painting: 0,
+      packaging: 0,
+      commission_percent: 0,
+      other: 0
+    },
+
+    volume_discounts: [
+      {
+        min: 1,
+        max: 4,
+        discount_percent: 0
+      },
+      {
+        min: 5,
+        max: 9,
+        discount_percent: 5
+      },
+      {
+        min: 10,
+        max: 24,
+        discount_percent: 10
+      },
+      {
+        min: 25,
+        max: 49,
+        discount_percent: 15
+      },
+      {
+        min: 50,
+        max: null,
+        discount_percent: 20
+      }
+    ]
+  };
+}
+
+
+async function getSettings(
+  env,
+  origin
+) {
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.settings,
+      defaultSettings(),
+      "4Maker 3D: criar configuracoes.json",
+      env
+    );
+
+  let settings =
+    parseJsonSafe(
+      file.content,
+      defaultSettings()
+    );
+
+  settings =
+    normalizeSettings(
+      settings
+    );
+
+  return json(
+    {
+      settings
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+async function updateSettings(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  if (
+    !body ||
+    typeof body !==
+      "object"
+  ) {
+    return json(
+      {
+        error:
+          "Configurações inválidas."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const settings =
+    normalizeSettings(
+      body.settings ||
+      body
+    );
+
+  const file =
+    await getFile(
+      ADMIN_FILES.settings,
+      env
+    );
+
+  await putFile(
+    ADMIN_FILES.settings,
+    encodeUtf8(
+      settings
+    ),
+    "4Maker 3D: atualizar configurações",
+    env,
+    file?.sha ||
+      null
+  );
+
+  return json(
+    {
+      ok: true,
+      settings
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+function normalizeSettings(
+  input
+) {
+  const defaults =
+    defaultSettings();
+
+  const result = {
+    ...defaults,
+    ...(input || {})
+  };
+
+  result.rounding = {
+    ...defaults.rounding,
+    ...(input?.rounding || {})
+  };
+
+  result.costs = {
+    ...defaults.costs,
+    ...(input?.costs || {})
+  };
+
+  if (
+    !Array.isArray(
+      input?.materials
+    )
+  ) {
+    result.materials =
+      defaults.materials;
+  } else {
+    result.materials =
+      input.materials
+        .map(
+          material => ({
+            name:
+              String(
+                material?.name ||
+                ""
+              ).trim(),
+
+            price_per_kg:
+              numberOrZero(
+                material?.price_per_kg
+              )
+          })
+        )
+        .filter(
+          material =>
+            material.name
+        );
+  }
+
+  if (
+    !Array.isArray(
+      input?.volume_discounts
+    )
+  ) {
+    result.volume_discounts =
+      defaults.volume_discounts;
+  } else {
+    result.volume_discounts =
+      input.volume_discounts
+        .map(
+          tier => ({
+            min:
+              Math.max(
+                1,
+                numberOrZero(
+                  tier?.min
+                )
+              ),
+
+            max:
+              tier?.max === null ||
+              tier?.max === "" ||
+              typeof tier?.max ===
+                "undefined"
+                ? null
+                : numberOrZero(
+                    tier.max
+                  ),
+
+            discount_percent:
+              Math.max(
+                0,
+                numberOrZero(
+                  tier?.discount_percent
+                )
+              )
+          })
+        )
+        .sort(
+          (a, b) =>
+            a.min - b.min
+        );
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   CLIENTES
+   ========================================================= */
+
+function defaultClients() {
+  return [];
+}
+
+
+async function listClients(
+  env,
+  origin
+) {
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.clients,
+      defaultClients(),
+      "4Maker 3D: criar clientes.json",
+      env
+    );
+
+  const clients =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  return json(
+    {
+      clients:
+        Array.isArray(
+          clients
+        )
+          ? clients
+          : []
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+async function createClient(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  if (
+    !body ||
+    typeof body !==
+      "object"
+  ) {
+    return json(
+      {
+        error:
+          "Cliente inválido."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.clients,
+      [],
+      "4Maker 3D: criar clientes.json",
+      env
+    );
+
+  const clients =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  const now =
+    new Date().toISOString();
+
+  const client = {
+    id:
+      body.id ||
+      generateId("CLI"),
+
+    name:
+      String(
+        body.name || ""
+      ).trim(),
+
+    cpf_cnpj:
+      String(
+        body.cpf_cnpj || ""
+      ).trim(),
+
+    email:
+      String(
+        body.email || ""
+      ).trim(),
+
+    phone:
+      String(
+        body.phone || ""
+      ).trim(),
+
+    address:
+      String(
+        body.address || ""
+      ).trim(),
+
+    notes:
+      String(
+        body.notes || ""
+      ).trim(),
+
     created_at:
-      new Date().toISOString(),
+      now,
+
+    updated_at:
+      now
+  };
+
+  if (!client.name) {
+    return json(
+      {
+        error:
+          "Nome do cliente é obrigatório."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  clients.push(
+    client
+  );
+
+  await putFile(
+    ADMIN_FILES.clients,
+    encodeUtf8(
+      clients
+    ),
+    `4Maker 3D: criar cliente ${client.name}`,
+    env,
+    file.sha
+  );
+
+  return json(
+    {
+      ok: true,
+      client
+    },
+    201,
+    origin,
+    env
+  );
+}
+
+
+async function updateClient(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  const id =
+    String(
+      body?.id || ""
+    ).trim();
+
+  if (!id) {
+    return json(
+      {
+        error:
+          "ID do cliente é obrigatório."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.clients,
+      [],
+      "4Maker 3D: criar clientes.json",
+      env
+    );
+
+  const clients =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  const index =
+    clients.findIndex(
+      client =>
+        String(
+          client.id
+        ) === id
+    );
+
+  if (index < 0) {
+    return json(
+      {
+        error:
+          "Cliente não encontrado."
+      },
+      404,
+      origin,
+      env
+    );
+  }
+
+  const current =
+    clients[index];
+
+  clients[index] = {
+    ...current,
+
+    name:
+      String(
+        body.name ??
+        current.name ??
+        ""
+      ).trim(),
+
+    cpf_cnpj:
+      String(
+        body.cpf_cnpj ??
+        current.cpf_cnpj ??
+        ""
+      ).trim(),
+
+    email:
+      String(
+        body.email ??
+        current.email ??
+        ""
+      ).trim(),
+
+    phone:
+      String(
+        body.phone ??
+        current.phone ??
+        ""
+      ).trim(),
+
+    address:
+      String(
+        body.address ??
+        current.address ??
+        ""
+      ).trim(),
+
+    notes:
+      String(
+        body.notes ??
+        current.notes ??
+        ""
+      ).trim(),
 
     updated_at:
       new Date().toISOString()
   };
+
+  if (
+    !clients[index].name
+  ) {
+    return json(
+      {
+        error:
+          "Nome do cliente é obrigatório."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  await putFile(
+    ADMIN_FILES.clients,
+    encodeUtf8(
+      clients
+    ),
+    `4Maker 3D: atualizar cliente ${id}`,
+    env,
+    file.sha
+  );
+
+  return json(
+    {
+      ok: true,
+      client:
+        clients[index]
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+/* =========================================================
+   PREÇOS NEGOCIADOS
+   ========================================================= */
+
+async function listPrices(
+  request,
+  env,
+  origin
+) {
+  const url =
+    new URL(
+      request.url
+    );
+
+  const customerId =
+    String(
+      url.searchParams.get(
+        "customerId"
+      ) || ""
+    ).trim();
+
+  const productFolder =
+    String(
+      url.searchParams.get(
+        "productFolder"
+      ) || ""
+    ).trim();
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.prices,
+      [],
+      "4Maker 3D: criar precos.json",
+      env
+    );
+
+  let prices =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  if (
+    customerId
+  ) {
+    prices =
+      prices.filter(
+        price =>
+          String(
+            price.customer_id
+          ) === customerId
+      );
+  }
+
+  if (
+    productFolder
+  ) {
+    prices =
+      prices.filter(
+        price =>
+          String(
+            price.product_folder
+          ) ===
+          productFolder
+      );
+  }
+
+  return json(
+    {
+      prices
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+async function savePrice(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  const customerId =
+    String(
+      body?.customer_id ||
+      ""
+    ).trim();
+
+  const productFolder =
+    safeFolder(
+      body?.product_folder
+    );
+
+  if (
+    !customerId ||
+    !productFolder
+  ) {
+    return json(
+      {
+        error:
+          "Cliente e produto são obrigatórios."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.prices,
+      [],
+      "4Maker 3D: criar precos.json",
+      env
+    );
+
+  const prices =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  const now =
+    new Date().toISOString();
+
+  const material =
+    String(
+      body?.material || ""
+    ).trim();
+
+  const color =
+    String(
+      body?.color || ""
+    ).trim();
+
+  const existingIndex =
+    prices.findIndex(
+      price =>
+        String(
+          price.customer_id
+        ) === customerId &&
+        String(
+          price.product_folder
+        ) === productFolder &&
+        String(
+          price.material || ""
+        ) === material &&
+        String(
+          price.color || ""
+        ) === color
+    );
+
+  const priceValue =
+    numberOrZero(
+      body?.price
+    );
+
+  if (
+    priceValue <= 0
+  ) {
+    return json(
+      {
+        error:
+          "O preço deve ser maior que zero."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const record = {
+    id:
+      existingIndex >= 0
+        ? prices[
+            existingIndex
+          ].id
+        : generateId(
+            "PRE"
+          ),
+
+    customer_id:
+      customerId,
+
+    product_folder:
+      productFolder,
+
+    product_name:
+      String(
+        body?.product_name ||
+        ""
+      ).trim(),
+
+    material,
+
+    color,
+
+    price:
+      roundMoney(
+        priceValue
+      ),
+
+    notes:
+      String(
+        body?.notes || ""
+      ).trim(),
+
+    created_at:
+      existingIndex >= 0
+        ? prices[
+            existingIndex
+          ].created_at
+        : now,
+
+    updated_at:
+      now
+  };
+
+  if (
+    existingIndex >= 0
+  ) {
+    prices[
+      existingIndex
+    ] = record;
+  } else {
+    prices.push(
+      record
+    );
+  }
+
+  await putFile(
+    ADMIN_FILES.prices,
+    encodeUtf8(
+      prices
+    ),
+    `4Maker 3D: salvar preço negociado ${productFolder}`,
+    env,
+    file.sha
+  );
+
+  return json(
+    {
+      ok: true,
+      price: record
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+/* =========================================================
+   PEDIDOS
+   ========================================================= */
+
+async function listOrders(
+  request,
+  env,
+  origin
+) {
+  const url =
+    new URL(
+      request.url
+    );
+
+  const status =
+    String(
+      url.searchParams.get(
+        "status"
+      ) || ""
+    ).trim();
+
+  const customerId =
+    String(
+      url.searchParams.get(
+        "customerId"
+      ) || ""
+    ).trim();
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.orders,
+      [],
+      "4Maker 3D: criar pedidos.json",
+      env
+    );
+
+  let orders =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  if (status) {
+    orders =
+      orders.filter(
+        order =>
+          String(
+            order.status
+          ) === status
+      );
+  }
+
+  if (customerId) {
+    orders =
+      orders.filter(
+        order =>
+          String(
+            order.customer_id
+          ) === customerId
+      );
+  }
+
+  orders.sort(
+    (a, b) =>
+      String(
+        b.created_at || ""
+      ).localeCompare(
+        String(
+          a.created_at || ""
+        )
+      )
+  );
+
+  return json(
+    {
+      orders
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+async function createOrder(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  if (
+    !body ||
+    typeof body !==
+      "object"
+  ) {
+    return json(
+      {
+        error:
+          "Pedido inválido."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const customerId =
+    String(
+      body.customer_id ||
+      ""
+    ).trim();
+
+  if (!customerId) {
+    return json(
+      {
+        error:
+          "Cliente é obrigatório."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const clientsFile =
+    await ensureJsonFile(
+      ADMIN_FILES.clients,
+      [],
+      "4Maker 3D: criar clientes.json",
+      env
+    );
+
+  const clients =
+    parseJsonSafe(
+      clientsFile.content,
+      []
+    );
+
+  const customer =
+    clients.find(
+      client =>
+        String(
+          client.id
+        ) === customerId
+    );
+
+  if (!customer) {
+    return json(
+      {
+        error:
+          "Cliente não encontrado."
+      },
+      404,
+      origin,
+      env
+    );
+  }
+
+  if (
+    !Array.isArray(
+      body.items
+    ) ||
+    body.items.length === 0
+  ) {
+    return json(
+      {
+        error:
+          "O pedido precisa ter pelo menos um produto."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const now =
+    new Date().toISOString();
+
+  const ordersFile =
+    await ensureJsonFile(
+      ADMIN_FILES.orders,
+      [],
+      "4Maker 3D: criar pedidos.json",
+      env
+    );
+
+  const orders =
+    parseJsonSafe(
+      ordersFile.content,
+      []
+    );
+
+  const orderNumber =
+    await nextOrderNumber(
+      orders
+    );
+
+  const items =
+    body.items.map(
+      item =>
+        normalizeOrderItem(
+          item
+        )
+    );
+
+  const totals =
+    calculateOrderTotals(
+      items
+    );
+
+  const order = {
+    id:
+      generateId(
+        "PED"
+      ),
+
+    order_number:
+      orderNumber,
+
+    customer_id:
+      customerId,
+
+    customer:
+      snapshotCustomer(
+        customer
+      ),
+
+    items,
+
+    subtotal:
+      totals.subtotal,
+
+    volume_discount_percent:
+      numberOrZero(
+        body.volume_discount_percent
+      ),
+
+    volume_discount_value:
+      numberOrZero(
+        body.volume_discount_value
+      ),
+
+    total:
+      numberOrZero(
+        body.total
+      ) ||
+      totals.total,
+
+    estimated_cost:
+      totals.cost,
+
+    estimated_profit:
+      roundMoney(
+        (
+          numberOrZero(
+            body.total
+          ) ||
+          totals.total
+        ) -
+        totals.cost
+      ),
+
+    status:
+      body.status ||
+      "Orçamento",
+
+    payment_status:
+      body.payment_status ||
+      "Pendente",
+
+    payment_method:
+      body.payment_method ||
+      "",
+
+    amount_paid:
+      numberOrZero(
+        body.amount_paid
+      ),
+
+    due_date:
+      String(
+        body.due_date ||
+        ""
+      ),
+
+    notes:
+      String(
+        body.notes || ""
+      ),
+
+    created_at:
+      now,
+
+    updated_at:
+      now
+  };
+
+  orders.push(
+    order
+  );
+
+  await putFile(
+    ADMIN_FILES.orders,
+    encodeUtf8(
+      orders
+    ),
+    `4Maker 3D: criar pedido ${order.order_number}`,
+    env,
+    ordersFile.sha
+  );
+
+  await updateBillingFile(
+    order,
+    env
+  );
+
+  return json(
+    {
+      ok: true,
+      order
+    },
+    201,
+    origin,
+    env
+  );
+}
+
+
+async function updateOrder(
+  request,
+  env,
+  origin
+) {
+  const body =
+    await request
+      .json()
+      .catch(() => null);
+
+  const id =
+    String(
+      body?.id || ""
+    ).trim();
+
+  if (!id) {
+    return json(
+      {
+        error:
+          "ID do pedido é obrigatório."
+      },
+      400,
+      origin,
+      env
+    );
+  }
+
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.orders,
+      [],
+      "4Maker 3D: criar pedidos.json",
+      env
+    );
+
+  const orders =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  const index =
+    orders.findIndex(
+      order =>
+        String(
+          order.id
+        ) === id
+    );
+
+  if (index < 0) {
+    return json(
+      {
+        error:
+          "Pedido não encontrado."
+      },
+      404,
+      origin,
+      env
+    );
+  }
+
+  const current =
+    orders[index];
+
+  const updated = {
+    ...current,
+
+    status:
+      body.status ??
+      current.status,
+
+    payment_status:
+      body.payment_status ??
+      current.payment_status,
+
+    payment_method:
+      body.payment_method ??
+      current.payment_method,
+
+    amount_paid:
+      numberOrZero(
+        body.amount_paid ??
+        current.amount_paid
+      ),
+
+    due_date:
+      body.due_date ??
+      current.due_date,
+
+    notes:
+      body.notes ??
+      current.notes,
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  orders[index] =
+    updated;
+
+  await putFile(
+    ADMIN_FILES.orders,
+    encodeUtf8(
+      orders
+    ),
+    `4Maker 3D: atualizar pedido ${updated.order_number}`,
+    env,
+    file.sha
+  );
+
+  await updateBillingFile(
+    updated,
+    env
+  );
+
+  return json(
+    {
+      ok: true,
+      order: updated
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+/* =========================================================
+   FATURAMENTO
+   ========================================================= */
+
+async function getBilling(
+  request,
+  env,
+  origin
+) {
+  const ordersFile =
+    await ensureJsonFile(
+      ADMIN_FILES.orders,
+      [],
+      "4Maker 3D: criar pedidos.json",
+      env
+    );
+
+  const orders =
+    parseJsonSafe(
+      ordersFile.content,
+      []
+    );
+
+  const url =
+    new URL(
+      request.url
+    );
+
+  const from =
+    String(
+      url.searchParams.get(
+        "from"
+      ) || ""
+    );
+
+  const to =
+    String(
+      url.searchParams.get(
+        "to"
+      ) || ""
+    );
+
+  let filtered =
+    orders;
+
+  if (from) {
+    filtered =
+      filtered.filter(
+        order =>
+          String(
+            order.created_at || ""
+          ) >= from
+      );
+  }
+
+  if (to) {
+    filtered =
+      filtered.filter(
+        order =>
+          String(
+            order.created_at || ""
+          ) <=
+          `${to}T23:59:59.999Z`
+      );
+  }
+
+  const totalRevenue =
+    filtered.reduce(
+      (sum, order) =>
+        sum +
+        numberOrZero(
+          order.total
+        ),
+      0
+    );
+
+  const totalReceived =
+    filtered.reduce(
+      (sum, order) =>
+        sum +
+        numberOrZero(
+          order.amount_paid
+        ),
+      0
+    );
+
+  const totalCost =
+    filtered.reduce(
+      (sum, order) =>
+        sum +
+        numberOrZero(
+          order.estimated_cost
+        ),
+      0
+    );
+
+  const totalProfit =
+    totalRevenue -
+    totalCost;
+
+  const pending =
+    filtered.reduce(
+      (sum, order) =>
+        sum +
+        Math.max(
+          0,
+          numberOrZero(
+            order.total
+          ) -
+          numberOrZero(
+            order.amount_paid
+          )
+        ),
+      0
+    );
+
+  return json(
+    {
+      billing: {
+        orders:
+          filtered,
+
+        total_orders:
+          filtered.length,
+
+        total_revenue:
+          roundMoney(
+            totalRevenue
+          ),
+
+        total_received:
+          roundMoney(
+            totalReceived
+          ),
+
+        total_pending:
+          roundMoney(
+            pending
+          ),
+
+        total_cost:
+          roundMoney(
+            totalCost
+          ),
+
+        estimated_profit:
+          roundMoney(
+            totalProfit
+          ),
+
+        average_ticket:
+          filtered.length
+            ? roundMoney(
+                totalRevenue /
+                filtered.length
+              )
+            : 0
+      }
+    },
+    200,
+    origin,
+    env
+  );
+}
+
+
+async function updateBillingFile(
+  order,
+  env
+) {
+  const file =
+    await ensureJsonFile(
+      ADMIN_FILES.billing,
+      [],
+      "4Maker 3D: criar faturamento.json",
+      env
+    );
+
+  const billing =
+    parseJsonSafe(
+      file.content,
+      []
+    );
+
+  const index =
+    billing.findIndex(
+      item =>
+        String(
+          item.order_id
+        ) ===
+        String(
+          order.id
+        )
+    );
+
+  const record = {
+    order_id:
+      order.id,
+
+    order_number:
+      order.order_number,
+
+    customer_id:
+      order.customer_id,
+
+    customer_name:
+      order.customer?.name ||
+      "",
+
+    total:
+      numberOrZero(
+        order.total
+      ),
+
+    amount_paid:
+      numberOrZero(
+        order.amount_paid
+      ),
+
+    pending:
+      Math.max(
+        0,
+        numberOrZero(
+          order.total
+        ) -
+        numberOrZero(
+          order.amount_paid
+        )
+      ),
+
+    estimated_cost:
+      numberOrZero(
+        order.estimated_cost
+      ),
+
+    estimated_profit:
+      numberOrZero(
+        order.estimated_profit
+      ),
+
+    status:
+      order.status ||
+      "",
+
+    payment_status:
+      order.payment_status ||
+      "Pendente",
+
+    payment_method:
+      order.payment_method ||
+      "",
+
+    due_date:
+      order.due_date ||
+      "",
+
+    updated_at:
+      new Date().toISOString()
+  };
+
+  if (index >= 0) {
+    billing[index] =
+      record;
+  } else {
+    billing.push(
+      record
+    );
+  }
+
+  await putFile(
+    ADMIN_FILES.billing,
+    encodeUtf8(
+      billing
+    ),
+    `4Maker 3D: atualizar faturamento ${order.order_number}`,
+    env,
+    file.sha
+  );
+}
+
+
+/* =========================================================
+   ARQUIVOS ADMINISTRATIVOS
+   ========================================================= */
+
+async function ensureJsonFile(
+  path,
+  defaultValue,
+  message,
+  env
+) {
+  const file =
+    await getFile(
+      path,
+      env
+    );
+
+  if (file) {
+    return file;
+  }
+
+  await putFile(
+    path,
+    encodeUtf8(
+      defaultValue
+    ),
+    message,
+    env
+  );
+
+  const created =
+    await getFile(
+      path,
+      env
+    );
+
+  if (!created) {
+    throw new Error(
+      `Arquivo criado mas não pôde ser recuperado: ${path}`
+    );
+  }
+
+  return created;
+}
+
+
+/* =========================================================
+   PEDIDOS — AUXILIARES
+   ========================================================= */
+
+function normalizeOrderItem(
+  item
+) {
+  const variants =
+    Array.isArray(
+      item?.variants
+    )
+      ? item.variants
+      : [];
+
+  const normalizedVariants =
+    variants
+      .map(
+        variant => {
+          const quantity =
+            Math.max(
+              0,
+              numberOrZero(
+                variant?.quantity
+              )
+            );
+
+          const unitPrice =
+            roundMoney(
+              numberOrZero(
+                variant?.unit_price
+              )
+            );
+
+          const unitCost =
+            roundMoney(
+              numberOrZero(
+                variant?.unit_cost
+              )
+            );
+
+          return {
+            material:
+              String(
+                variant?.material ||
+                ""
+              ).trim(),
+
+            color:
+              String(
+                variant?.color ||
+                ""
+              ).trim(),
+
+            quantity,
+
+            unit_price:
+              unitPrice,
+
+            unit_cost:
+              unitCost,
+
+            subtotal:
+              roundMoney(
+                quantity *
+                unitPrice
+              ),
+
+            cost:
+              roundMoney(
+                quantity *
+                unitCost
+              )
+          };
+        }
+      )
+      .filter(
+        variant =>
+          variant.quantity >
+          0
+      )
+      .sort(
+        (a, b) => {
+          const material =
+            a.material.localeCompare(
+              b.material,
+              "pt-BR",
+              {
+                numeric: true
+              }
+            );
+
+          if (
+            material !== 0
+          ) {
+            return material;
+          }
+
+          return a.color.localeCompare(
+            b.color,
+            "pt-BR",
+            {
+              numeric: true
+            }
+          );
+        }
+      );
+
+  const quantity =
+    normalizedVariants.reduce(
+      (sum, variant) =>
+        sum +
+        variant.quantity,
+      0
+    );
+
+  const subtotal =
+    normalizedVariants.reduce(
+      (sum, variant) =>
+        sum +
+        variant.subtotal,
+      0
+    );
+
+  const cost =
+    normalizedVariants.reduce(
+      (sum, variant) =>
+        sum +
+        variant.cost,
+      0
+    );
+
+  return {
+    product_folder:
+      String(
+        item?.product_folder ||
+        ""
+      ),
+
+    product_name:
+      String(
+        item?.product_name ||
+        item?.name ||
+        ""
+      ),
+
+    quantity,
+
+    variants:
+      normalizedVariants,
+
+    subtotal:
+      roundMoney(
+        subtotal
+      ),
+
+    cost:
+      roundMoney(
+        cost
+      )
+  };
+}
+
+
+function calculateOrderTotals(
+  items
+) {
+  const subtotal =
+    items.reduce(
+      (sum, item) =>
+        sum +
+        numberOrZero(
+          item.subtotal
+        ),
+      0
+    );
+
+  const cost =
+    items.reduce(
+      (sum, item) =>
+        sum +
+        numberOrZero(
+          item.cost
+        ),
+      0
+    );
+
+  return {
+    subtotal:
+      roundMoney(
+        subtotal
+      ),
+
+    total:
+      roundMoney(
+        subtotal
+      ),
+
+    cost:
+      roundMoney(
+        cost
+      )
+  };
+}
+
+
+function snapshotCustomer(
+  customer
+) {
+  return {
+    id:
+      customer.id,
+
+    name:
+      customer.name,
+
+    cpf_cnpj:
+      customer.cpf_cnpj ||
+      "",
+
+    email:
+      customer.email ||
+      "",
+
+    phone:
+      customer.phone ||
+      "",
+
+    address:
+      customer.address ||
+      ""
+  };
+}
+
+
+async function nextOrderNumber(
+  orders
+) {
+  let max = 0;
+
+  for (
+    const order of orders
+  ) {
+    const number =
+      parseInt(
+        String(
+          order.order_number ||
+          ""
+        ).replace(
+          /\D/g,
+          ""
+        ),
+        10
+      );
+
+    if (
+      Number.isFinite(
+        number
+      ) &&
+      number > max
+    ) {
+      max = number;
+    }
+  }
+
+  return String(
+    max + 1
+  ).padStart(
+    5,
+    "0"
+  );
+}
+
+
+/* =========================================================
+   UTILITÁRIOS
+   ========================================================= */
+
+function generateId(
+  prefix
+) {
+  const random =
+    crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random()
+          .toString(36)
+          .slice(2);
+
+  return `${prefix}-${random}`;
+}
+
+
+function numberOrZero(
+  value
+) {
+  const number =
+    Number(
+      String(
+        value ?? ""
+      ).replace(
+        ",",
+        "."
+      )
+    );
+
+  return Number.isFinite(
+    number
+  )
+    ? number
+    : 0;
+}
+
+
+function roundMoney(
+  value
+) {
+  return Math.round(
+    numberOrZero(
+      value
+    ) *
+      100
+  ) / 100;
+}
+
+
+function parseJsonSafe(
+  text,
+  fallback
+) {
+  try {
+    const value =
+      JSON.parse(
+        text
+      );
+
+    return value;
+  } catch {
+    return fallback;
+  }
 }
 
 
@@ -1303,11 +3687,13 @@ function defaultDados(
    SEGURANÇA DE PASTA
    ========================================================= */
 
-
-function safeFolder(value) {
+function safeFolder(
+  value
+) {
   const folder =
-    String(value || "")
-      .trim();
+    String(
+      value || ""
+    ).trim();
 
   if (
     !folder ||
@@ -1338,8 +3724,9 @@ function safeFolder(value) {
    BASE64 / UTF-8
    ========================================================= */
 
-
-function encodeUtf8(value) {
+function encodeUtf8(
+  value
+) {
   return base64urlToStandard(
     base64urlBytes(
       new TextEncoder().encode(
@@ -1354,9 +3741,12 @@ function encodeUtf8(value) {
 }
 
 
-function base64url(input) {
+function base64url(
+  input
+) {
   if (
-    typeof input === "string"
+    typeof input ===
+    "string"
   ) {
     return base64urlBytes(
       new TextEncoder().encode(
@@ -1371,7 +3761,9 @@ function base64url(input) {
 }
 
 
-function base64urlBytes(bytes) {
+function base64urlBytes(
+  bytes
+) {
   let binary = "";
 
   const chunk =
@@ -1395,9 +3787,18 @@ function base64urlBytes(bytes) {
   }
 
   return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+    .replace(
+      /\+/g,
+      "-"
+    )
+    .replace(
+      /\//g,
+      "_"
+    )
+    .replace(
+      /=+$/g,
+      ""
+    );
 }
 
 
@@ -1406,12 +3807,18 @@ function base64urlToStandard(
 ) {
   return (
     value
-      .replace(/-/g, "+")
-      .replace(/_/g, "/") +
+      .replace(
+        /-/g,
+        "+"
+      )
+      .replace(
+        /_/g,
+        "/"
+      ) +
     "=".repeat(
       (
         4 -
-        value.length % 4
+        (value.length % 4)
       ) % 4
     )
   );
@@ -1427,16 +3834,21 @@ function fromBase64url(
     );
 
   const binary =
-    atob(standard);
+    atob(
+      standard
+    );
 
   const bytes =
     Uint8Array.from(
       binary,
-      c => c.charCodeAt(0)
+      c =>
+        c.charCodeAt(0)
     );
 
   return new TextDecoder()
-    .decode(bytes);
+    .decode(
+      bytes
+    );
 }
 
 
@@ -1450,14 +3862,19 @@ function decodeBase64Utf8(
     );
 
   const binary =
-    atob(clean);
+    atob(
+      clean
+    );
 
   const bytes =
     Uint8Array.from(
       binary,
-      c => c.charCodeAt(0)
+      c =>
+        c.charCodeAt(0)
     );
 
   return new TextDecoder()
-    .decode(bytes);
+    .decode(
+      bytes
+    );
 }
