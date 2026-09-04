@@ -2192,6 +2192,8 @@
 
     </style>
 
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 </head>
 
 
@@ -3462,6 +3464,14 @@
                     Editar cliente
                 </button>
 
+                <button
+                    type="button"
+                    class="btn danger"
+                    id="deleteClientModal"
+                >
+                    Excluir cliente
+                </button>
+
             </div>
 
             <div class="client-history">
@@ -3544,6 +3554,30 @@
                     id="openOrderClient"
                 >
                     Ver cliente
+                </button>
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="editOrderModal"
+                >
+                    Editar pedido
+                </button>
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="downloadOrderPdf"
+                >
+                    Baixar PDF
+                </button>
+
+                <button
+                    type="button"
+                    class="btn danger"
+                    id="deleteOrderModal"
+                >
+                    Excluir pedido
                 </button>
             </div>
 
@@ -4769,6 +4803,8 @@
 
         current: null,
 
+        currentOrder: null,
+
         calcMode: 'cost',
 
         calcInputMode: 'product',
@@ -5381,6 +5417,28 @@
     }
 
 
+    async function loadPublicProductJson(folder) {
+
+        try {
+            const url =
+                'https://4maker3d.github.io/catalogo-3d/Modelos/' +
+                encodeURIComponent(String(folder || '')) +
+                '/produto.json';
+
+            const response = await fetch(url, { cache: 'no-store' });
+
+            if (!response.ok) return null;
+
+            const data = await response.json();
+
+            return data && typeof data === 'object' ? data : null;
+
+        } catch {
+            return null;
+        }
+    }
+
+
     async function loadProducts() {
 
         try {
@@ -5437,11 +5495,20 @@
                                             encodeURIComponent(p.folder)
                                         );
 
-                                    const produto =
+                                    const apiProduto =
                                         detail?.produto &&
                                         typeof detail.produto === 'object'
                                             ? detail.produto
                                             : {};
+
+                                    const publicProduto =
+                                        await loadPublicProductJson(p.folder) ||
+                                        {};
+
+                                    const produto = {
+                                        ...publicProduto,
+                                        ...apiProduto
+                                    };
 
                                     const rawMaterials =
                                         produto.materials ??
@@ -5491,7 +5558,15 @@
                                             typeof detail.dados === 'object'
                                                 ? true
                                                 : p.hasData,
-                                        _detailLoaded: true
+                                        dataCreated:
+                                            Boolean(
+                                                detail?.dataCreated ||
+                                                p.dataCreated
+                                            ),
+                                        _detailLoaded: Boolean(
+                                            detail?.dados &&
+                                            typeof detail.dados === 'object'
+                                        )
                                     };
 
                                 } catch {
@@ -6046,7 +6121,10 @@
                     encodeURIComponent(folder)
                 );
 
-            state.current = d;
+            state.current = {
+                ...(d || {}),
+                folder: String(folder || '').trim()
+            };
 
             $('#editFolder').textContent = folder;
 
@@ -6056,14 +6134,39 @@
                     ? d.produto
                     : {};
 
+            const publicProduct =
+                await loadPublicProductJson(folder) ||
+                {};
+
             /*
-             * O produto.json do GitHub é a fonte de verdade.
-             * Se algum campo vier vazio da API, preservamos o
-             * valor que já veio da lista de produtos.
+             * O produto.json público continua sendo a referência
+             * dos dados comerciais. A API pode trazer campos vazios
+             * em versões antigas do Worker; nesse caso usamos o JSON
+             * público e só depois o estado local como fallback.
              */
+            const nonEmpty = (value, fallback = '') =>
+                String(value ?? '').trim()
+                    ? value
+                    : fallback;
+
             const produto = {
                 ...localProduct,
-                ...apiProduct
+                ...publicProduct,
+                ...apiProduct,
+                name: nonEmpty(apiProduct.name, nonEmpty(publicProduct.name, localProduct.name)),
+                category: nonEmpty(apiProduct.category, nonEmpty(publicProduct.category, localProduct.category)),
+                description: nonEmpty(apiProduct.description, nonEmpty(publicProduct.description, localProduct.description)),
+                customization: nonEmpty(apiProduct.customization, nonEmpty(publicProduct.customization, localProduct.customization)),
+                materials: Array.isArray(apiProduct.materials) && apiProduct.materials.length
+                    ? apiProduct.materials
+                    : (Array.isArray(publicProduct.materials) && publicProduct.materials.length
+                        ? publicProduct.materials
+                        : localProduct.materials),
+                colors: Array.isArray(apiProduct.colors) && apiProduct.colors.length
+                    ? apiProduct.colors
+                    : (Array.isArray(publicProduct.colors) && publicProduct.colors.length
+                        ? publicProduct.colors
+                        : localProduct.colors)
             };
 
             const textOrFallback = (value, fallback = '') => {
@@ -6595,7 +6698,11 @@
                             body: {
 
                                 folder:
-                                    state.current.folder,
+                                    String(
+                                        state.current?.folder ||
+                                        $('#editFolder')?.textContent ||
+                                        ''
+                                    ).trim(),
 
                                 produto:
                                     p,
@@ -8568,6 +8675,48 @@
         );
 
 
+    $('#deleteClientModal')
+        .onclick =
+            async () => {
+
+                const client =
+                    state.currentClient;
+
+                const id =
+                    clientId(client);
+
+                if (!id) {
+                    return;
+                }
+
+                const ok =
+                    confirm(
+                        'Excluir este cliente? Os pedidos já registrados serão mantidos com o histórico salvo.'
+                    );
+
+                if (!ok) {
+                    return;
+                }
+
+                try {
+                    await api(
+                        '/api/client',
+                        {
+                            method: 'DELETE',
+                            body: { id }
+                        }
+                    );
+
+                    closeClientDetails();
+                    await loadClients();
+                    alert('Cliente excluído com sucesso.');
+
+                } catch (err) {
+                    alert(err.message);
+                }
+            };
+
+
     $('#editClientModal')
         .onclick =
             () => {
@@ -9433,7 +9582,12 @@
                 }
 
 
+                const editingId =
+                    String(state.currentOrder?.id || '').trim();
+
                 const order = {
+
+                    ...(editingId ? { id: editingId } : {}),
 
                     customer_id:
                         customerId,
@@ -9452,11 +9606,6 @@
 
                     items,
 
-                    /*
-                     * Mantemos o resultado visual do
-                     * painel, mas o Worker recalcula
-                     * os totais no servidor.
-                     */
                     client_calculation:
                         result
 
@@ -9472,7 +9621,7 @@
                         {
 
                             method:
-                                'POST',
+                                editingId ? 'PUT' : 'POST',
 
                             body:
                                 order
@@ -9505,6 +9654,11 @@
 
 
     function clearOrder() {
+
+        state.currentOrder = null;
+
+        $('#saveOrder').textContent = 'SALVAR PEDIDO';
+        $('#clearOrder').textContent = 'LIMPAR';
 
         $('#orderClient')
             .value =
@@ -9614,7 +9768,7 @@
                         return `
 
                             <article
-                                class="product order-card-clickable"
+                                class="product"
                                 data-order-id="${esc(id)}"
                             >
 
@@ -9645,6 +9799,16 @@
                                     <b>${money(total)}</b>
                                 </div>
 
+                                <div class="client-actions" style="margin-top:12px">
+                                    <button
+                                        type="button"
+                                        class="btn small order-open-btn"
+                                        data-order-id="${esc(id)}"
+                                    >
+                                        Ver detalhes
+                                    </button>
+                                </div>
+
                             </article>
 
                         `;
@@ -9652,14 +9816,14 @@
                 )
                 .join('');
 
-        $$('#orders .order-card-clickable')
+        $$('#orders .order-open-btn')
             .forEach(
-                card => {
-                    card.addEventListener(
+                button => {
+                    button.addEventListener(
                         'click',
                         () =>
                             openOrderDetails(
-                                card.dataset.orderId
+                                button.dataset.orderId
                             )
                     );
                 }
@@ -9853,6 +10017,256 @@
                 'aria-hidden',
                 'false'
             );
+    }
+
+
+    $('#deleteOrderModal')
+        .onclick =
+            async () => {
+
+                const order =
+                    state.currentOrder;
+
+                const id =
+                    orderId(order);
+
+                if (!id) {
+                    return;
+                }
+
+                if (!confirm('Excluir este pedido? Esta ação não pode ser desfeita.')) {
+                    return;
+                }
+
+                try {
+                    await api(
+                        '/api/order',
+                        {
+                            method: 'DELETE',
+                            body: { id }
+                        }
+                    );
+
+                    closeOrderDetails();
+                    await loadOrders();
+                    await loadBilling();
+                    alert('Pedido excluído com sucesso.');
+
+                } catch (err) {
+                    alert(err.message);
+                }
+            };
+
+
+    $('#editOrderModal')
+        .onclick =
+            () => {
+                const id = orderId(state.currentOrder);
+                closeOrderDetails();
+                if (id) {
+                    openOrderForEdit(id);
+                }
+            };
+
+
+    async function downloadOrderPdf(orderOverride = null) {
+
+        const order = orderOverride || state.currentOrder;
+
+        if (!order) {
+            alert('Pedido não encontrado.');
+            return;
+        }
+
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            alert('O módulo de PDF ainda não carregou. Verifique sua conexão e tente novamente.');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        const margin = 16;
+        const pageWidth = 210;
+        let y = 18;
+
+        const text = (value) => String(value ?? '').trim() || '—';
+        const brl = (value) => money(Number(value || 0));
+        const orderNumber = text(order.order_number || order.number || order.id);
+        const customer = order.customer || {};
+        const customerName = text(customer.name || order.customer_name || order.customerName);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
+        doc.text('4Maker 3D', margin, y);
+        y += 8;
+        doc.setFontSize(14);
+        doc.text('Pedido ' + orderNumber, margin, y);
+        y += 7;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('Documento gerado pelo Painel 4Maker 3D', margin, y);
+        y += 8;
+
+        doc.setDrawColor(210);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 7;
+
+        const info = [
+            ['Cliente', customerName],
+            ['CPF / CNPJ', text(customer.cpf_cnpj || customer.document)],
+            ['Telefone', text(customer.phone)],
+            ['E-mail', text(customer.email)],
+            ['Status', text(order.status || 'Orçamento')],
+            ['Pagamento', text(order.payment_method)],
+            ['Situação', text(order.payment_status || 'Pendente')],
+            ['Vencimento', text(order.due_date)],
+            ['Criado em', formatDateTime(order.created_at)]
+        ];
+
+        doc.setFontSize(9);
+        for (const [label, value] of info) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(label + ':', margin, y);
+            doc.setFont('helvetica', 'normal');
+            const lines = doc.splitTextToSize(value, 130);
+            doc.text(lines, margin + 34, y);
+            y += Math.max(5, lines.length * 4.5);
+        }
+
+        y += 3;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.text('Produtos', margin, y);
+        y += 7;
+
+        const items = Array.isArray(order.items) ? order.items : [];
+        for (const item of items) {
+            if (y > 270) { doc.addPage(); y = 18; }
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text(text(item.product_name || item.product_folder), margin, y);
+            y += 5;
+
+            const variants = Array.isArray(item.variants) ? item.variants : [];
+            for (const v of variants) {
+                if (y > 275) { doc.addPage(); y = 18; }
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(9);
+                const desc = `${text(v.material)} · ${text(v.color)} · ${text(v.quantity)} un.`;
+                doc.text(desc, margin + 4, y);
+                doc.text(brl(v.unit_price || v.unitPrice) + '/un.', 148, y);
+                y += 5;
+            }
+            y += 3;
+        }
+
+        if (y > 245) { doc.addPage(); y = 18; }
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 7;
+
+        const subtotal = Number(order.subtotal ?? order.totals?.subtotal ?? 0) || 0;
+        const discount = Number(order.volume_discount_value ?? order.totals?.discount ?? 0) || 0;
+        const discountPercent = Number(order.volume_discount_percent ?? 0) || 0;
+        const total = Number(order.total ?? order.totals?.total ?? 0) || 0;
+
+        const totals = [
+            ['Subtotal', brl(subtotal)],
+            ['Desconto por volume', brl(discount) + (discountPercent ? ` (${discountPercent}%)` : '')],
+            ['Total do pedido', brl(total)]
+        ];
+
+        for (const [label, value] of totals) {
+            doc.setFont('helvetica', label === 'Total do pedido' ? 'bold' : 'normal');
+            doc.setFontSize(label === 'Total do pedido' ? 12 : 10);
+            doc.text(label, margin, y);
+            doc.text(value, pageWidth - margin, y, { align: 'right' });
+            y += label === 'Total do pedido' ? 8 : 6;
+        }
+
+        const notes = text(order.notes);
+        if (notes !== '—') {
+            y += 4;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text('Observações', margin, y);
+            y += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.text(doc.splitTextToSize(notes, pageWidth - margin * 2), margin, y);
+        }
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text('4Maker 3D · orçamento/pedido interno', margin, 287);
+        doc.save('Pedido-' + orderNumber.replace(/[^a-z0-9_-]/gi, '_') + '.pdf');
+    }
+
+
+    $('#downloadOrderPdf').onclick = () => downloadOrderPdf();
+
+
+    function openOrderForEdit(id) {
+        const order = state.orders.find(o => orderId(o) === String(id));
+        if (!order) {
+            alert('Pedido não encontrado.');
+            return;
+        }
+
+        state.currentOrder = order;
+        go('pedidos');
+        fillOrderForEdit(order);
+    }
+
+
+    function fillOrderForEdit(order) {
+        $('#orderClient').value =
+            String(order?.customer_id || order?.customer?.id || '').trim();
+
+        $('#orderStatus').value =
+            order?.status || 'Orçamento';
+
+        $('#orderPayment').value =
+            order?.payment_method || '';
+
+        $('#orderDueDate').value =
+            order?.due_date || '';
+
+        $('#orderProducts').innerHTML = '';
+
+        const items = Array.isArray(order?.items) ? order.items : [];
+
+        items.forEach(item => {
+            addOrderProductCard(
+                String(item?.product_folder || '').trim()
+            );
+
+            const card = $$('#orderProducts .order-product').at(-1);
+            if (!card) return;
+
+            const defaultRow = card.querySelector('.variation-row');
+            if (defaultRow) defaultRow.remove();
+
+            const variants = Array.isArray(item?.variants) ? item.variants : [];
+            variants.forEach(v => {
+                addVariationRow(card);
+                const row = card.querySelectorAll('.variation-row').at(-1);
+                if (!row) return;
+                row.querySelector('.variation-material').value = v?.material || '';
+                row.querySelector('.variation-color').value = v?.color || '';
+                row.querySelector('.variation-quantity').value = Number(v?.quantity || 1);
+                row.querySelector('.variation-price').value = Number(v?.unit_price ?? v?.unitPrice ?? 0);
+            });
+
+            if (!variants.length) addVariationRow(card);
+        });
+
+        calculateOrder();
+
+        $('#saveOrder').textContent = 'ATUALIZAR PEDIDO';
+        $('#clearOrder').textContent = 'CANCELAR E LIMPAR';
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
 
@@ -10975,7 +11389,7 @@
                 state.products
                     .filter(
                         p =>
-                            !p.hasData
+                            !(p.hasData || p.dataCreated || p._detailLoaded)
                     )
                     .length;
 
