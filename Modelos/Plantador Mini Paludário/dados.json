@@ -1,19 +1,19 @@
 {
     "version": 1,
-    "weight_g": "",
-    "filament_length_m": "",
-    "filament_weight_g": "",
-    "print_time_h": "",
-    "infill_percent": "",
-    "supports": "",
+    "weight_g": 125.83,
+    "filament_length_m": 42.19,
+    "filament_weight_g": 125.83,
+    "print_time_h": 10.7,
+    "infill_percent": 8,
+    "supports": "Não",
     "dimensions_mm": {
         "x": "",
         "y": "",
         "z": ""
     },
-    "material": "",
-    "layer_height_mm": "",
-    "nozzle_mm": "",
+    "material": "PLA",
+    "layer_height_mm": 0.2,
+    "nozzle_mm": 0.04,
     "quantity": 1,
     "costs": {
         "filament": 0,
@@ -26,5 +26,5 @@
     },
     "internal_notes": "",
     "created_at": "2026-09-03T19:10:40.190Z",
-    "updated_at": "2026-09-03T19:10:40.190Z"
+    "updated_at": "2026-09-05T21:23:34.483Z"
 }
