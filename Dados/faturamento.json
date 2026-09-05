@@ -34,15 +34,15 @@
         "order_number": "00001",
         "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
         "customer_name": "Teste",
-        "total": 302.1,
+        "total": 0,
         "amount_paid": 0,
-        "pending": 302.1,
+        "pending": 0,
         "estimated_cost": 0,
-        "estimated_profit": 302.1,
+        "estimated_profit": 0,
         "status": "Orçamento",
         "payment_status": "Pendente",
-        "payment_method": "PIX",
+        "payment_method": "Boleto",
         "due_date": "2222-05-22",
-        "updated_at": "2026-09-05T17:18:29.627Z"
+        "updated_at": "2026-09-05T17:19:14.008Z"
     }
 ]
