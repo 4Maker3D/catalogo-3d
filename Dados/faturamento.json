@@ -20,15 +20,15 @@
         "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
         "customer_name": "Teste",
         "total": 308.01,
-        "amount_paid": 50,
-        "pending": 258.01,
+        "amount_paid": 308.01,
+        "pending": 0,
         "estimated_cost": 0,
         "estimated_profit": 308.01,
         "status": "Orçamento",
-        "payment_status": "Parcial",
+        "payment_status": "Pago",
         "payment_method": "Boleto",
         "due_date": "2222-05-22",
-        "updated_at": "2026-09-05T19:41:40.342Z"
+        "updated_at": "2026-09-05T20:21:27.991Z"
     },
     {
         "order_id": "PED-ecefa1ce-3801-4555-b83c-fa92d295803b",
