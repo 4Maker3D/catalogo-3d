@@ -4934,14 +4934,12 @@
         }
 
 
-        const r =
-            await fetch(
-                API_URL + path,
-                {
-                    ...options,
-                    headers
-                }
-            );
+        let r;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            r = await fetch(API_URL + path, { ...options, headers });
+            if (![502,503,504].includes(r.status) || attempt === 2) break;
+            await new Promise(resolve => setTimeout(resolve, 700 * (attempt + 1)));
+        }
 
 
         if (
@@ -6505,9 +6503,12 @@
                         : originalMaterials;
 
 
+                const currentFolder = String(state.current?.folder || $('#editFolder')?.textContent || '').trim();
+                if (!currentFolder) { alert('Produto inválido: pasta do produto não identificada.'); return; }
+
                 const p = {
 
-                    ...state.current.produto,
+                    ...(state.current?.produto || {}),
 
 
                     name:
@@ -6697,12 +6698,7 @@
 
                             body: {
 
-                                folder:
-                                    String(
-                                        state.current?.folder ||
-                                        $('#editFolder')?.textContent ||
-                                        ''
-                                    ).trim(),
+                                folder: currentFolder,
 
                                 produto:
                                     p,
@@ -7651,11 +7647,7 @@
 
                     ?
 
-                    unitCost /
-                    (
-                        1 -
-                        effectiveMargin
-                    ) /
+                    unitCost * (1 + effectiveMargin) /
                     (
                         1 -
                         commissionPercent
@@ -7682,11 +7674,7 @@
 
             resellerPrice =
 
-                unitCost /
-                (
-                    1 -
-                    effective4MakerMargin
-                );
+                unitCost * (1 + effective4MakerMargin);
 
 
             const resellerMargin =
@@ -7721,11 +7709,7 @@
 
                 customerPrice =
 
-                    resellerPrice /
-                    (
-                        1 -
-                        resellerMargin
-                    );
+                    resellerPrice * (1 + resellerMargin);
 
             }
 
@@ -7771,11 +7755,7 @@
 
                 const minimum4MakerPrice =
 
-                    unitCost /
-                    (
-                        1 -
-                        minimumMargin
-                    );
+                    unitCost * (1 + minimumMargin);
 
 
                 customerPrice =
@@ -7793,11 +7773,7 @@
 
                 const minimum4MakerPrice =
 
-                    unitCost /
-                    (
-                        1 -
-                        minimumMargin
-                    );
+                    unitCost * (1 + minimumMargin);
 
 
                 unitPrice =
@@ -9132,8 +9108,11 @@
             )
             .addEventListener(
                 'change',
-                () =>
-                    calculateOrder()
+                () => {
+                    wrapper.querySelectorAll('.variation-row').forEach(row => refreshVariationColors(row));
+                    loadNegotiatedPrices(wrapper);
+                    calculateOrder();
+                }
             );
 
 
@@ -9148,6 +9127,49 @@
         );
 
     }
+
+
+    function getOrderProduct(folder) {
+        return state.products.find(p => String(p?.folder || '') === String(folder || '')) || null;
+    }
+
+    function refreshVariationColors(row, selected = '') {
+        const card = row.closest('.order-product');
+        const select = row.querySelector('.variation-color');
+        if (!select) return;
+        const folder = card?.querySelector('.order-product-select')?.value || '';
+        const colors = Array.isArray(getOrderProduct(folder)?.colors) ? getOrderProduct(folder).colors : [];
+        select.innerHTML = '<option value="">Selecione uma cor</option>' + colors.map(c => {
+            const name = typeof c === 'string' ? c : c?.name;
+            return name ? `<option value="${esc(name)}">${esc(name)}</option>` : '';
+        }).join('');
+        if (selected && !colors.some(c => (typeof c === 'string' ? c : c?.name) === selected)) {
+            select.insertAdjacentHTML('beforeend', `<option value="${esc(selected)}">${esc(selected)}</option>`);
+        }
+        select.value = selected || '';
+    }
+
+    async function loadNegotiatedPrices(card) {
+        const customerId = String($('#orderClient')?.value || '').trim();
+        const folder = String(card?.querySelector('.order-product-select')?.value || '').trim();
+        if (!customerId || !folder) return;
+        try {
+            const d = await api('/api/prices?customerId=' + encodeURIComponent(customerId) + '&productFolder=' + encodeURIComponent(folder));
+            const prices = Array.isArray(d?.prices) ? d.prices : [];
+            card.querySelectorAll('.variation-row').forEach(row => {
+                const material = String(row.querySelector('.variation-material')?.value || '').trim();
+                const color = String(row.querySelector('.variation-color')?.value || '').trim();
+                const found = prices.find(x => String(x?.material || '').trim() === material && String(x?.color || '').trim() === color) || prices.find(x => String(x?.material || '').trim() === material && !x?.color);
+                const input = row.querySelector('.variation-price');
+                if (found && input && (!input.value || input.dataset.autoPrice === 'true')) { input.value = Number(found.price).toFixed(2); input.dataset.autoPrice = 'true'; }
+            });
+            calculateOrder();
+        } catch {}
+    }
+
+    $('#orderClient')?.addEventListener('change', () => {
+        $$('#orderProducts .order-product').forEach(loadNegotiatedPrices);
+    });
 
 
     function addVariationRow(
@@ -9200,10 +9222,9 @@
             </select>
 
 
-            <input
-                class="variation-color"
-                placeholder="Cor"
-            >
+            <select class="variation-color">
+                <option value="">Selecione uma cor</option>
+            </select>
 
 
             <input
@@ -9233,6 +9254,8 @@
         `;
 
 
+        refreshVariationColors(row);
+
         row
             .querySelector(
                 '.remove-variation'
@@ -9247,21 +9270,19 @@
                 };
 
 
-        row
-            .querySelectorAll(
-                'input,select'
-            )
-            .forEach(
+        row.querySelectorAll('input,select').forEach(element => {
+            element.addEventListener('input', () => {
+                if (element.classList.contains('variation-price')) element.dataset.autoPrice = 'false';
+                calculateOrder();
+            });
+            element.addEventListener('change', () => {
+                if (element.classList.contains('variation-color') || element.classList.contains('variation-material')) loadNegotiatedPrices(productCard);
+                calculateOrder();
+            });
+        });
 
-                element =>
 
-                    element.addEventListener(
-                        'input',
-                        calculateOrder
-                    )
-
-            );
-
+        list.appendChild
 
         list.appendChild(
             row
@@ -10347,267 +10368,19 @@
 
 
     function renderBilling() {
-
-        const q =
-            (
-                $('#billingSearch')
-                    ?.value ||
-                ''
-            )
-                .toLowerCase();
-
-
-        const list =
-            state.billing
-                .filter(
-
-                    item =>
-
-                        (
-                            item.orderNumber ||
-                            '' +
-                            ' ' +
-                            (
-                                item.clientName ||
-                                ''
-                            ) +
-                            ' ' +
-                            (
-                                item.status ||
-                                ''
-                            )
-                        )
-                            .toLowerCase()
-                            .includes(q)
-
-                );
-
-
-        let revenue =
-            0;
-
-        let received =
-            0;
-
-        let profit =
-            0;
-
-
-        list.forEach(
-
-            item => {
-
-                revenue +=
-                    Number(
-                        item.total ||
-                        0
-                    );
-
-
-                received +=
-                    Number(
-                        item.received ||
-                        0
-                    );
-
-
-                profit +=
-                    Number(
-                        item.profit ||
-                        0
-                    );
-
-            }
-
-        );
-
-
-        const receivable =
-            revenue -
-            received;
-
-
-        $('#fRevenue')
-            .textContent =
-                money(
-                    revenue
-                );
-
-
-        $('#fReceived')
-            .textContent =
-                money(
-                    received
-                );
-
-
-        $('#fReceivable')
-            .textContent =
-                money(
-                    receivable
-                );
-
-
-        $('#fOrders')
-            .textContent =
-                list.length;
-
-
-        $('#fAverage')
-            .textContent =
-                money(
-                    list.length
-                        ? revenue /
-                          list.length
-                        : 0
-                );
-
-
-        $('#fProfit')
-            .textContent =
-                money(
-                    profit
-                );
-
-
-        if (!list.length) {
-
-            $('#billing').innerHTML =
-
-                '<div class="empty">' +
-
-                'Nenhum registro financeiro encontrado.' +
-
-                '</div>';
-
-            return;
-
-        }
-
-
-        $('#billing').innerHTML =
-
-            list.map(
-
-                item => `
-
-                    <article class="product">
-
-                        <div
-                            style="
-                                display:flex;
-                                justify-content:space-between;
-                                gap:15px;
-                                align-items:flex-start;
-                            "
-                        >
-
-                            <div>
-
-                                <span class="category">
-                                    ${esc(
-                                        item.status ||
-                                        'Pendente'
-                                    )}
-                                </span>
-
-                                <h3>
-                                    Pedido ${esc(
-                                        item.orderNumber ||
-                                        item.orderId ||
-                                        ''
-                                    )}
-                                </h3>
-
-                                <p>
-                                    ${esc(
-                                        item.clientName ||
-                                        ''
-                                    )}
-                                </p>
-
-                            </div>
-
-
-                            <span class="status ${
-                                item.paymentStatus ===
-                                'Pago'
-                                    ? 'paid'
-                                    : item.paymentStatus ===
-                                      'Cancelado'
-                                        ? 'cancelled'
-                                        : 'pending'
-                            }">
-
-                                ${esc(
-                                    item.paymentStatus ||
-                                    'Pendente'
-                                )}
-
-                            </span>
-
-                        </div>
-
-
-                        <div class="line">
-
-                            <span>
-                                Total
-                            </span>
-
-                            <b>
-                                ${money(
-                                    item.total ||
-                                    0
-                                )}
-                            </b>
-
-                        </div>
-
-
-                        <div class="line">
-
-                            <span>
-                                Recebido
-                            </span>
-
-                            <b>
-                                ${money(
-                                    item.received ||
-                                    0
-                                )}
-                            </b>
-
-                        </div>
-
-
-                        <div class="line">
-
-                            <span>
-                                A receber
-                            </span>
-
-                            <b>
-                                ${money(
-                                    (
-                                        item.total ||
-                                        0
-                                    ) -
-                                    (
-                                        item.received ||
-                                        0
-                                    )
-                                )}
-                            </b>
-
-                        </div>
-
-                    </article>
-
-                `
-
-            ).join('');
-
+        const q = String($('#billingSearch')?.value || '').toLowerCase().trim();
+        const list = (Array.isArray(state.billing) ? state.billing : []).map(item => ({
+            ...item, orderId: item.orderId ?? item.order_id, orderNumber: item.orderNumber ?? item.order_number,
+            clientName: item.clientName ?? item.customer_name ?? item.customer?.name ?? '',
+            total: Number(item.total ?? 0) || 0, received: Number(item.received ?? item.amount_paid ?? 0) || 0,
+            pending: Number(item.pending ?? Math.max(0,(Number(item.total ?? 0)||0)-(Number(item.amount_paid ?? item.received ?? 0)||0))) || 0,
+            profit: Number(item.profit ?? item.estimated_profit ?? 0) || 0, status:item.status||'Pendente', paymentStatus:item.paymentStatus??item.payment_status??'Pendente'
+        })).filter(item => [item.orderNumber,item.clientName,item.status,item.paymentStatus].join(' ').toLowerCase().includes(q));
+        const revenue=list.reduce((a,x)=>a+x.total,0), received=list.reduce((a,x)=>a+x.received,0), profit=list.reduce((a,x)=>a+x.profit,0);
+        $('#fRevenue').textContent=money(revenue); $('#fReceived').textContent=money(received); $('#fReceivable').textContent=money(Math.max(0,revenue-received)); $('#fOrders').textContent=list.length; $('#fAverage').textContent=money(list.length?revenue/list.length:0); $('#fProfit').textContent=money(profit);
+        if(!list.length){ $('#billing').innerHTML='<div class="empty">Nenhum registro financeiro encontrado.</div>'; return; }
+        $('#billing').innerHTML=list.map(item=>`<article class="product billing-card"><div style="display:flex;justify-content:space-between;gap:15px;align-items:flex-start;"><div><span class="category">${esc(item.status)}</span><h3>Pedido ${esc(item.orderNumber||item.orderId||'')}</h3><p>${esc(item.clientName||'Cliente não informado')}</p></div><span class="status ${item.paymentStatus==='Pago'?'paid':item.paymentStatus==='Cancelado'?'cancelled':'pending'}">${esc(item.paymentStatus)}</span></div><div class="line"><span>Total</span><b>${money(item.total)}</b></div><div class="line"><span>Recebido</span><b>${money(item.received)}</b></div><div class="line"><span>A receber</span><b>${money(item.pending)}</b></div><div class="client-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small billing-open-btn" data-order-id="${esc(item.orderId||'')}">Ver detalhes</button>${item.pending>0?`<button type="button" class="btn small billing-pending-btn" data-order-id="${esc(item.orderId||'')}">Ver pendência</button>`:''}</div></article>`).join('');
+        $$('#billing .billing-open-btn,#billing .billing-pending-btn').forEach(b=>b.addEventListener('click',()=>openOrderDetails(b.dataset.orderId)));
     }
 
 
