@@ -1183,8 +1183,12 @@ async function calculatePrice(
 
   const weight = Math.max(0, numberOrZero(body.weight_g));
   const printTime = Math.max(0, numberOrZero(body.print_time_h));
+  const quantity = Math.max(1, Math.floor(numberOrZero(body.quantity) || 1));
   const waste = Math.max(0, numberOrZero(body.waste_percent ?? settings.waste_percent)) / 100;
   const materialName = String(body.material || "").trim();
+  const mode = ["cost", "final", "reseller"].includes(String(body.mode || ""))
+    ? String(body.mode)
+    : "final";
 
   const material =
     settings.materials.find(
@@ -1202,15 +1206,6 @@ async function calculatePrice(
     );
   }
 
-  if (printTime < 0) {
-    return json(
-      { error: "Tempo de impressão inválido." },
-      400,
-      origin,
-      env
-    );
-  }
-
   if (!material) {
     return json(
       { error: "Material não encontrado nas configurações." },
@@ -1220,107 +1215,205 @@ async function calculatePrice(
     );
   }
 
-  const materialPricePerKg =
-    numberOrZero(
-      material.price_per_kg
-    );
+  const materialPricePerKg = numberOrZero(material.price_per_kg);
+  const rawFilamentCost = weight * materialPricePerKg / 1000;
+  const wasteCost = rawFilamentCost * waste;
+  const filamentCost = rawFilamentCost + wasteCost;
+  const effectiveWeight = weight * (1 + waste);
+  const machineCost = printTime * numberOrZero(settings.machine_hour_cost);
 
-  const rawFilamentCost =
-    weight *
-    materialPricePerKg /
-    1000;
+  const finishing = numberOrZero(body.finishing ?? settings.costs.finishing);
+  const painting = numberOrZero(body.painting ?? settings.costs.painting);
+  const packaging = numberOrZero(body.packaging ?? settings.costs.packaging);
+  const other = numberOrZero(body.other ?? settings.costs.other);
 
-  const wasteCost =
-    rawFilamentCost *
-    waste;
-
-  const effectiveWeight =
-    weight *
-    (1 + waste);
-
-  const filamentCost =
-    rawFilamentCost +
-    wasteCost;
-
-  const machineCost =
-    printTime *
-    numberOrZero(
-      settings.machine_hour_cost
-    );
-
-  const extraCosts =
-    numberOrZero(settings.costs.finishing) +
-    numberOrZero(settings.costs.painting) +
-    numberOrZero(settings.costs.packaging) +
-    numberOrZero(settings.costs.other);
-
-  const commissionPercent =
-    Math.max(
-      0,
-      numberOrZero(
-        settings.costs.commission_percent
-      )
-    ) / 100;
-
-  const costBeforeCommission =
+  const productionCost =
     filamentCost +
     machineCost +
-    extraCosts;
+    finishing +
+    painting +
+    packaging +
+    other;
 
-  const baseCost =
-    commissionPercent < 1
-      ? costBeforeCommission /
-        (1 - commissionPercent)
-      : costBeforeCommission;
+  const commissionPercent =
+    Math.min(
+      0.95,
+      Math.max(
+        0,
+        numberOrZero(
+          body.commission_percent ??
+          settings.costs.commission_percent
+        ) / 100
+      )
+    );
 
-  const requestedMargin =
+  const requestedMarkup =
     Math.max(
       0,
       numberOrZero(
         body.margin_percent ??
         settings.default_margin_percent
-      )
-    ) / 100;
+      ) / 100
+    );
 
-  const resellerMargin =
+  const minimumMarkup =
     Math.max(
       0,
       numberOrZero(
-        body.reseller_margin_percent ??
-        settings.default_reseller_margin_percent
-      )
-    ) / 100;
-
-  // Margens de revenda são somadas sobre o mesmo custo-base.
-  // Ex.: custo 51,33 + 70% 4Maker + 30% revendedor = 102,66 final.
-  const resellerPrice =
-    baseCost *
-    (1 + requestedMargin);
-
-  const finalPrice =
-    baseCost *
-    (
-      1 +
-      requestedMargin +
-      resellerMargin
+        settings.minimum_margin_percent ?? 20
+      ) / 100
     );
 
-  const rounding = settings.rounding;
-  const applyRounding = value => {
-    if (!rounding.enabled || numberOrZero(rounding.increment) <= 0) {
-      return roundMoney(value);
+  const effectiveMarkup = Math.max(requestedMarkup, minimumMarkup);
+
+  // No modelo comercial V4.2.2 este percentual representa margem REAL
+  // do revendedor sobre o preço público, não acréscimo sobre o custo.
+  const resellerMarginRate =
+    Math.min(
+      0.95,
+      Math.max(
+        0,
+        numberOrZero(
+          body.reseller_margin_percent ??
+          settings.default_reseller_margin_percent
+        ) / 100
+      )
+    );
+
+  const targetPrice = Math.max(0, numberOrZero(body.target_price));
+  const negotiatedPrice = Boolean(body.negotiated_price);
+
+  const makerMinimumRevenue =
+    productionCost *
+    (1 + minimumMarkup) /
+    (1 - commissionPercent);
+
+  let publicPrice =
+    targetPrice > 0
+      ? targetPrice
+      : productionCost *
+        (1 + effectiveMarkup) /
+        (1 - commissionPercent);
+
+  let makerRevenue = publicPrice;
+
+  const tier =
+    [...(settings.volume_discounts || [])]
+      .sort(
+        (a, b) =>
+          numberOrZero(a.min) -
+          numberOrZero(b.min)
+      )
+      .find(
+        tier =>
+          quantity >= numberOrZero(tier.min) &&
+          (tier.max === null ||
+            quantity <= numberOrZero(tier.max))
+      );
+
+  const configuredVolumeDiscount =
+    Math.min(
+      0.99,
+      Math.max(
+        0,
+        numberOrZero(tier?.discount_percent) / 100
+      )
+    );
+
+  let appliedVolumeDiscount = 0;
+  let floorLimited = false;
+  let commercialWarning = "";
+
+  if (mode === "cost") {
+    publicPrice = productionCost;
+    makerRevenue = productionCost;
+  }
+
+  if (mode === "final") {
+    if (configuredVolumeDiscount > 0) {
+      publicPrice *= (1 - configuredVolumeDiscount);
+      appliedVolumeDiscount = configuredVolumeDiscount;
     }
-    const increment = numberOrZero(rounding.increment);
-    return roundMoney(Math.ceil(value / increment) * increment);
+
+    if (publicPrice < makerMinimumRevenue) {
+      publicPrice = makerMinimumRevenue;
+      floorLimited = true;
+    }
+
+    makerRevenue = publicPrice;
+  }
+
+  if (mode === "reseller") {
+    makerRevenue = publicPrice * (1 - resellerMarginRate);
+
+    if (!negotiatedPrice && configuredVolumeDiscount > 0) {
+      makerRevenue *= (1 - configuredVolumeDiscount);
+      appliedVolumeDiscount = configuredVolumeDiscount;
+    }
+
+    if (makerRevenue < makerMinimumRevenue) {
+      makerRevenue = makerMinimumRevenue;
+      floorLimited = true;
+    }
+
+    if (makerRevenue > publicPrice) {
+      publicPrice = makerRevenue;
+      commercialWarning =
+        "O preço público informado era baixo demais para preservar o piso mínimo da 4Maker.";
+    }
+  }
+
+  const roundingIncrement =
+    body.rounding_increment !== undefined
+      ? Math.max(0, numberOrZero(body.rounding_increment))
+      : (
+          settings.rounding?.enabled
+            ? Math.max(0, numberOrZero(settings.rounding?.increment))
+            : 0
+        );
+
+  const roundUpCommercial = value => {
+    if (roundingIncrement <= 0) return roundMoney(value);
+    return roundMoney(
+      Math.ceil(value / roundingIncrement) * roundingIncrement
+    );
   };
 
-  const finalRounded = applyRounding(finalPrice);
-  const resellerRounded = applyRounding(resellerPrice);
+  if (mode === "reseller") {
+    makerRevenue = roundUpCommercial(makerRevenue);
+    publicPrice = roundUpCommercial(publicPrice);
+  } else if (mode === "final") {
+    publicPrice = roundUpCommercial(publicPrice);
+    makerRevenue = publicPrice;
+  }
+
+  const commissionCost =
+    mode === "cost"
+      ? 0
+      : makerRevenue * commissionPercent;
+
+  const totalCost = productionCost + commissionCost;
+  const makerProfitUnit =
+    mode === "cost"
+      ? 0
+      : makerRevenue - totalCost;
+
+  const resellerProfitUnit =
+    mode === "reseller"
+      ? Math.max(0, publicPrice - makerRevenue)
+      : 0;
+
+  const resellerMarginActual =
+    mode === "reseller" && publicPrice > 0
+      ? resellerProfitUnit / publicPrice * 100
+      : 0;
 
   return json(
     {
       ok: true,
       calculation: {
+        mode,
+        quantity,
         weight_g: roundMoney(weight),
         effective_weight_g: roundMoney(effectiveWeight),
         waste_percent: roundMoney(waste * 100),
@@ -1330,15 +1423,33 @@ async function calculatePrice(
         waste_cost: roundMoney(wasteCost),
         filament_cost: roundMoney(filamentCost),
         machine_cost: roundMoney(machineCost),
-        extra_costs: roundMoney(extraCosts),
-        base_cost: roundMoney(baseCost),
-        margin_percent: roundMoney(requestedMargin * 100),
-        reseller_margin_percent: roundMoney(resellerMargin * 100),
-        final_price: finalRounded,
-        reseller_price: resellerRounded,
-        estimated_profit_final: roundMoney(finalRounded - baseCost),
-        estimated_profit_reseller: roundMoney(resellerRounded - baseCost),
-        reseller_profit: roundMoney(finalRounded - resellerRounded)
+        finishing_cost: roundMoney(finishing),
+        painting_cost: roundMoney(painting),
+        packaging_cost: roundMoney(packaging),
+        other_cost: roundMoney(other),
+        production_cost: roundMoney(productionCost),
+        commission_percent: roundMoney(commissionPercent * 100),
+        commission_cost: roundMoney(commissionCost),
+        total_cost: roundMoney(totalCost),
+        maker_markup_percent: roundMoney(effectiveMarkup * 100),
+        minimum_markup_percent: roundMoney(minimumMarkup * 100),
+        maker_minimum_revenue: roundMoney(makerMinimumRevenue),
+        reseller_margin_percent: roundMoney(resellerMarginRate * 100),
+        reseller_margin_actual_percent: roundMoney(resellerMarginActual),
+        configured_volume_discount_percent: roundMoney(configuredVolumeDiscount * 100),
+        applied_volume_discount_percent: roundMoney(appliedVolumeDiscount * 100),
+        negotiated_price: negotiatedPrice,
+        floor_limited: floorLimited,
+        commercial_warning: commercialWarning,
+        public_price: roundMoney(publicPrice),
+        reseller_price: roundMoney(mode === "reseller" ? makerRevenue : 0),
+        maker_revenue: roundMoney(makerRevenue),
+        maker_profit_unit: roundMoney(makerProfitUnit),
+        maker_profit_total: roundMoney(makerProfitUnit * quantity),
+        reseller_profit_unit: roundMoney(resellerProfitUnit),
+        reseller_profit_total: roundMoney(resellerProfitUnit * quantity),
+        final_price: roundMoney(publicPrice),
+        total: roundMoney(publicPrice * quantity)
       }
     },
     200,
@@ -2005,6 +2116,8 @@ function defaultSettings() {
     default_margin_percent: 30,
 
     default_reseller_margin_percent: 20,
+
+    minimum_margin_percent: 20,
 
     waste_percent: 5,
 
