@@ -1,97 +1,96 @@
 {
-  "version": 1,
-  "machine_hour_cost": 2,
-  "default_margin_percent": 0,
-  "default_reseller_margin_percent": 20,
-  "waste_percent": 5,
-  "rounding": {
-    "enabled": false,
-    "increment": 0.5
-  },
-  "materials": [
-    {
-      "name": "PLA",
-      "price_per_kg": 89
+    "version": 1,
+    "machine_hour_cost": 2,
+    "default_margin_percent": 0,
+    "default_reseller_margin_percent": 20,
+    "waste_percent": 5,
+    "rounding": {
+        "enabled": false,
+        "increment": 0.5
     },
-    {
-      "name": "PETG",
-      "price_per_kg": 99
+    "materials": [
+        {
+            "name": "PLA",
+            "price_per_kg": 89
+        },
+        {
+            "name": "PETG",
+            "price_per_kg": 99
+        },
+        {
+            "name": "ABS",
+            "price_per_kg": 89
+        },
+        {
+            "name": "ASA",
+            "price_per_kg": 109
+        },
+        {
+            "name": "TPU",
+            "price_per_kg": 129
+        },
+        {
+            "name": "TPE",
+            "price_per_kg": 139
+        },
+        {
+            "name": "PA",
+            "price_per_kg": 149
+        },
+        {
+            "name": "Nylon",
+            "price_per_kg": 149
+        },
+        {
+            "name": "PC",
+            "price_per_kg": 159
+        },
+        {
+            "name": "Fibra de Carbono",
+            "price_per_kg": 179
+        },
+        {
+            "name": "Fibra de Vidro",
+            "price_per_kg": 159
+        },
+        {
+            "name": "HIPS",
+            "price_per_kg": 109
+        }
+    ],
+    "costs": {
+        "finishing": 0,
+        "painting": 0,
+        "packaging": 0,
+        "commission_percent": 0,
+        "other": 0
     },
-    {
-      "name": "ABS",
-      "price_per_kg": 89
-    },
-    {
-      "name": "ASA",
-      "price_per_kg": 109
-    },
-    {
-      "name": "TPU",
-      "price_per_kg": 129
-    },
-    {
-      "name": "TPE",
-      "price_per_kg": 139
-    },
-    {
-      "name": "PA",
-      "price_per_kg": 149
-    },
-    {
-      "name": "Nylon",
-      "price_per_kg": 149
-    },
-    {
-      "name": "PC",
-      "price_per_kg": 159
-    },
-    {
-      "name": "Fibra de Carbono",
-      "price_per_kg": 179
-    },
-    {
-      "name": "Fibra de Vidro",
-      "price_per_kg": 159
-    },
-    {
-      "name": "HIPS",
-      "price_per_kg": 109
-    }
-  ],
-  "costs": {
-    "finishing": 0,
-    "painting": 0,
-    "packaging": 0,
-    "commission_percent": 0,
-    "other": 0
-  },
-  "volume_discounts": [
-    {
-      "min": 1,
-      "max": 4,
-      "discount_percent": 0
-    },
-    {
-      "min": 5,
-      "max": 9,
-      "discount_percent": 0
-    },
-    {
-      "min": 10,
-      "max": 24,
-      "discount_percent": 0
-    },
-    {
-      "min": 25,
-      "max": 49,
-      "discount_percent": 0
-    },
-    {
-      "min": 50,
-      "max": null,
-      "discount_percent": 0
-    }
-  ],
-  "updated_at": "2026-09-04T22:30:33.056Z",
-  "minimum_margin_percent": 20
+    "volume_discounts": [
+        {
+            "min": 1,
+            "max": 4,
+            "discount_percent": 0
+        },
+        {
+            "min": 5,
+            "max": 9,
+            "discount_percent": 0
+        },
+        {
+            "min": 10,
+            "max": 24,
+            "discount_percent": 5
+        },
+        {
+            "min": 25,
+            "max": 49,
+            "discount_percent": 0
+        },
+        {
+            "min": 50,
+            "max": null,
+            "discount_percent": 0
+        }
+    ],
+    "minimum_margin_percent": 20
 }
