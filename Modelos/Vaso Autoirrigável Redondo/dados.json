@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "weight_g": "",
+    "weight_g": 200.26,
     "filament_length_m": 67.14,
     "filament_weight_g": 200.26,
     "print_time_h": 16.31,
@@ -26,5 +26,5 @@
     },
     "internal_notes": "",
     "created_at": "2026-09-04T21:58:42.096Z",
-    "updated_at": "2026-09-05T17:15:51.320Z"
+    "updated_at": "2026-09-05T17:42:57.604Z"
 }
