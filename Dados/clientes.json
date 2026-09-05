@@ -1,15 +1,16 @@
 [
-  {
-    "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
-    "name": "Teste",
-    "document": "99999999999",
-    "email": "teste@gmail.com",
-    "phone": "99999999999",
-    "address": "",
-    "city": "",
-    "state": "",
-    "notes": "",
-    "created_at": "2026-09-04T19:41:40.798Z",
-    "updated_at": "2026-09-04T19:41:40.798Z"
-  }
+    {
+        "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "name": "Teste",
+        "document": "99999999999",
+        "email": "teste@gmail.com",
+        "phone": "99999999999",
+        "address": "",
+        "city": "",
+        "state": "",
+        "notes": "",
+        "created_at": "2026-09-04T19:41:40.798Z",
+        "updated_at": "2026-09-05T18:19:57.770Z",
+        "cpf_cnpj": "99999999999"
+    }
 ]
