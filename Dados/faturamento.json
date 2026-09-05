@@ -34,15 +34,15 @@
         "order_number": "00001",
         "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
         "customer_name": "Teste",
-        "total": 0,
+        "total": 308.01,
         "amount_paid": 0,
-        "pending": 0,
+        "pending": 308.01,
         "estimated_cost": 0,
-        "estimated_profit": 0,
+        "estimated_profit": 308.01,
         "status": "Orçamento",
         "payment_status": "Pendente",
         "payment_method": "Boleto",
         "due_date": "2222-05-22",
-        "updated_at": "2026-09-05T17:19:14.008Z"
+        "updated_at": "2026-09-05T17:54:05.708Z"
     }
 ]
