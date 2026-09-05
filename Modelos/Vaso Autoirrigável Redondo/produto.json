@@ -1,39 +1,39 @@
 {
-  "name": "Vaso Autoirrigável Redondo",
-  "category": "PLANTAS E DECORAÇÃO",
-  "description": "Modelo disponível para produção personalizada.",
-  "materials": "PLA • PETG • ABS",
-  "customization": "Cores e tamanhos sob consulta",
-  "colors": [
-    {
-      "name": "Branco",
-      "hex": 16777215,
-      "swatch": 16777215
-    },
-    {
-      "name": "Preto",
-      "hex": 2368548,
-      "swatch": 2368548
-    },
-    {
-      "name": "Azul",
-      "hex": 1527420,
-      "swatch": 1527420
-    },
-    {
-      "name": "Vermelho",
-      "hex": 15018795,
-      "swatch": 15018795
-    },
-    {
-      "name": "Amarelo",
-      "hex": 14726426,
-      "swatch": 14726426
-    },
-    {
-      "name": "Verde",
-      "hex": 3975776,
-      "swatch": 3975776
-    }
-  ]
+    "name": "Vaso Autoirrigável Redondo",
+    "category": "PLANTAS E DECORAÇÃO",
+    "description": "Modelo disponível para produção personalizada.",
+    "materials": "PLA • PETG • ABS",
+    "customization": "Cores e tamanhos sob consulta",
+    "colors": [
+        {
+            "name": "Branco",
+            "hex": 16777215,
+            "swatch": 16777215
+        },
+        {
+            "name": "Preto",
+            "hex": 2368548,
+            "swatch": 2368548
+        },
+        {
+            "name": "Azul",
+            "hex": 1527420,
+            "swatch": 1527420
+        },
+        {
+            "name": "Vermelho",
+            "hex": 15018795,
+            "swatch": 15018795
+        },
+        {
+            "name": "Amarelo",
+            "hex": 14726426,
+            "swatch": 14726426
+        },
+        {
+            "name": "Verde",
+            "hex": 3975776,
+            "swatch": 3975776
+        }
+    ]
 }
