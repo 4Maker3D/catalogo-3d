@@ -198,46 +198,46 @@
             {
                 "product_folder": "Vaso Autoirrigável Redondo",
                 "product_name": "Vaso Autoirrigável Redondo",
-                "quantity": 3,
+                "quantity": 12,
                 "variants": [
                     {
                         "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
+                        "color": "Branco",
+                        "quantity": 4,
                         "unit_price": 120,
                         "unit_cost": 0,
-                        "subtotal": 120,
+                        "subtotal": 480,
                         "cost": 0
                     },
                     {
                         "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
+                        "color": "Preto",
+                        "quantity": 2,
                         "unit_price": 120,
                         "unit_cost": 0,
-                        "subtotal": 120,
+                        "subtotal": 240,
                         "cost": 0
                     },
                     {
                         "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
+                        "color": "Verde",
+                        "quantity": 6,
                         "unit_price": 120,
                         "unit_cost": 0,
-                        "subtotal": 120,
+                        "subtotal": 720,
                         "cost": 0
                     }
                 ],
-                "subtotal": 360,
+                "subtotal": 1440,
                 "cost": 0
             }
         ],
-        "subtotal": 360,
-        "volume_discount_percent": 0,
-        "volume_discount_value": 0,
-        "total": 360,
+        "subtotal": 1440,
+        "volume_discount_percent": 5,
+        "volume_discount_value": 72,
+        "total": 1368,
         "estimated_cost": 0,
-        "estimated_profit": 360,
+        "estimated_profit": 1368,
         "status": "Confirmado",
         "payment_status": "Pendente",
         "payment_method": "Faturado",
@@ -247,6 +247,6 @@
         "payment_received_date": "",
         "notes": "",
         "created_at": "2026-09-05T20:56:43.973Z",
-        "updated_at": "2026-09-05T20:57:19.924Z"
+        "updated_at": "2026-09-05T21:06:16.131Z"
     }
 ]
