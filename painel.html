@@ -4662,7 +4662,7 @@
                             <div class="field">
 
                                 <label>
-                                    Acréscimo 4Maker (%)
+                                    Acréscimo do preço público (%)
                                 </label>
 
                                 <input
@@ -4681,14 +4681,15 @@
                             >
 
                                 <label>
-                                    Acréscimo desejado do revendedor (%)
+                                    Margem do revendedor (% do preço público)
                                 </label>
 
                                 <input
                                     id="cResellerMargin"
                                     type="number"
                                     step="0.1"
-                                    value="30"
+                                    min="0"
+                                    max="95"
                                 >
 
                             </div>
@@ -4701,7 +4702,7 @@
                             >
 
                                 <label>
-                                    Preço final desejado (R$)
+                                    Preço público desejado / negociado (R$)
                                 </label>
 
                                 <input
@@ -4920,7 +4921,7 @@
                     >
 
                         <span>
-                            Preço do revendedor
+                            Preço de compra do revendedor
                         </span>
 
                         <b id="rReseller">
@@ -4936,7 +4937,7 @@
                     >
 
                         <span>
-                            Preço final
+                            Preço público sugerido
                         </span>
 
                         <b id="rCustomer">
@@ -4974,6 +4975,23 @@
 
                         <b id="rResellerProfit">
                             R$ 0,00
+                        </b>
+
+                    </div>
+
+
+                    <div
+                        class="line"
+                        id="rResellerMarginActualLine"
+                        style="display:none"
+                    >
+
+                        <span>
+                            Margem real do revendedor
+                        </span>
+
+                        <b id="rResellerMarginActual">
+                            0,0%
                         </b>
 
                     </div>
@@ -5060,7 +5078,7 @@
                         <div class="field">
 
                             <label>
-                                Margem padrão 4Maker (%)
+                                Acréscimo padrão do preço público (%)
                             </label>
 
                             <input
@@ -5076,7 +5094,7 @@
                         <div class="field">
 
                             <label>
-                                Margem padrão do revendedor (%)
+                                Margem padrão do revendedor (% do preço público)
                             </label>
 
                             <input
@@ -5087,7 +5105,7 @@
                             >
 
                             <small>
-                                Margem usada para formar o preço do revendedor.
+                                Percentual do preço público que fica com o revendedor.
                             </small>
 
                         </div>
@@ -5116,7 +5134,7 @@
                         <div class="field">
 
                             <label>
-                                Margem mínima 4Maker (%)
+                                Acréscimo mínimo líquido 4Maker (%)
                             </label>
 
                             <input
@@ -7516,6 +7534,19 @@
        CALCULADORA — MODOS
     ========================================================= */
 
+    function syncCalculatorCommercialDefaults(force = false) {
+        const maker = $('#cMargin');
+        const reseller = $('#cResellerMargin');
+
+        if (maker && (force || String(maker.value || '').trim() === '')) {
+            maker.value = Number(state.settings?.margin ?? 0) || 0;
+        }
+
+        if (reseller && (force || String(reseller.value || '').trim() === '')) {
+            reseller.value = Number(state.settings?.defaultResellerMargin ?? 0) || 0;
+        }
+    }
+
     function setCalcMode(
         mode
     ) {
@@ -7603,6 +7634,13 @@
         if (saveButton) saveButton.textContent = mode === 'reseller' && $('#calcCustomer')?.value
             ? 'SALVAR PREÇO NEGOCIADO'
             : 'SALVAR CÁLCULO';
+
+        const resellerMarginActualLine = $('#rResellerMarginActualLine');
+        if (resellerMarginActualLine) {
+            resellerMarginActualLine.style.display = mode === 'reseller' ? 'flex' : 'none';
+        }
+
+        syncCalculatorCommercialDefaults();
 
     }
 
@@ -7966,66 +8004,124 @@
         const painting = Number($('#cPainting')?.value || 0) || 0;
         const packaging = Number($('#cPackaging')?.value || 0) || 0;
         const other = Number($('#cOther')?.value || 0) || 0;
-        const commissionPercent = Math.max(0, Number($('#cCommission')?.value || 0) || 0) / 100;
 
-        const baseCosts = filament + wasteCost + machine + finishing + painting + packaging + other;
-        const costBeforeCommission = baseCosts;
+        // Comissão é custo comercial sobre o valor que a 4Maker realmente recebe.
+        // Limitamos a 95% para impedir divisão por zero ou preços infinitos.
+        const commissionPercent = Math.min(0.95, Math.max(0, Number($('#cCommission')?.value || 0) || 0) / 100);
+
+        const productionCost = filament + wasteCost + machine + finishing + painting + packaging + other;
+
+        // "Acréscimo" continua sendo markup sobre custo, não margem sobre preço de venda.
         const makerMarkup = Math.max(0, Number($('#cMargin')?.value || 0) || 0) / 100;
         const minimumMarkup = Math.max(0, Number($('#setMinimumMargin')?.value || 0) || 0) / 100;
         const effectiveMakerMarkup = Math.max(makerMarkup, minimumMarkup);
-        const resellerMarkup = Math.max(0, Number($('#cResellerMargin')?.value || 0) || 0) / 100;
-        const targetPrice = Number($('#cTargetPrice')?.value || 0) || 0;
 
-        let resellerPrice = 0, customerPrice = 0, unitPrice = costBeforeCommission;
+        // Agora este percentual é margem REAL do revendedor sobre o preço público.
+        // Ex.: 20% significa comprar por 80% do preço público.
+        const resellerMarginRate = Math.min(0.95, Math.max(0, Number($('#cResellerMargin')?.value || 0) || 0) / 100);
+
+        const targetEl = $('#cTargetPrice');
+        const targetPrice = Math.max(0, Number(targetEl?.value || 0) || 0);
+        const negotiatedPrice = targetEl?.dataset?.negotiatedPrice === 'true';
+
+        // Receita mínima necessária para a 4Maker conservar o acréscimo mínimo
+        // mesmo depois de pagar comissão sobre a venda.
+        const makerMinimumRevenue =
+            productionCost * (1 + minimumMarkup) / (1 - commissionPercent);
+
+        // O preço público é único: venda direta e revenda partem da mesma referência.
+        // Se houver preço público desejado/negociado, ele vira a referência principal.
+        let publicPrice = targetPrice > 0
+            ? targetPrice
+            : productionCost * (1 + effectiveMakerMarkup) / (1 - commissionPercent);
+
+        let makerRevenue = publicPrice;
+        const configuredVolumeDiscount = Math.max(0, Math.min(99, getVolumeDiscount(quantity))) / 100;
+        let appliedVolumeDiscount = 0;
+        let floorLimited = false;
+        let commercialWarning = '';
 
         if (state.calcMode === 'cost') {
-            unitPrice = costBeforeCommission;
-        } else if (state.calcMode === 'final') {
-            // Percentual é acréscimo sobre o custo. 100% = custo x 2.
-            unitPrice = costBeforeCommission * (1 + effectiveMakerMarkup);
-        } else if (state.calcMode === 'reseller') {
-            // 70% 4Maker + 30% revendedor = 100% de acréscimo total, não multiplicação sequencial.
-            resellerPrice = costBeforeCommission * (1 + effectiveMakerMarkup);
-            customerPrice = targetPrice > 0
-                ? targetPrice
-                : costBeforeCommission * (1 + effectiveMakerMarkup + resellerMarkup);
-            unitPrice = resellerPrice;
+            publicPrice = productionCost;
+            makerRevenue = productionCost;
         }
 
-        const volumeDiscount = getVolumeDiscount(quantity);
-        if (volumeDiscount > 0) {
-            if (state.calcMode === 'reseller') {
-                resellerPrice *= (1 - volumeDiscount);
-                customerPrice *= (1 - volumeDiscount);
-            } else if (state.calcMode !== 'cost') {
-                unitPrice *= (1 - volumeDiscount);
+        if (state.calcMode === 'final') {
+            if (configuredVolumeDiscount > 0) {
+                publicPrice *= (1 - configuredVolumeDiscount);
+                appliedVolumeDiscount = configuredVolumeDiscount;
+            }
+
+            if (publicPrice < makerMinimumRevenue) {
+                publicPrice = makerMinimumRevenue;
+                floorLimited = true;
+            }
+
+            makerRevenue = publicPrice;
+        }
+
+        if (state.calcMode === 'reseller') {
+            makerRevenue = publicPrice * (1 - resellerMarginRate);
+
+            // Em revenda, desconto por volume reduz o preço de compra do revendedor,
+            // não o preço público. Preço já negociado não recebe novo desconto automático.
+            if (!negotiatedPrice && configuredVolumeDiscount > 0) {
+                makerRevenue *= (1 - configuredVolumeDiscount);
+                appliedVolumeDiscount = configuredVolumeDiscount;
+            }
+
+            if (makerRevenue < makerMinimumRevenue) {
+                makerRevenue = makerMinimumRevenue;
+                floorLimited = true;
+            }
+
+            // Nunca permitimos preço de compra maior que preço público sem avisar.
+            if (makerRevenue > publicPrice) {
+                publicPrice = makerRevenue;
+                commercialWarning = 'O preço público informado era baixo demais para preservar o piso mínimo da 4Maker.';
             }
         }
 
-        const rounding = Number($('#cRounding')?.value || 0) || 0;
+        const rounding = Math.max(0, Number($('#cRounding')?.value || 0) || 0);
         if (rounding > 0) {
             if (state.calcMode === 'reseller') {
-                resellerPrice = roundUp(resellerPrice, rounding);
-                customerPrice = roundUp(customerPrice, rounding);
-            } else {
-                unitPrice = roundUp(unitPrice, rounding);
+                makerRevenue = roundUp(makerRevenue, rounding);
+                publicPrice = roundUp(publicPrice, rounding);
+            } else if (state.calcMode === 'final') {
+                publicPrice = roundUp(publicPrice, rounding);
+                makerRevenue = publicPrice;
             }
         }
 
-        // Comissão é um custo adicional calculado sobre o valor efetivamente recebido pela 4Maker.
-        const revenueFor4MakerUnit = state.calcMode === 'reseller' ? resellerPrice : unitPrice;
-        const commission = state.calcMode === 'cost' ? 0 : revenueFor4MakerUnit * commissionPercent;
-        const totalCost = costBeforeCommission + commission;
-        const finalUnitPrice = state.calcMode === 'reseller' ? customerPrice : unitPrice;
-        const finalTotal = finalUnitPrice * quantity;
-        const profit =
-            (revenueFor4MakerUnit - totalCost) *
-            quantity;
+        const commission = state.calcMode === 'cost'
+            ? 0
+            : makerRevenue * commissionPercent;
 
-        const resellerProfit =
-            state.calcMode === 'reseller'
-                ? (finalUnitPrice - resellerPrice) * quantity
-                : 0;
+        const totalCost = productionCost + commission;
+        const finalUnitPrice = state.calcMode === 'cost' ? productionCost : publicPrice;
+        const resellerPrice = state.calcMode === 'reseller' ? makerRevenue : 0;
+        const finalTotal = finalUnitPrice * quantity;
+
+        const profit = state.calcMode === 'cost'
+            ? 0
+            : (makerRevenue - totalCost) * quantity;
+
+        const resellerProfit = state.calcMode === 'reseller'
+            ? (publicPrice - makerRevenue) * quantity
+            : 0;
+
+        const resellerMarginActual = state.calcMode === 'reseller' && publicPrice > 0
+            ? ((publicPrice - makerRevenue) / publicPrice) * 100
+            : 0;
+
+        // O pedido aplica sua própria faixa de volume ao subtotal. Para evitar
+        // desconto duplicado, guardamos o preço bruto que, depois do desconto
+        // do pedido, chega exatamente ao valor líquido calculado aqui.
+        const orderDiscount = configuredVolumeDiscount;
+        const netOrderUnitPrice = state.calcMode === 'reseller' ? makerRevenue : finalUnitPrice;
+        const orderUnitPrice = orderDiscount > 0 && orderDiscount < 1
+            ? netOrderUnitPrice / (1 - orderDiscount)
+            : netOrderUnitPrice;
 
         $('#rFilament').textContent = money(filament);
         $('#rMachine').textContent = money(machine);
@@ -8039,38 +8135,85 @@
         $('#rTotal').textContent = money(totalCost);
         $('#rReseller').textContent = money(resellerPrice);
         $('#rCustomer').textContent = money(finalUnitPrice);
-        $('#rProfit').textContent =
-            money(profit);
+        $('#rProfit').textContent = money(profit);
 
         if ($('#rResellerProfit')) {
-            $('#rResellerProfit').textContent =
-                money(resellerProfit);
+            $('#rResellerProfit').textContent = money(resellerProfit);
         }
 
         if ($('#rResellerProfitLine')) {
-            $('#rResellerProfitLine').style.display =
-                state.calcMode === 'reseller'
-                    ? ''
-                    : 'none';
+            $('#rResellerProfitLine').style.display = state.calcMode === 'reseller' ? '' : 'none';
         }
 
-        $('#price').textContent =
-            money(finalUnitPrice);
-        $('#volumeInfo').textContent = volumeDiscount > 0 ? `Desconto por volume aplicado: ${volumeDiscount}%` : 'Sem desconto por volume para esta quantidade.';
+        if ($('#rResellerMarginActual')) {
+            $('#rResellerMarginActual').textContent = resellerMarginActual.toLocaleString('pt-BR', {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            }) + '%';
+        }
+
+        if ($('#rResellerMarginActualLine')) {
+            $('#rResellerMarginActualLine').style.display = state.calcMode === 'reseller' ? 'flex' : 'none';
+        }
+
+        $('#price').textContent = money(finalUnitPrice);
+
+        let volumeText = 'Sem desconto por volume para esta quantidade.';
+        if (negotiatedPrice && configuredVolumeDiscount > 0) {
+            volumeText = 'Preço negociado ativo: nenhum novo desconto por volume foi aplicado automaticamente.';
+        } else if (appliedVolumeDiscount > 0 && state.calcMode === 'reseller') {
+            volumeText = `Desconto de ${(appliedVolumeDiscount * 100).toLocaleString('pt-BR')}% aplicado ao preço de compra do revendedor; o preço público foi mantido.`;
+        } else if (appliedVolumeDiscount > 0) {
+            volumeText = `Desconto por volume aplicado: ${(appliedVolumeDiscount * 100).toLocaleString('pt-BR')}%.`;
+        }
+
+        if (floorLimited) {
+            volumeText += ' O piso mínimo da 4Maker limitou a redução.';
+        }
+
+        if (commercialWarning) {
+            volumeText += ' ' + commercialWarning;
+        }
+
+        $('#volumeInfo').textContent = volumeText;
 
         state.lastCalculation = {
-            product: String($('#calcProduct')?.value || ''), material: materialName, weight, effectiveWeight: weight * (1 + wasteFactor),
-            time, quantity, cost: totalCost, resellerPrice, finalPrice: finalUnitPrice, customerId: String($('#calcCustomer')?.value || ''),
-            color: String($('#calcColor')?.value || ''), total: finalTotal, volumeDiscount, profit, calculatedAt: new Date().toISOString(),
+            product: String($('#calcProduct')?.value || ''),
+            material: materialName,
+            weight,
+            effectiveWeight: weight * (1 + wasteFactor),
+            time,
+            quantity,
+            cost: totalCost,
+            productionCost,
+            resellerPrice,
+            finalPrice: finalUnitPrice,
+            publicPrice: finalUnitPrice,
+            orderUnitPrice,
+            customerId: String($('#calcCustomer')?.value || ''),
+            color: String($('#calcColor')?.value || ''),
+            total: finalTotal,
+            volumeDiscount: appliedVolumeDiscount * 100,
+            configuredVolumeDiscount: configuredVolumeDiscount * 100,
+            profit,
+            calculatedAt: new Date().toISOString(),
             filamentBaseCost: filament,
             wasteCost,
             wastePercent,
             makerMarkup: effectiveMakerMarkup * 100,
-            resellerMarkup: resellerMarkup * 100,
-            resellerProfit
+            minimumMarkup: minimumMarkup * 100,
+            resellerMargin: resellerMarginRate * 100,
+            resellerMarginActual,
+            resellerProfit,
+            negotiatedPrice,
+            floorLimited
         };
 
-        if ($('#savePrice')) $('#savePrice').textContent = state.calcMode === 'reseller' && $('#calcCustomer')?.value ? 'SALVAR PREÇO NEGOCIADO' : 'SALVAR CÁLCULO';
+        if ($('#savePrice')) {
+            $('#savePrice').textContent = state.calcMode === 'reseller' && $('#calcCustomer')?.value
+                ? 'SALVAR PREÇO PÚBLICO NEGOCIADO'
+                : 'SALVAR CÁLCULO';
+        }
     }
 
 
@@ -11107,7 +11250,7 @@
                     customer_id: customerId, product_folder: calc.product,
                     product_name: state.products.find(p => String(p?.folder || '') === calc.product)?.name || calc.product,
                     material: calc.material || '', color: calc.color || '', price: Number(calc.finalPrice || 0),
-                    notes: 'Preço negociado salvo pela calculadora.'
+                    notes: 'Preço público negociado salvo pela calculadora.'
                 }});
                 toast('Preço negociado salvo para o cliente.');
                 return;
@@ -11492,9 +11635,13 @@
         applyClientPaymentDefaults();
 
         const card = addOrderProductCard(calc.product, { addDefaultVariation: false });
-        const unitPrice = state.calcMode === 'reseller' && Number(calc.resellerPrice || 0) > 0
-            ? Number(calc.resellerPrice)
-            : Number(calc.finalPrice || 0);
+        const unitPrice = Number(calc.orderUnitPrice || 0) > 0
+            ? Number(calc.orderUnitPrice)
+            : (
+                state.calcMode === 'reseller' && Number(calc.resellerPrice || 0) > 0
+                    ? Number(calc.resellerPrice)
+                    : Number(calc.finalPrice || 0)
+            );
         addVariationRow(card, {
             material: calc.material || 'PLA',
             color: calc.color || '',
@@ -12293,6 +12440,7 @@
         renderMaterialsSettings();
         renderVolumeSettings();
         setupMaterialSelectors();
+        syncCalculatorCommercialDefaults(true);
     }
 
 
