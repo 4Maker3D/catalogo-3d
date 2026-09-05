@@ -56,12 +56,12 @@
         "pending": 1567.5,
         "estimated_cost": 0,
         "estimated_profit": 1567.5,
-        "status": "Orçamento",
+        "status": "Confirmado",
         "payment_status": "Pendente",
         "payment_method": "Faturado",
         "payment_terms_days": 21,
         "due_date": "2026-09-26",
         "payment_received_date": "",
-        "updated_at": "2026-09-05T23:05:01.536Z"
+        "updated_at": "2026-09-05T23:05:10.450Z"
     }
 ]
