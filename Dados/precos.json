@@ -1,1 +1,14 @@
-[]
+[
+    {
+        "id": "PRE-0c79afa6-7897-4174-b7d0-d84e2d36b138",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "product_folder": "Vaso Autoirrigável Redondo",
+        "product_name": "Vaso Autoirrigável Redondo",
+        "material": "PLA",
+        "color": "",
+        "price": 110.88,
+        "notes": "",
+        "created_at": "2026-09-05T17:24:21.276Z",
+        "updated_at": "2026-09-05T17:24:21.276Z"
+    }
+]
