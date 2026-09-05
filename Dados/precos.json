@@ -10,5 +10,17 @@
         "notes": "Preço negociado salvo pela calculadora.",
         "created_at": "2026-09-05T17:24:21.276Z",
         "updated_at": "2026-09-05T19:42:43.937Z"
+    },
+    {
+        "id": "PRE-9003eb0a-1d7b-4e08-aa16-c4e9638491af",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "product_folder": "Plantador Mini Paludário",
+        "product_name": "Plantador Mini Paludário",
+        "material": "PLA",
+        "color": "",
+        "price": 70,
+        "notes": "Preço negociado salvo pela calculadora.",
+        "created_at": "2026-09-05T21:25:37.767Z",
+        "updated_at": "2026-09-05T21:25:37.767Z"
     }
 ]
