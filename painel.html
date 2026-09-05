@@ -11665,7 +11665,7 @@
             for (let i = 0; i < variants.length; i++) {
                 const v = variants[i];
                 ensureSpace(12);
-                const productName = i === 0 ? text(item.product_name || item.product_folder) : '↳';
+                const productName = text(item.product_name || item.product_folder);
                 const productLines = doc.splitTextToSize(productName, 61);
                 const mat = [text(v.material), text(v.color)].filter(x => x !== '—').join(' · ') || '—';
                 const matLines = doc.splitTextToSize(mat, 50);
