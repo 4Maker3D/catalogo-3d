@@ -5,7 +5,7 @@
     "filament_weight_g": 200.26,
     "print_time_h": 16.31,
     "infill_percent": 8,
-    "supports": "Sim",
+    "supports": "Não",
     "dimensions_mm": {
         "x": "",
         "y": "",
@@ -26,5 +26,5 @@
     },
     "internal_notes": "",
     "created_at": "2026-09-04T21:58:42.096Z",
-    "updated_at": "2026-09-05T17:42:57.604Z"
+    "updated_at": "2026-09-05T17:43:29.513Z"
 }
