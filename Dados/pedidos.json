@@ -1,52 +1,135 @@
 [
-  {
-    "id": "f98859b3-41c5-48f8-99c3-a377950edd66",
-    "number": "PED-1788552272244",
-    "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
-    "customer_snapshot": {
-      "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
-      "name": "Teste",
-      "document": "99999999999",
-      "email": "teste@gmail.com",
-      "phone": "99999999999",
-      "address": "",
-      "city": "",
-      "state": "",
-      "notes": "",
-      "created_at": "2026-09-04T19:41:40.798Z",
-      "updated_at": "2026-09-04T19:41:40.798Z"
-    },
-    "items": [
-      {
-        "product_folder": "Vaso Autoirrigável Redondo",
-        "product_name": "Vaso Autoirrigável Redondo",
-        "variants": [
-          {
-            "material": "PLA",
-            "color": "",
-            "quantity": 1,
-            "unit_price": 0
-          }
+    {
+        "id": "f98859b3-41c5-48f8-99c3-a377950edd66",
+        "number": "PED-1788552272244",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "customer_snapshot": {
+            "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+            "name": "Teste",
+            "document": "99999999999",
+            "email": "teste@gmail.com",
+            "phone": "99999999999",
+            "address": "",
+            "city": "",
+            "state": "",
+            "notes": "",
+            "created_at": "2026-09-04T19:41:40.798Z",
+            "updated_at": "2026-09-04T19:41:40.798Z"
+        },
+        "items": [
+            {
+                "product_folder": "Vaso Autoirrigável Redondo",
+                "product_name": "Vaso Autoirrigável Redondo",
+                "variants": [
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 1,
+                        "unit_price": 0
+                    }
+                ],
+                "quantity": 1,
+                "unit_price": 0,
+                "unit_cost": 0
+            }
         ],
-        "quantity": 1,
-        "unit_price": 0,
-        "unit_cost": 0
-      }
-    ],
-    "subtotal": 0,
-    "volume_discount_percent": 0,
-    "volume_discount_value": 0,
-    "total": 0,
-    "estimated_cost": 0,
-    "estimated_profit": 0,
-    "status": "Em produção",
-    "payment": {
-      "method": "",
-      "status": "",
-      "paid": false
+        "subtotal": 0,
+        "volume_discount_percent": 0,
+        "volume_discount_value": 0,
+        "total": 0,
+        "estimated_cost": 0,
+        "estimated_profit": 0,
+        "status": "Em produção",
+        "payment": {
+            "method": "",
+            "status": "",
+            "paid": false
+        },
+        "notes": "",
+        "created_at": "2026-09-04T20:04:32.244Z",
+        "updated_at": "2026-09-04T20:04:32.244Z"
     },
-    "notes": "",
-    "created_at": "2026-09-04T20:04:32.244Z",
-    "updated_at": "2026-09-04T20:04:32.244Z"
-  }
+    {
+        "id": "PED-c8732601-fc6c-4e70-897b-c76eaae3225c",
+        "order_number": "00001",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "customer": {
+            "id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+            "name": "Teste",
+            "cpf_cnpj": "",
+            "email": "teste@gmail.com",
+            "phone": "99999999999",
+            "address": ""
+        },
+        "items": [
+            {
+                "product_folder": "Vaso Autoirrigável Redondo",
+                "product_name": "Vaso Autoirrigável Redondo",
+                "quantity": 14,
+                "variants": [
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 1,
+                        "unit_price": 12,
+                        "unit_cost": 0,
+                        "subtotal": 12,
+                        "cost": 0
+                    },
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 1,
+                        "unit_price": 5,
+                        "unit_cost": 0,
+                        "subtotal": 5,
+                        "cost": 0
+                    },
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 1,
+                        "unit_price": 64,
+                        "unit_cost": 0,
+                        "subtotal": 64,
+                        "cost": 0
+                    },
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 1,
+                        "unit_price": 17,
+                        "unit_cost": 0,
+                        "subtotal": 17,
+                        "cost": 0
+                    },
+                    {
+                        "material": "PLA",
+                        "color": "",
+                        "quantity": 10,
+                        "unit_price": 22,
+                        "unit_cost": 0,
+                        "subtotal": 220,
+                        "cost": 0
+                    }
+                ],
+                "subtotal": 318,
+                "cost": 0
+            }
+        ],
+        "subtotal": 318,
+        "volume_discount_percent": 5,
+        "volume_discount_value": 15.9,
+        "total": 302.1,
+        "estimated_cost": 0,
+        "estimated_profit": 302.1,
+        "status": "Orçamento",
+        "payment_status": "Pendente",
+        "payment_method": "PIX",
+        "amount_paid": 0,
+        "due_date": "2222-05-22",
+        "notes": "",
+        "created_at": "2026-09-05T17:18:28.224Z",
+        "updated_at": "2026-09-05T17:18:28.224Z"
+    }
 ]
