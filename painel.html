@@ -4090,19 +4090,18 @@
 
                     <div class="form-grid" style="margin-top:14px">
 
-                        <div class="field">
+                        <div class="field" id="calcCustomerField">
                             <label>Cliente para preço negociado</label>
                             <select id="calcCustomer">
                                 <option value="">Nenhum cliente selecionado</option>
                             </select>
-                            <small>Se houver preço negociado, ele será carregado automaticamente.</small>
+                            <small>Disponível apenas no modo Revendedor.</small>
                         </div>
 
-                        <div class="field">
-                            <label>Cor</label>
-                            <select id="calcColor">
-                                <option value="">Selecione uma cor</option>
-                            </select>
+                        <div class="field" id="calcMaterialField">
+                            <label>Material</label>
+                            <select id="calcMaterial"></select>
+                            <small>O preço por kg é carregado das Configurações.</small>
                         </div>
 
                     </div>
@@ -7186,13 +7185,17 @@
                     : 'flex';
 
 
-        const customerField = $('#calcCustomer')?.closest('.field');
-        const colorField = $('#calcColor')?.closest('.field');
+        const customerField = $('#calcCustomerField') || $('#calcCustomer')?.closest('.field');
+        const materialField = $('#calcMaterialField') || $('#calcMaterial')?.closest('.field');
         const targetField = $('#targetPriceField');
         const saveButton = $('#savePrice');
 
         if (customerField) customerField.style.display = mode === 'reseller' ? '' : 'none';
-        if (colorField) colorField.style.display = mode === 'reseller' ? '' : 'none';
+        if (materialField) materialField.style.display = '';
+        if (mode !== 'reseller') {
+            const target = $('#cTargetPrice');
+            if (target) { target.value = ''; delete target.dataset.negotiatedPrice; }
+        }
         if (targetField) targetField.style.display = mode === 'reseller' ? '' : 'none';
         if (saveButton) saveButton.textContent = mode === 'reseller' && $('#calcCustomer')?.value
             ? 'SALVAR PREÇO NEGOCIADO'
@@ -7306,36 +7309,30 @@
         if (old && state.clients.some(c => clientId(c) === old)) select.value = old;
     }
 
-    function fillCalcColors(product) {
-        const select = $('#calcColor');
+    function fillCalcMaterialSelector() {
+        const select = $('#calcMaterial');
         if (!select) return;
-        const old = String(select.value || '');
-        const colors = Array.isArray(product?.colors) ? product.colors : [];
-        select.innerHTML = '<option value="">Selecione uma cor</option>' + colors.map(c => {
-            const name = typeof c === 'string' ? c : c?.name;
-            return name ? `<option value="${esc(name)}">${esc(name)}</option>` : '';
-        }).join('');
-        if (old && colors.some(c => (typeof c === 'string' ? c : c?.name) === old)) select.value = old;
+        const old = String(select.value || $('#cMaterialSelect')?.value || '').trim();
+        const materials = materialNames();
+        select.innerHTML = materials.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+        if (old && materials.includes(old)) select.value = old;
+        if (!select.value && materials.length) select.value = materials[0];
+        if ($('#cMaterialSelect')) $('#cMaterialSelect').value = select.value;
     }
 
     async function loadCalcNegotiatedPrice() {
+        if (state.calcMode !== 'reseller') return;
         const customerId = String($('#calcCustomer')?.value || '').trim();
         const folder = String($('#calcProduct')?.value || '').trim();
+        const target = $('#cTargetPrice');
+        if (target) { target.value = ''; delete target.dataset.negotiatedPrice; }
         if (!customerId || !folder) return;
         try {
             const d = await api('/api/prices?customerId=' + encodeURIComponent(customerId) + '&productFolder=' + encodeURIComponent(folder));
             const prices = Array.isArray(d?.prices) ? d.prices : [];
-            const material = String($('#cMaterialSelect')?.value || '').trim();
-            const color = String($('#calcColor')?.value || '').trim();
-            const found = prices.find(x => String(x?.material || '').trim() === material && String(x?.color || '').trim() === color)
-                || prices.find(x => String(x?.material || '').trim() === material && !x?.color)
-                || prices.find(x => !x?.material && String(x?.color || '').trim() === color)
-                || prices.find(x => !x?.material && !x?.color);
-            const target = $('#cTargetPrice');
-            if (found && target) {
-                target.value = Number(found.price || 0).toFixed(2);
-                target.dataset.negotiatedPrice = 'true';
-            }
+            const material = String($('#calcMaterial')?.value || $('#cMaterialSelect')?.value || '').trim();
+            const found = prices.find(x => String(x?.material || '').trim() === material) || prices.find(x => !String(x?.material || '').trim());
+            if (found && target) { target.value = Number(found.price || 0).toFixed(2); target.dataset.negotiatedPrice = 'true'; }
         } catch {}
     }
 
@@ -7403,13 +7400,7 @@
     }
 
 
-    function fillCalcMaterials() {
-
-        renderMaterialOptions(
-            $('#cMaterialSelect')
-        );
-
-    }
+    function fillCalcMaterials() { renderMaterialOptions($('#cMaterialSelect')); fillCalcMaterialSelector(); }
 
 
     async function calcProduct(
@@ -7448,6 +7439,7 @@
     });
 
     $('#calcCustomer')?.addEventListener('change', loadCalcNegotiatedPrice);
+    $('#calcMaterial')?.addEventListener('change', () => { if ($('#cMaterialSelect')) $('#cMaterialSelect').value = $('#calcMaterial').value; loadCalcNegotiatedPrice(); });
     $('#calcColor')?.addEventListener('change', loadCalcNegotiatedPrice);
     $('#cMaterialSelect')?.addEventListener('change', loadCalcNegotiatedPrice);
 
@@ -7472,14 +7464,16 @@
                 const dados = d?.dados || {};
                 weight = Number(dados.filament_weight_g ?? dados.weight_g ?? 0) || 0;
                 time = Number(dados.print_time_h ?? 0) || 0;
-                materialName = String(dados.material || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+                materialName = String($('#calcMaterial')?.value || dados.material || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+                if ($('#calcMaterial') && [...$('#calcMaterial').options].some(o => o.value === materialName)) $('#calcMaterial').value = materialName;
                 if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
                 material = materialPrice(materialName);
             } catch (e) { alert(e.message); return; }
         } else {
             weight = Number($('#cWeight')?.value || 0) || 0;
             time = Number($('#cTime')?.value || 0) || 0;
-            materialName = String($('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+            materialName = String($('#calcMaterial')?.value || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+            if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
             material = materialPrice(materialName);
         }
 
@@ -7554,7 +7548,9 @@
         $('#rPainting').textContent = money(painting);
         $('#rPackaging').textContent = money(packaging);
         $('#rCommission').textContent = money(commission);
-        $('#rOther').textContent = money(other + wasteCost);
+        $('#rOther').textContent = money(other);
+        const wasteEl = $('#rWaste');
+        if (wasteEl) wasteEl.textContent = money(wasteCost);
         $('#rTotal').textContent = money(totalCost);
         $('#rReseller').textContent = money(resellerPrice);
         $('#rCustomer').textContent = money(finalUnitPrice);
@@ -8255,9 +8251,9 @@
                             .value,
 
                     margin:
-                        num(
-                            $('#clientMargin')
-                        ),
+                        String($('#clientMargin')?.value || '').trim() === ''
+                            ? null
+                            : num($('#clientMargin')),
 
                     address:
                         $('#clientAddress')
@@ -9290,11 +9286,12 @@
 
     function openOrderDetails(id) {
 
+        const key = String(id || '').trim();
         const order =
             state.orders.find(
                 o =>
-                    orderId(o) ===
-                    String(id)
+                    orderId(o) === key ||
+                    String(o?.order_number || o?.number || '').trim() === key
             );
 
         if (!order) {
@@ -9652,13 +9649,18 @@
     $('#downloadOrderPdf').onclick = () => downloadOrderPdf();
 
 
-    function openOrderForEdit(id) {
-        const order = state.orders.find(o => orderId(o) === String(id));
-        if (!order) {
-            alert('Pedido não encontrado.');
-            return;
+    async function openOrderForEdit(id) {
+        const key = String(id || '').trim();
+        let order = state.orders.find(o => orderId(o) === key);
+        if (!order || !Array.isArray(order.items)) {
+            try {
+                const d = await api('/api/orders');
+                const orders = Array.isArray(d?.orders) ? d.orders : [];
+                state.orders = orders;
+                order = orders.find(o => orderId(o) === key || String(o?.order_number || o?.number || '').trim() === key);
+            } catch {}
         }
-
+        if (!order) { alert('Pedido não encontrado.'); return; }
         state.currentOrder = order;
         go('pedidos');
         fillOrderForEdit(order);
@@ -9683,16 +9685,13 @@
         const items = Array.isArray(order?.items) ? order.items : [];
 
         items.forEach(item => {
-            addOrderProductCard(
-                String(item?.product_folder || '').trim()
-            );
-
+            const folder = String(item?.product_folder || item?.folder || item?.product?.folder || '').trim();
+            if (!folder) return;
+            addOrderProductCard(folder);
             const card = $$('#orderProducts .order-product').at(-1);
             if (!card) return;
-
             const defaultRow = card.querySelector('.variation-row');
             if (defaultRow) defaultRow.remove();
-
             const variants = Array.isArray(item?.variants) ? item.variants : (Array.isArray(item?.product_variants) ? item.product_variants : (item?.material || item?.color || item?.quantity ? [item] : []));
             variants.forEach(v => {
                 addVariationRow(card);
@@ -9703,7 +9702,6 @@
                 row.querySelector('.variation-quantity').value = Number(v?.quantity || 1);
                 row.querySelector('.variation-price').value = Number(v?.unit_price ?? v?.unitPrice ?? 0);
             });
-
             if (!variants.length) addVariationRow(card);
         });
 
@@ -9801,7 +9799,7 @@
     function renderBilling() {
         const q = String($('#billingSearch')?.value || '').toLowerCase().trim();
         const list = (Array.isArray(state.billing) ? state.billing : []).map(item => ({
-            ...item, orderId: item.orderId ?? item.order_id, orderNumber: item.orderNumber ?? item.order_number,
+            ...item, orderId: item.orderId ?? item.order_id ?? item.id, orderNumber: item.orderNumber ?? item.order_number ?? item.number,
             clientName: item.clientName ?? item.customer_name ?? item.customer?.name ?? '',
             total: Number(item.total ?? 0) || 0, received: Number(item.received ?? item.amount_paid ?? 0) || 0,
             pending: Number(item.pending ?? Math.max(0,(Number(item.total ?? 0)||0)-(Number(item.amount_paid ?? item.received ?? 0)||0))) || 0,
@@ -9810,7 +9808,7 @@
         const revenue=list.reduce((a,x)=>a+x.total,0), received=list.reduce((a,x)=>a+x.received,0), profit=list.reduce((a,x)=>a+x.profit,0);
         $('#fRevenue').textContent=money(revenue); $('#fReceived').textContent=money(received); $('#fReceivable').textContent=money(Math.max(0,revenue-received)); $('#fOrders').textContent=list.length; $('#fAverage').textContent=money(list.length?revenue/list.length:0); $('#fProfit').textContent=money(profit);
         if(!list.length){ $('#billing').innerHTML='<div class="empty">Nenhum registro financeiro encontrado.</div>'; return; }
-        $('#billing').innerHTML=list.map(item=>`<article class="product billing-card"><div style="display:flex;justify-content:space-between;gap:15px;align-items:flex-start;"><div><span class="category">${esc(item.status)}</span><h3>Pedido ${esc(item.orderNumber||item.orderId||'')}</h3><p>${esc(item.clientName||'Cliente não informado')}</p></div><span class="status ${item.paymentStatus==='Pago'?'paid':item.paymentStatus==='Cancelado'?'cancelled':'pending'}">${esc(item.paymentStatus)}</span></div><div class="line"><span>Total</span><b>${money(item.total)}</b></div><div class="line"><span>Recebido</span><b>${money(item.received)}</b></div><div class="line"><span>A receber</span><b>${money(item.pending)}</b></div><div class="client-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small billing-open-btn" data-order-id="${esc(item.orderId||'')}">Ver detalhes</button>${item.pending>0?`<button type="button" class="btn small billing-pending-btn" data-order-id="${esc(item.orderId||'')}">Ver pendência</button>`:''}</div></article>`).join('');
+        $('#billing').innerHTML=list.map(item=>`<article class="product billing-card"><div style="display:flex;justify-content:space-between;gap:15px;align-items:flex-start;"><div><span class="category">${esc(item.status)}</span><h3>Pedido ${esc(item.orderNumber||item.orderId||'')}</h3><p>${esc(item.clientName||'Cliente não informado')}</p></div><span class="status ${item.paymentStatus==='Pago'?'paid':item.paymentStatus==='Cancelado'?'cancelled':'pending'}">${esc(item.paymentStatus)}</span></div><div class="line"><span>Total</span><b>${money(item.total)}</b></div><div class="line"><span>Recebido</span><b>${money(item.received)}</b></div><div class="line"><span>A receber</span><b>${money(item.pending)}</b></div><div class="client-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn small billing-open-btn" data-order-id="${esc(item.orderId || item.orderNumber || '')}">Ver detalhes</button>${item.pending>0?`<button type="button" class="btn small billing-pending-btn" data-order-id="${esc(item.orderId || item.orderNumber || '')}">Ver pendência</button>`:''}</div></article>`).join('');
         $$('#billing .billing-open-btn,#billing .billing-pending-btn').forEach(b=>b.addEventListener('click',()=>openOrderDetails(b.dataset.orderId)));
     }
 
@@ -10561,6 +10559,8 @@
 
 
             setupMaterialSelectors();
+            fillCalcMaterials();
+            fillCalcCustomers();
 
 
             setCalcMode(
