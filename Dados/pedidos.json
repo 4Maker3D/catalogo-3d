@@ -238,7 +238,7 @@
         "total": 360,
         "estimated_cost": 0,
         "estimated_profit": 360,
-        "status": "Confirmado",
+        "status": "Em produção",
         "payment_status": "Pendente",
         "payment_method": "Faturado",
         "payment_terms_days": 21,
@@ -247,6 +247,6 @@
         "payment_received_date": "",
         "notes": "",
         "created_at": "2026-09-05T20:56:43.973Z",
-        "updated_at": "2026-09-05T20:56:43.973Z"
+        "updated_at": "2026-09-05T20:57:08.698Z"
     }
 ]
