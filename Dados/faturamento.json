@@ -63,5 +63,23 @@
         "due_date": "2026-09-26",
         "payment_received_date": "",
         "updated_at": "2026-09-05T23:05:10.450Z"
+    },
+    {
+        "order_id": "PED-71fda4ae-4281-437d-a113-463e50df0697",
+        "order_number": "00004",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "customer_name": "Teste",
+        "total": 2772.41,
+        "amount_paid": 0,
+        "pending": 2772.41,
+        "estimated_cost": 0,
+        "estimated_profit": 2772.41,
+        "status": "Orçamento",
+        "payment_status": "Pendente",
+        "payment_method": "Faturado",
+        "payment_terms_days": 21,
+        "due_date": "2026-09-26",
+        "payment_received_date": "",
+        "updated_at": "2026-09-05T23:28:46.299Z"
     }
 ]
