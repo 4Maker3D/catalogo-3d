@@ -3,7 +3,7 @@
     "machine_hour_cost": 2,
     "default_margin_percent": 0,
     "default_reseller_margin_percent": 20,
-    "minimum_margin_percent": 50,
+    "minimum_margin_percent": 75,
     "waste_percent": 5,
     "rounding": {
         "enabled": false,
