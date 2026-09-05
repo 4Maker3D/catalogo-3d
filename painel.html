@@ -3463,52 +3463,7 @@
                 id="clientDetails"
             ></div>
 
-            <div
-                class="order-status-editor"
-                style="margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)"
-            >
-                <h3 style="margin:0 0 12px">💰 Status do pedido</h3>
-                <div
-                    style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"
-                >
-                    <div class="field">
-                        <label>Produção / entrega</label>
-                        <select id="orderModalProductionStatus">
-                            <option value="Orçamento">Orçamento</option>
-                            <option value="Confirmado">Confirmado</option>
-                            <option value="Em produção">Em produção</option>
-                            <option value="Pronto">Pronto</option>
-                            <option value="Entregue">Entregue</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Pagamento</label>
-                        <select id="orderModalPaymentStatus">
-                            <option value="Pendente">Pendente</option>
-                            <option value="Parcial">Parcial</option>
-                            <option value="Pago">Pago</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Valor recebido (R$)</label>
-                        <input id="orderModalAmountPaid" type="number" min="0" step="0.01">
-                    </div>
-                    <div class="field">
-                        <label>Vencimento</label>
-                        <input id="orderModalDueDate" type="date">
-                    </div>
-                </div>
-                <button
-                    type="button"
-                    class="btn primary"
-                    id="saveOrderStatus"
-                    style="width:100%;margin-top:12px"
-                >
-                    SALVAR STATUS E PAGAMENTO
-                </button>
-            </div>
+
 
 
             <div class="client-actions" style="margin-top:14px">
@@ -3603,6 +3558,54 @@
                     <b id="orderModalTotal">R$ 0,00</b>
                 </div>
             </div>
+
+            <div
+                class="order-status-editor"
+                style="margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)"
+            >
+                <h3 style="margin:0 0 12px">💰 Status do pedido</h3>
+                <div
+                    style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"
+                >
+                    <div class="field">
+                        <label>Produção / entrega</label>
+                        <select id="orderModalProductionStatus">
+                            <option value="Orçamento">Orçamento</option>
+                            <option value="Confirmado">Confirmado</option>
+                            <option value="Em produção">Em produção</option>
+                            <option value="Pronto">Pronto</option>
+                            <option value="Entregue">Entregue</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Pagamento</label>
+                        <select id="orderModalPaymentStatus">
+                            <option value="Pendente">Pendente</option>
+                            <option value="Parcial">Parcial</option>
+                            <option value="Pago">Pago</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Valor recebido (R$)</label>
+                        <input id="orderModalAmountPaid" type="number" min="0" step="0.01">
+                    </div>
+                    <div class="field">
+                        <label>Vencimento</label>
+                        <input id="orderModalDueDate" type="date">
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="btn primary"
+                    id="saveOrderStatus"
+                    style="width:100%;margin-top:12px"
+                >
+                    SALVAR STATUS E PAGAMENTO
+                </button>
+            </div>
+
 
             <div class="client-actions" style="margin-top:14px">
                 <button
@@ -8578,7 +8581,8 @@
 
 
     function addOrderProductCard(
-        productFolder = ''
+        productFolder = '',
+        options = {}
     ) {
 
         const wrapper =
@@ -8589,6 +8593,18 @@
 
         wrapper.className =
             'order-product';
+
+
+        const hasSelectedProduct =
+            state.products.some(
+                p =>
+                    String(
+                        p?.folder || ''
+                    ) ===
+                    String(
+                        productFolder || ''
+                    )
+            );
 
 
         wrapper.innerHTML = `
@@ -8647,6 +8663,20 @@
                             .join('')
                     }
 
+                    ${
+                        productFolder &&
+                        !hasSelectedProduct
+                            ? `
+                                <option
+                                    value="${esc(productFolder)}"
+                                    selected
+                                >
+                                    ${esc(productFolder)}
+                                </option>
+                              `
+                            : ''
+                    }
+
                 </select>
 
             </div>
@@ -8694,12 +8724,15 @@
             )
             .onclick =
                 () => {
-                    const selectedFolder = wrapper.querySelector('.order-product-select')?.value || '';
-                    addVariationRow(wrapper);
-                    const productSelect = wrapper.querySelector('.order-product-select');
-                    if (productSelect) productSelect.value = selectedFolder;
-                    wrapper.querySelectorAll('.variation-row').forEach(row => refreshVariationColors(row));
-                    loadNegotiatedPrices(wrapper);
+
+                    addVariationRow(
+                        wrapper
+                    );
+
+                    loadNegotiatedPrices(
+                        wrapper
+                    );
+
                 };
 
 
@@ -8710,9 +8743,24 @@
             .addEventListener(
                 'change',
                 () => {
-                    wrapper.querySelectorAll('.variation-row').forEach(row => refreshVariationColors(row));
-                    loadNegotiatedPrices(wrapper);
+
+                    wrapper
+                        .querySelectorAll(
+                            '.variation-row'
+                        )
+                        .forEach(
+                            row =>
+                                refreshVariationColors(
+                                    row
+                                )
+                        );
+
+                    loadNegotiatedPrices(
+                        wrapper
+                    );
+
                     calculateOrder();
+
                 }
             );
 
@@ -8723,12 +8771,21 @@
             );
 
 
-        addVariationRow(
-            wrapper
-        );
+        if (
+            options?.addDefaultVariation !==
+            false
+        ) {
+
+            addVariationRow(
+                wrapper
+            );
+
+        }
+
+
+        return wrapper;
 
     }
-
 
     function getOrderProduct(folder) {
         return state.products.find(p => String(p?.folder || '') === String(folder || '')) || null;
@@ -8774,7 +8831,8 @@
 
 
     function addVariationRow(
-        productCard
+        productCard,
+        values = {}
     ) {
 
         const list =
@@ -8782,6 +8840,11 @@
                 .querySelector(
                     '.variation-list'
                 );
+
+
+        if (!list) {
+            return null;
+        }
 
 
         const row =
@@ -8794,10 +8857,72 @@
             'variation-row';
 
 
-        const colors =
-            productCard
-                .dataset
-                .colors || '';
+        const savedMaterial =
+            String(
+                values?.material || ''
+            ).trim();
+
+
+        const savedColor =
+            String(
+                values?.color || ''
+            ).trim();
+
+
+        const savedQuantity =
+            Math.max(
+                1,
+                parseInt(
+                    values?.quantity,
+                    10
+                ) || 1
+            );
+
+
+        const rawSavedPrice =
+            values?.unit_price ??
+            values?.unitPrice ??
+            '';
+
+
+        const hasSavedPrice =
+            rawSavedPrice !== '' &&
+            rawSavedPrice !== null &&
+            typeof rawSavedPrice !==
+                'undefined';
+
+
+        const savedPrice =
+            hasSavedPrice &&
+            Number.isFinite(
+                Number(rawSavedPrice)
+            )
+                ? Number(rawSavedPrice)
+                : '';
+
+
+        const availableMaterials =
+            materialNames();
+
+
+        const materialOptions =
+            [
+                ...availableMaterials
+            ];
+
+
+        if (
+            savedMaterial &&
+            !materialOptions.includes(
+                savedMaterial
+            )
+        ) {
+
+            materialOptions.push(
+                savedMaterial
+            );
+
+        }
 
 
         row.innerHTML = `
@@ -8805,13 +8930,20 @@
             <select class="variation-material">
 
                 ${
-                    materialNames()
+                    materialOptions
                         .map(
 
                             m =>
 
                                 `
-                                <option value="${esc(m)}">
+                                <option
+                                    value="${esc(m)}"
+                                    ${
+                                        m === savedMaterial
+                                            ? 'selected'
+                                            : ''
+                                    }
+                                >
                                     ${esc(m)}
                                 </option>
                                 `
@@ -8833,7 +8965,7 @@
                 type="number"
                 min="1"
                 step="1"
-                value="1"
+                value="${esc(savedQuantity)}"
             >
 
 
@@ -8842,6 +8974,11 @@
                 type="number"
                 step="0.01"
                 placeholder="Preço unit."
+                value="${
+                    savedPrice === ''
+                        ? ''
+                        : esc(savedPrice)
+                }"
             >
 
 
@@ -8855,7 +8992,59 @@
         `;
 
 
-        refreshVariationColors(row);
+        /*
+         * A linha precisa estar dentro do card ANTES de carregar
+         * as cores. refreshVariationColors() usa row.closest()
+         * para descobrir qual produto pertence à variação.
+         */
+        list.appendChild(
+            row
+        );
+
+
+        refreshVariationColors(
+            row,
+            savedColor
+        );
+
+
+        const materialSelect =
+            row.querySelector(
+                '.variation-material'
+            );
+
+
+        if (
+            materialSelect &&
+            savedMaterial
+        ) {
+
+            materialSelect.value =
+                savedMaterial;
+
+        }
+
+
+        const priceInput =
+            row.querySelector(
+                '.variation-price'
+            );
+
+
+        if (priceInput) {
+
+            /*
+             * Preço que veio de um pedido existente é histórico e
+             * não deve ser substituído automaticamente pelo preço
+             * negociado atual do cliente.
+             */
+            priceInput.dataset.autoPrice =
+                hasSavedPrice
+                    ? 'false'
+                    : 'true';
+
+        }
+
 
         row
             .querySelector(
@@ -8871,26 +9060,65 @@
                 };
 
 
-        row.querySelectorAll('input,select').forEach(element => {
-            element.addEventListener('input', () => {
-                if (element.classList.contains('variation-price')) element.dataset.autoPrice = 'false';
-                calculateOrder();
-            });
-            element.addEventListener('change', () => {
-                if (element.classList.contains('variation-color') || element.classList.contains('variation-material')) loadNegotiatedPrices(productCard);
-                calculateOrder();
-            });
-        });
+        row
+            .querySelectorAll(
+                'input,select'
+            )
+            .forEach(
+                element => {
+
+                    element.addEventListener(
+                        'input',
+                        () => {
+
+                            if (
+                                element.classList.contains(
+                                    'variation-price'
+                                )
+                            ) {
+
+                                element.dataset.autoPrice =
+                                    'false';
+
+                            }
+
+                            calculateOrder();
+
+                        }
+                    );
 
 
-        list.appendChild
+                    element.addEventListener(
+                        'change',
+                        () => {
 
-        list.appendChild(
-            row
-        );
+                            if (
+                                element.classList.contains(
+                                    'variation-color'
+                                ) ||
+                                element.classList.contains(
+                                    'variation-material'
+                                )
+                            ) {
+
+                                loadNegotiatedPrices(
+                                    productCard
+                                );
+
+                            }
+
+                            calculateOrder();
+
+                        }
+                    );
+
+                }
+            );
+
+
+        return row;
 
     }
-
 
     $('#addOrderProduct')
         .onclick =
@@ -9889,49 +10117,158 @@
 
 
     function fillOrderForEdit(order) {
+
         $('#orderClient').value =
-            String(order?.customer_id || order?.customer?.id || '').trim();
+            String(
+                order?.customer_id ||
+                order?.customer?.id ||
+                ''
+            ).trim();
+
 
         $('#orderStatus').value =
-            order?.status || 'Orçamento';
+            order?.status ||
+            'Orçamento';
+
 
         $('#orderPayment').value =
-            order?.payment_method || '';
+            order?.payment_method ||
+            '';
+
 
         $('#orderDueDate').value =
-            order?.due_date || '';
+            order?.due_date ||
+            '';
 
-        $('#orderProducts').innerHTML = '';
 
-        const items = Array.isArray(order?.items) ? order.items : [];
+        $('#orderProducts').innerHTML =
+            '';
 
-        items.forEach(item => {
-            const folder = String(item?.product_folder || item?.folder || item?.product?.folder || '').trim();
-            if (!folder) return;
-            addOrderProductCard(folder);
-            const card = $$('#orderProducts .order-product').at(-1);
-            if (!card) return;
-            const defaultRow = card.querySelector('.variation-row');
-            if (defaultRow) defaultRow.remove();
-            const variants = Array.isArray(item?.variants) ? item.variants : (Array.isArray(item?.product_variants) ? item.product_variants : (item?.material || item?.color || item?.quantity ? [item] : []));
-            variants.forEach(v => {
-                addVariationRow(card);
-                const row = card.querySelectorAll('.variation-row').at(-1);
-                if (!row) return;
-                row.querySelector('.variation-material').value = v?.material || '';
-                row.querySelector('.variation-color').value = v?.color || '';
-                row.querySelector('.variation-quantity').value = Number(v?.quantity || 1);
-                row.querySelector('.variation-price').value = Number(v?.unit_price ?? v?.unitPrice ?? 0);
-            });
-            if (!variants.length) addVariationRow(card);
-        });
+
+        const items =
+            Array.isArray(
+                order?.items
+            )
+                ? order.items
+                : [];
+
+
+        items.forEach(
+            item => {
+
+                const folder =
+                    String(
+                        item?.product_folder ||
+                        item?.folder ||
+                        item?.product?.folder ||
+                        ''
+                    ).trim();
+
+
+                if (!folder) {
+                    return;
+                }
+
+
+                /*
+                 * Na edição não criamos uma variação vazia.
+                 * O próprio pedido será usado para reconstruir
+                 * exatamente as variações que já estavam salvas.
+                 */
+                const card =
+                    addOrderProductCard(
+                        folder,
+                        {
+                            addDefaultVariation:
+                                false
+                        }
+                    );
+
+
+                if (!card) {
+                    return;
+                }
+
+
+                const variants =
+                    Array.isArray(
+                        item?.variants
+                    )
+                        ? item.variants
+                        : Array.isArray(
+                            item?.product_variants
+                        )
+                            ? item.product_variants
+                            : (
+                                item?.material ||
+                                item?.color ||
+                                item?.quantity
+                            )
+                                ? [item]
+                                : [];
+
+
+                variants.forEach(
+                    variant => {
+
+                        addVariationRow(
+                            card,
+                            {
+                                material:
+                                    variant?.material ||
+                                    '',
+
+                                color:
+                                    variant?.color ||
+                                    '',
+
+                                quantity:
+                                    Number(
+                                        variant?.quantity ??
+                                        1
+                                    ) || 1,
+
+                                unit_price:
+                                    Number(
+                                        variant?.unit_price ??
+                                        variant?.unitPrice ??
+                                        0
+                                    ) || 0
+                            }
+                        );
+
+                    }
+                );
+
+
+                if (!variants.length) {
+
+                    addVariationRow(
+                        card
+                    );
+
+                }
+
+            }
+        );
+
 
         calculateOrder();
 
-        $('#saveOrder').textContent = 'ATUALIZAR PEDIDO';
-        $('#clearOrder').textContent = 'CANCELAR E LIMPAR';
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        $('#saveOrder').textContent =
+            'ATUALIZAR PEDIDO';
+
+
+        $('#clearOrder').textContent =
+            'CANCELAR E LIMPAR';
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
     }
 
 
@@ -9942,70 +10279,188 @@
                 const order =
                     state.currentOrder;
 
+
                 if (!order) {
+
+                    alert(
+                        'Nenhum pedido está aberto.'
+                    );
+
                     return;
+
                 }
+
 
                 const id =
-                    String(order?.id || '').trim();
+                    orderId(
+                        order
+                    );
+
 
                 if (!id) {
-                    alert('Este pedido não possui um ID válido.');
+
+                    alert(
+                        'Este pedido não possui um ID válido.'
+                    );
+
                     return;
+
                 }
 
+
+                const button =
+                    $('#saveOrderStatus');
+
+
+                const oldText =
+                    button?.textContent ||
+                    'SALVAR STATUS E PAGAMENTO';
+
+
+                if (button) {
+
+                    button.disabled =
+                        true;
+
+                    button.textContent =
+                        'SALVANDO...';
+
+                }
+
+
                 try {
+
+                    const payload = {
+
+                        id,
+
+                        status:
+                            $('#orderModalProductionStatus')
+                                .value,
+
+                        payment_status:
+                            $('#orderModalPaymentStatus')
+                                .value,
+
+                        amount_paid:
+                            Number(
+                                $('#orderModalAmountPaid')
+                                    .value ||
+                                0
+                            ) || 0,
+
+                        due_date:
+                            $('#orderModalDueDate')
+                                .value ||
+                            ''
+
+                    };
+
 
                     const response =
                         await api(
                             '/api/order',
                             {
-                                method: 'PUT',
-                                body: {
-                                    id,
-                                    status: $('#orderModalProductionStatus').value,
-                                    payment_status: $('#orderModalPaymentStatus').value,
-                                    amount_paid: Number($('#orderModalAmountPaid').value || 0) || 0,
-                                    due_date: $('#orderModalDueDate').value || ''
-                                }
+                                method:
+                                    'PUT',
+
+                                body:
+                                    payload
                             }
                         );
+
 
                     const updated =
                         response?.order ||
                         {
                             ...order,
-                            status: $('#orderModalProductionStatus').value,
-                            payment_status: $('#orderModalPaymentStatus').value,
-                            amount_paid: Number($('#orderModalAmountPaid').value || 0) || 0,
-                            due_date: $('#orderModalDueDate').value || ''
+                            ...payload
                         };
+
+
+                    const updatedId =
+                        orderId(
+                            updated
+                        ) ||
+                        id;
+
 
                     state.currentOrder =
                         updated;
 
+
                     const index =
                         state.orders.findIndex(
-                            o => String(o?.id || '') === id
+                            o =>
+                                orderId(o) ===
+                                id
                         );
 
+
                     if (index >= 0) {
+
                         state.orders[index] =
                             updated;
+
                     }
+
+
+                    /*
+                     * Recarrega os pedidos do Worker para que o modal,
+                     * a lista e o dashboard usem a mesma versão que foi
+                     * realmente persistida em Dados/pedidos.json.
+                     */
+                    await loadOrders();
 
                     await loadBilling();
 
-                    openOrderDetails(id);
 
-                    alert('Status e pagamento atualizados.');
+                    const persisted =
+                        state.orders.find(
+                            o =>
+                                orderId(o) ===
+                                updatedId
+                        );
+
+
+                    if (persisted) {
+
+                        state.currentOrder =
+                            persisted;
+
+                    }
+
+
+                    await openOrderDetails(
+                        updatedId
+                    );
+
+
+                    alert(
+                        'Status e pagamento atualizados.'
+                    );
 
                 } catch (err) {
+
                     alert(
                         err.message ||
                         'Não foi possível atualizar o pedido.'
                     );
+
+                } finally {
+
+                    if (button) {
+
+                        button.disabled =
+                            false;
+
+                        button.textContent =
+                            oldText;
+
+                    }
+
                 }
+
             };
 
 
