@@ -2500,6 +2500,15 @@
                             —
                         </strong>
 
+                        <button
+                            type="button"
+                            class="btn small"
+                            id="viewPendingDashboard"
+                            style="margin-top:10px"
+                        >
+                            Ver pendências
+                        </button>
+
                     </div>
 
                 </div>
@@ -4079,6 +4088,25 @@
 
                     </div>
 
+                    <div class="form-grid" style="margin-top:14px">
+
+                        <div class="field">
+                            <label>Cliente para preço negociado</label>
+                            <select id="calcCustomer">
+                                <option value="">Nenhum cliente selecionado</option>
+                            </select>
+                            <small>Se houver preço negociado, ele será carregado automaticamente.</small>
+                        </div>
+
+                        <div class="field">
+                            <label>Cor</label>
+                            <select id="calcColor">
+                                <option value="">Selecione uma cor</option>
+                            </select>
+                        </div>
+
+                    </div>
+
 
                     <!-- =========================================
                          MANUAL
@@ -4272,7 +4300,7 @@
                             <div class="field">
 
                                 <label>
-                                    Margem 4Maker (%)
+                                    Acréscimo 4Maker (%)
                                 </label>
 
                                 <input
@@ -4291,7 +4319,7 @@
                             >
 
                                 <label>
-                                    Margem desejada do revendedor (%)
+                                    Acréscimo desejado do revendedor (%)
                                 </label>
 
                                 <input
@@ -7254,6 +7282,50 @@
         };
 
 
+    function fillCalcCustomers() {
+        const select = $('#calcCustomer');
+        if (!select) return;
+        const old = String(select.value || '');
+        select.innerHTML = '<option value="">Nenhum cliente selecionado</option>' +
+            state.clients.filter(c => clientId(c)).map(c =>
+                `<option value="${esc(clientId(c))}">${esc(c?.name || 'Cliente')}</option>`
+            ).join('');
+        if (old && state.clients.some(c => clientId(c) === old)) select.value = old;
+    }
+
+    function fillCalcColors(product) {
+        const select = $('#calcColor');
+        if (!select) return;
+        const old = String(select.value || '');
+        const colors = Array.isArray(product?.colors) ? product.colors : [];
+        select.innerHTML = '<option value="">Selecione uma cor</option>' + colors.map(c => {
+            const name = typeof c === 'string' ? c : c?.name;
+            return name ? `<option value="${esc(name)}">${esc(name)}</option>` : '';
+        }).join('');
+        if (old && colors.some(c => (typeof c === 'string' ? c : c?.name) === old)) select.value = old;
+    }
+
+    async function loadCalcNegotiatedPrice() {
+        const customerId = String($('#calcCustomer')?.value || '').trim();
+        const folder = String($('#calcProduct')?.value || '').trim();
+        if (!customerId || !folder) return;
+        try {
+            const d = await api('/api/prices?customerId=' + encodeURIComponent(customerId) + '&productFolder=' + encodeURIComponent(folder));
+            const prices = Array.isArray(d?.prices) ? d.prices : [];
+            const material = String($('#cMaterialSelect')?.value || '').trim();
+            const color = String($('#calcColor')?.value || '').trim();
+            const found = prices.find(x => String(x?.material || '').trim() === material && String(x?.color || '').trim() === color)
+                || prices.find(x => String(x?.material || '').trim() === material && !x?.color)
+                || prices.find(x => !x?.material && String(x?.color || '').trim() === color)
+                || prices.find(x => !x?.material && !x?.color);
+            const target = $('#cTargetPrice');
+            if (found && target) {
+                target.value = Number(found.price || 0).toFixed(2);
+                target.dataset.negotiatedPrice = 'true';
+            }
+        } catch {}
+    }
+
     function fillCalcProducts() {
 
         const s =
@@ -7355,6 +7427,16 @@
     window.calcProduct =
         calcProduct;
 
+
+    $('#calcProduct')?.addEventListener('change', async () => {
+        const product = getOrderProduct($('#calcProduct').value);
+        fillCalcColors(product);
+        await loadCalcNegotiatedPrice();
+    });
+
+    $('#calcCustomer')?.addEventListener('change', loadCalcNegotiatedPrice);
+    $('#calcColor')?.addEventListener('change', loadCalcNegotiatedPrice);
+    $('#cMaterialSelect')?.addEventListener('change', loadCalcNegotiatedPrice);
 
     $('#calculate')
         .onclick =
@@ -7634,28 +7716,15 @@
             'final'
         ) {
 
-            const effectiveMargin =
+            const effectiveMarkup =
                 Math.max(
                     margin,
                     minimumMargin
                 );
 
-
             unitPrice =
-
-                commissionPercent < 1
-
-                    ?
-
-                    unitCost * (1 + effectiveMargin) /
-                    (
-                        1 -
-                        commissionPercent
-                    )
-
-                    :
-
-                    unitCost;
+                unitCost * (1 + effectiveMarkup) /
+                Math.max(0.000001, (1 - commissionPercent));
 
         }
 
@@ -7665,16 +7734,15 @@
             'reseller'
         ) {
 
-            const effective4MakerMargin =
+            const effective4MakerMarkup =
                 Math.max(
                     margin,
                     minimumMargin
                 );
 
-
             resellerPrice =
-
-                unitCost * (1 + effective4MakerMargin);
+                unitCost * (1 + effective4MakerMarkup) /
+                Math.max(0.000001, (1 - commissionPercent));
 
 
             const resellerMargin =
@@ -7698,19 +7766,10 @@
             if (
                 targetPrice > 0
             ) {
-
-                customerPrice =
-                    Math.max(
-                        targetPrice,
-                        resellerPrice
-                    );
-
+                customerPrice = targetPrice;
             } else {
-
                 customerPrice =
-
                     resellerPrice * (1 + resellerMargin);
-
             }
 
 
@@ -7830,30 +7889,9 @@
 
 
         const commission =
-            (
-                state.calcMode ===
-                'cost'
-            )
-
-                ?
-
-                0
-
-                :
-
-                (
-                    state.calcMode ===
-                    'reseller'
-
-                        ?
-
-                        resellerPrice
-
-                        :
-
-                        unitPrice
-                ) *
-                commissionPercent;
+            (state.calcMode === 'cost')
+                ? 0
+                : (state.calcMode === 'reseller' ? resellerPrice : unitPrice) * commissionPercent;
 
 
         const totalCost =
@@ -7874,14 +7912,31 @@
 
                 unitPrice;
 
+        const negotiatedPrice = Number($('#cTargetPrice')?.value || 0);
+        const hasNegotiated = Boolean(
+            $('#calcCustomer')?.value &&
+            negotiatedPrice > 0 &&
+            $('#cTargetPrice')?.dataset.negotiatedPrice === 'true'
+        );
+
+        const effectiveFinalUnitPrice =
+            hasNegotiated && state.calcMode !== 'cost'
+                ? negotiatedPrice
+                : finalUnitPrice;
+
 
         const finalTotal =
-            finalUnitPrice *
+            effectiveFinalUnitPrice *
             quantity;
 
 
+        const revenueFor4Maker =
+            state.calcMode === 'reseller'
+                ? resellerPrice
+                : effectiveFinalUnitPrice;
+
         const profit =
-            finalUnitPrice -
+            revenueFor4Maker -
             totalCost;
 
 
@@ -7951,7 +8006,7 @@
         $('#rCustomer')
             .textContent =
                 money(
-                    finalUnitPrice
+                    effectiveFinalUnitPrice
                 );
 
 
@@ -7965,7 +8020,7 @@
         $('#price')
             .textContent =
                 money(
-                    finalUnitPrice
+                    effectiveFinalUnitPrice
                 );
 
 
@@ -8009,7 +8064,13 @@
             resellerPrice,
 
             finalPrice:
-                finalUnitPrice,
+                effectiveFinalUnitPrice,
+
+            customerId:
+                String($('#calcCustomer')?.value || ''),
+
+            color:
+                String($('#calcColor')?.value || ''),
 
             total:
                 finalTotal,
@@ -8338,45 +8399,15 @@
             ).join('');
 
 
-        $$('#clients .client-card')
+        $$('#clients .client-open-btn')
             .forEach(
-                card => {
-
-                    const id =
-                        String(
-                            card.dataset.clientId ||
-                            ''
-                        );
-
-
-                    card.addEventListener(
+                button => {
+                    const card = button.closest('.client-card');
+                    const id = String(card?.dataset.clientId || '');
+                    button.addEventListener(
                         'click',
-                        e => {
-
-                            if (
-                                e.target.closest(
-                                    'button'
-                                )
-                            ) {
-                                return;
-                            }
-
-                            openClientDetails(id);
-
-                        }
+                        () => openClientDetails(id)
                     );
-
-
-                    card
-                        .querySelector(
-                            '.client-open-btn'
-                        )
-                        ?.addEventListener(
-                            'click',
-                            () =>
-                                openClientDetails(id)
-                        );
-
                 }
             );
 
@@ -9096,10 +9127,14 @@
                 '.add-variation'
             )
             .onclick =
-                () =>
-                    addVariationRow(
-                        wrapper
-                    );
+                () => {
+                    const selectedFolder = wrapper.querySelector('.order-product-select')?.value || '';
+                    addVariationRow(wrapper);
+                    const productSelect = wrapper.querySelector('.order-product-select');
+                    if (productSelect) productSelect.value = selectedFolder;
+                    wrapper.querySelectorAll('.variation-row').forEach(row => refreshVariationColors(row));
+                    loadNegotiatedPrices(wrapper);
+                };
 
 
         wrapper
@@ -10350,7 +10385,13 @@
 
 
             state.billing =
-                d.billing || [];
+                Array.isArray(d?.billing)
+                    ? d.billing
+                    : Array.isArray(d?.billing?.orders)
+                        ? d.billing.orders
+                        : Array.isArray(d?.orders)
+                            ? d.orders
+                            : [];
 
 
             renderBilling();
@@ -10418,8 +10459,8 @@
 
 
                 const customer =
-                    $('#orderClient')
-                        ?.value ||
+                    $('#calcCustomer')?.value ||
+                    $('#orderClient')?.value ||
                     '';
 
 
@@ -11102,43 +11143,26 @@
                 state.orders.length;
 
 
+        const billingRows =
+            Array.isArray(state.billing)
+                ? state.billing
+                : [];
+
         const revenue =
-            state.billing
+            billingRows
                 .reduce(
-
-                    (
-                        total,
-                        item
-                    ) =>
-
-                        total +
-                        Number(
-                            item.total ||
-                            0
-                        ),
-
+                    (total, item) =>
+                        total + Number(item?.total ?? 0),
                     0
-
                 );
 
 
         const received =
-            state.billing
+            billingRows
                 .reduce(
-
-                    (
-                        total,
-                        item
-                    ) =>
-
-                        total +
-                        Number(
-                            item.received ||
-                            0
-                        ),
-
+                    (total, item) =>
+                        total + Number(item?.received ?? item?.amount_paid ?? 0),
                     0
-
                 );
 
 
@@ -11156,17 +11180,24 @@
                 );
 
 
-        $('#mPending')
-            .textContent =
+        const pendingOrders =
+            billingRows.filter(item =>
+                Number(item?.pending ?? (Number(item?.total ?? 0) - Number(item?.amount_paid ?? item?.received ?? 0))) > 0
+            );
 
-                state.products
-                    .filter(
-                        p =>
-                            !(p.hasData || p.dataCreated || p._detailLoaded)
-                    )
-                    .length;
+        $('#mPending').textContent = pendingOrders.length;
 
     }
+
+
+    $('#viewPendingDashboard')?.addEventListener('click', () => {
+        go('faturamento');
+        const input = $('#billingSearch');
+        if (input) {
+            input.value = 'Pendente';
+            renderBilling();
+        }
+    });
 
 
     /* =========================================================
