@@ -170,12 +170,12 @@
         "estimated_cost": 0,
         "estimated_profit": 240,
         "status": "Confirmado",
-        "payment_status": "Pendente",
+        "payment_status": "Parcial",
         "payment_method": "PIX",
-        "amount_paid": 0,
+        "amount_paid": 100,
         "due_date": "",
         "notes": "",
         "created_at": "2026-09-05T19:43:46.992Z",
-        "updated_at": "2026-09-05T19:43:46.992Z"
+        "updated_at": "2026-09-05T20:22:04.106Z"
     }
 ]
