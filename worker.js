@@ -2424,6 +2424,22 @@ async function createClient(
             body.margin
           ),
 
+    default_payment_method:
+      String(
+        body.default_payment_method ||
+        ""
+      ).trim(),
+
+    default_payment_terms_days:
+      Math.max(
+        0,
+        Math.floor(
+          numberOrZero(
+            body.default_payment_terms_days
+          )
+        )
+      ),
+
     address:
       String(
         body.address || ""
@@ -2660,6 +2676,33 @@ async function updateClient(
             : numberOrZero(
                 body.margin
               ),
+
+    default_payment_method:
+      String(
+        body.default_payment_method ??
+        current.default_payment_method ??
+        ""
+      ).trim(),
+
+    default_payment_terms_days:
+      typeof body.default_payment_terms_days ===
+        "undefined"
+        ? Math.max(
+            0,
+            Math.floor(
+              numberOrZero(
+                current.default_payment_terms_days
+              )
+            )
+          )
+        : Math.max(
+            0,
+            Math.floor(
+              numberOrZero(
+                body.default_payment_terms_days
+              )
+            )
+          ),
 
     address:
       String(
@@ -3255,6 +3298,16 @@ async function createOrder(
       body.payment_method ||
       "",
 
+    payment_terms_days:
+      Math.max(
+        0,
+        Math.floor(
+          numberOrZero(
+            body.payment_terms_days
+          )
+        )
+      ),
+
     amount_paid:
       numberOrZero(
         body.amount_paid
@@ -3263,6 +3316,12 @@ async function createOrder(
     due_date:
       String(
         body.due_date ||
+        ""
+      ),
+
+    payment_received_date:
+      String(
+        body.payment_received_date ||
         ""
       ),
 
@@ -3441,6 +3500,26 @@ async function updateOrder(
       body.payment_method ??
       current.payment_method,
 
+    payment_terms_days:
+      typeof body.payment_terms_days ===
+        "undefined"
+        ? Math.max(
+            0,
+            Math.floor(
+              numberOrZero(
+                current.payment_terms_days
+              )
+            )
+          )
+        : Math.max(
+            0,
+            Math.floor(
+              numberOrZero(
+                body.payment_terms_days
+              )
+            )
+          ),
+
     amount_paid:
       numberOrZero(
         body.amount_paid ??
@@ -3450,6 +3529,11 @@ async function updateOrder(
     due_date:
       body.due_date ??
       current.due_date,
+
+    payment_received_date:
+      body.payment_received_date ??
+      current.payment_received_date ??
+      "",
 
     notes:
       body.notes ??
@@ -3770,7 +3854,9 @@ async function rebuildBillingFile(
       status: order.status || "",
       payment_status: order.payment_status || "Pendente",
       payment_method: order.payment_method || "",
+      payment_terms_days: Math.max(0, Math.floor(numberOrZero(order.payment_terms_days))),
       due_date: order.due_date || "",
+      payment_received_date: order.payment_received_date || "",
       updated_at: order.updated_at || new Date().toISOString()
     }));
 
@@ -3878,8 +3964,22 @@ async function updateBillingFile(
       order.payment_method ||
       "",
 
+    payment_terms_days:
+      Math.max(
+        0,
+        Math.floor(
+          numberOrZero(
+            order.payment_terms_days
+          )
+        )
+      ),
+
     due_date:
       order.due_date ||
+      "",
+
+    payment_received_date:
+      order.payment_received_date ||
       "",
 
     updated_at:
@@ -4237,6 +4337,20 @@ function snapshotCustomer(
     margin:
       customer.margin ??
       null,
+
+    default_payment_method:
+      customer.default_payment_method ||
+      "",
+
+    default_payment_terms_days:
+      Math.max(
+        0,
+        Math.floor(
+          numberOrZero(
+            customer.default_payment_terms_days
+          )
+        )
+      ),
 
     address:
       customer.address ||

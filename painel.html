@@ -12,6 +12,13 @@
 
     <title>4Maker 3D — Painel</title>
 
+    <meta name="theme-color" content="#2d7cff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="4Maker Admin">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="logo.png">
+
     <style>
 
         :root {
@@ -2190,6 +2197,206 @@
 
         }
 
+        /* =====================================================
+           V4.2 — QUALIDADE DE VIDA / PWA
+        ===================================================== */
+
+        .admin-brand {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .admin-brand-badge {
+            position: absolute;
+            right: -13px;
+            bottom: -7px;
+            border: 1px solid #5b9cff;
+            background: #10254a;
+            color: #8ab9ff;
+            border-radius: 999px;
+            padding: 4px 7px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.1px;
+            line-height: 1;
+        }
+
+        .top-search {
+            position: relative;
+            margin-left: auto;
+            width: min(430px, 42vw);
+            min-width: 220px;
+        }
+
+        .top-search input {
+            width: 100%;
+            height: 46px;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #111318;
+            color: var(--text);
+            padding: 0 42px 0 14px;
+            outline: none;
+        }
+
+        .top-search input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px #2d7cff1e;
+        }
+
+        .top-search-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            pointer-events: none;
+        }
+
+        .global-search-results {
+            display: none;
+            position: absolute;
+            z-index: 80;
+            left: 0;
+            right: 0;
+            top: calc(100% + 8px);
+            max-height: 420px;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #111318;
+            box-shadow: var(--shadow);
+            padding: 8px;
+        }
+
+        .global-search-results.show { display: block; }
+
+        .global-result {
+            width: 100%;
+            border: 0;
+            background: transparent;
+            color: var(--text);
+            text-align: left;
+            padding: 11px 12px;
+            border-radius: 12px;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .global-result:hover,
+        .global-result:focus-visible {
+            background: #182033;
+            outline: none;
+        }
+
+        .global-result .kind {
+            min-width: 62px;
+            color: #8ab9ff;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .8px;
+        }
+
+        .global-result strong,
+        .global-result small {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .global-result small { color: var(--muted); margin-top: 2px; }
+
+        .toast-stack {
+            position: fixed;
+            z-index: 200;
+            right: 18px;
+            bottom: 18px;
+            display: grid;
+            gap: 9px;
+            width: min(380px, calc(100vw - 32px));
+            pointer-events: none;
+        }
+
+        .toast-item {
+            pointer-events: auto;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #14171e;
+            color: var(--text);
+            box-shadow: var(--shadow);
+            padding: 13px 14px;
+            animation: toastIn .2s ease;
+        }
+
+        .toast-item.success { border-color: #3a7c5c; }
+        .toast-item.error { border-color: #7c3f45; }
+        .toast-item.warning { border-color: #826827; }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .draft-banner {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding: 13px 14px;
+            border: 1px solid #2d7cff55;
+            background: #10213d;
+            border-radius: 14px;
+        }
+
+        .draft-banner.show { display: flex; }
+        .draft-banner p { margin: 0; color: #cbdcff; }
+        .draft-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .quick-status-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 12px;
+        }
+
+        .quick-status-grid .btn.current {
+            border-color: var(--blue);
+            background: #16305c;
+            color: #91bdff;
+        }
+
+        .payment-term-custom { display: none; }
+        .payment-term-custom.show { display: block; }
+
+        .install-hint {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.4;
+            padding: 0 12px 8px;
+        }
+
+        @media (max-width: 850px) {
+            .topbar {
+                min-height: 92px;
+                height: auto;
+                flex-wrap: wrap;
+                padding-top: 14px;
+                padding-bottom: 14px;
+            }
+            .top-title { flex: 1; min-width: 0; }
+            .top-search { order: 3; width: 100%; min-width: 0; margin-left: 0; }
+            .draft-banner { align-items: flex-start; flex-direction: column; }
+            .draft-actions { width: 100%; }
+            .draft-actions .btn { flex: 1; }
+            .order-status-editor > div[style*=\"grid-template-columns\"] { grid-template-columns: 1fr !important; }
+        }
+
     </style>
 
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -2218,10 +2425,13 @@
 
         <div class="side-top">
 
-            <img
-                src="logo.png"
-                alt="4Maker 3D"
-            >
+            <span class="admin-brand">
+                <img
+                    src="logo.png"
+                    alt="4Maker 3D"
+                >
+                <span class="admin-brand-badge">ADMIN</span>
+            </span>
 
             <button
                 class="close-side"
@@ -2337,6 +2547,18 @@
             </div>
 
 
+            <button
+                type="button"
+                id="installAdminApp"
+            >
+                <span class="ico">⇩</span>
+                Instalar 4Maker Admin
+            </button>
+
+            <small class="install-hint" id="installAdminHint">
+                Crie um atalho em formato de aplicativo.
+            </small>
+
             <button data-route="configuracoes">
 
                 <span class="ico">
@@ -2388,6 +2610,18 @@
                     Gerenciamento 4Maker 3D
                 </p>
 
+            </div>
+
+            <div class="top-search">
+                <input
+                    id="globalSearch"
+                    type="search"
+                    autocomplete="off"
+                    placeholder="Buscar produto, cliente ou pedido..."
+                    aria-label="Busca global"
+                >
+                <span class="top-search-icon">⌕</span>
+                <div class="global-search-results" id="globalSearchResults"></div>
             </div>
 
         </header>
@@ -3342,6 +3576,32 @@
 
                             </div>
 
+                            <div class="field">
+                                <label>Pagamento padrão</label>
+                                <select id="clientDefaultPayment">
+                                    <option value="">Não definido</option>
+                                    <option value="PIX">PIX</option>
+                                    <option value="Dinheiro">Dinheiro</option>
+                                    <option value="Cartão">Cartão</option>
+                                    <option value="Transferência">Transferência</option>
+                                    <option value="Boleto">Boleto</option>
+                                    <option value="Faturado">Faturado</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+
+                            <div class="field">
+                                <label>Prazo padrão faturado (dias)</label>
+                                <input
+                                    id="clientDefaultTerm"
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    placeholder="Ex.: 30"
+                                >
+                                <small>Usado automaticamente em novos pedidos faturados.</small>
+                            </div>
+
 
                             <div class="field full">
 
@@ -3564,9 +3824,16 @@
                 style="margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)"
             >
                 <h3 style="margin:0 0 12px">💰 Status do pedido</h3>
-                <div
-                    style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"
-                >
+
+                <div class="quick-status-grid" id="quickStatusButtons">
+                    <button type="button" class="btn small" data-quick-status="Orçamento">Orçamento</button>
+                    <button type="button" class="btn small" data-quick-status="Confirmado">Confirmado</button>
+                    <button type="button" class="btn small" data-quick-status="Em produção">Em produção</button>
+                    <button type="button" class="btn small" data-quick-status="Pronto">Pronto</button>
+                    <button type="button" class="btn small" data-quick-status="Entregue">Entregue</button>
+                </div>
+
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
                     <div class="field">
                         <label>Produção / entrega</label>
                         <select id="orderModalProductionStatus">
@@ -3579,13 +3846,41 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>Pagamento</label>
+                        <label>Situação financeira</label>
                         <select id="orderModalPaymentStatus">
                             <option value="Pendente">Pendente</option>
                             <option value="Parcial">Parcial</option>
                             <option value="Pago">Pago</option>
                             <option value="Cancelado">Cancelado</option>
                         </select>
+                    </div>
+                    <div class="field">
+                        <label>Forma de pagamento</label>
+                        <select id="orderModalPaymentMethod">
+                            <option value="">Não definida</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão">Cartão</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Faturado">Faturado</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="field" id="orderModalTermField">
+                        <label>Prazo faturado</label>
+                        <select id="orderModalPaymentTerm">
+                            <option value="">Sem prazo</option>
+                            <option value="7">7 dias</option>
+                            <option value="14">14 dias</option>
+                            <option value="21">21 dias</option>
+                            <option value="28">28 dias</option>
+                            <option value="30">30 dias</option>
+                            <option value="45">45 dias</option>
+                            <option value="60">60 dias</option>
+                            <option value="custom">Personalizado</option>
+                        </select>
+                        <input id="orderModalCustomTerm" class="payment-term-custom" type="number" min="1" step="1" placeholder="Dias" style="margin-top:8px">
                     </div>
                     <div class="field">
                         <label>Valor recebido (R$)</label>
@@ -3596,14 +3891,11 @@
                         <input id="orderModalDueDate" type="date">
                     </div>
                 </div>
-                <button
-                    type="button"
-                    class="btn primary"
-                    id="saveOrderStatus"
-                    style="width:100%;margin-top:12px"
-                >
-                    SALVAR STATUS E PAGAMENTO
-                </button>
+
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+                    <button type="button" class="btn primary" id="saveOrderStatus" style="flex:1;min-width:190px">SALVAR STATUS E PAGAMENTO</button>
+                    <button type="button" class="btn" id="markOrderPaid">✓ Marcar como pago</button>
+                </div>
             </div>
 
 
@@ -3622,6 +3914,14 @@
                     id="editOrderModal"
                 >
                     Editar pedido
+                </button>
+
+                <button
+                    type="button"
+                    class="btn"
+                    id="duplicateOrderModal"
+                >
+                    Duplicar pedido
                 </button>
 
                 <button
@@ -3671,6 +3971,14 @@
 
                 </div>
 
+
+                <div class="draft-banner" id="orderDraftBanner">
+                    <p id="orderDraftText">Existe um pedido em rascunho neste dispositivo.</p>
+                    <div class="draft-actions">
+                        <button type="button" class="btn primary small" id="restoreOrderDraft">Continuar</button>
+                        <button type="button" class="btn small" id="discardOrderDraft">Descartar</button>
+                    </div>
+                </div>
 
                 <div class="card">
 
@@ -3739,35 +4047,39 @@
 
                             <select id="orderPayment">
 
-                                <option value="">
-                                    Não definida
-                                </option>
-
-                                <option value="PIX">
-                                    PIX
-                                </option>
-
-                                <option value="Dinheiro">
-                                    Dinheiro
-                                </option>
-
-                                <option value="Cartão">
-                                    Cartão
-                                </option>
-
-                                <option value="Transferência">
-                                    Transferência
-                                </option>
-
-                                <option value="Boleto">
-                                    Boleto
-                                </option>
-
-                                <option value="Outro">
-                                    Outro
-                                </option>
+                                <option value="">Não definida</option>
+                                <option value="PIX">PIX</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão">Cartão</option>
+                                <option value="Transferência">Transferência</option>
+                                <option value="Boleto">Boleto</option>
+                                <option value="Faturado">Faturado</option>
+                                <option value="Outro">Outro</option>
 
                             </select>
+
+                        </div>
+
+
+                        <div class="field" id="orderPaymentTermField">
+
+                            <label>
+                                Prazo faturado
+                            </label>
+
+                            <select id="orderPaymentTerm">
+                                <option value="">Sem prazo</option>
+                                <option value="7">7 dias</option>
+                                <option value="14">14 dias</option>
+                                <option value="21">21 dias</option>
+                                <option value="28">28 dias</option>
+                                <option value="30">30 dias</option>
+                                <option value="45">45 dias</option>
+                                <option value="60">60 dias</option>
+                                <option value="custom">Personalizado</option>
+                            </select>
+
+                            <input id="orderCustomTerm" class="payment-term-custom" type="number" min="1" step="1" placeholder="Prazo em dias" style="margin-top:8px">
 
                         </div>
 
@@ -4678,6 +4990,15 @@
                         SALVAR PREÇO NEGOCIADO
                     </button>
 
+                    <button
+                        type="button"
+                        class="btn"
+                        id="createOrderFromCalc"
+                        style="width:100%;margin-top:10px"
+                    >
+                        CRIAR PEDIDO COM ESTE CÁLCULO
+                    </button>
+
                 </div>
 
             </section>
@@ -4885,6 +5206,7 @@
 
 </div>
 
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 
@@ -6373,7 +6695,7 @@
 
         } catch (e) {
 
-            alert(
+            toast(
                 e.message ||
                 'Não foi possível abrir o produto.'
             );
@@ -6612,7 +6934,7 @@
 
 
                 const currentFolder = String(state.current?.folder || $('#editFolder')?.textContent || '').trim();
-                if (!currentFolder) { alert('Produto inválido: pasta do produto não identificada.'); return; }
+                if (!currentFolder) { toast('Produto inválido: pasta do produto não identificada.'); return; }
 
                 const p = {
 
@@ -6821,7 +7143,7 @@
                     );
 
 
-                    alert(
+                    toast(
                         'Produto salvo com sucesso.'
                     );
 
@@ -6835,7 +7157,7 @@
 
                 } catch (err) {
 
-                    alert(
+                    toast(
                         err.message
                     );
 
@@ -7109,7 +7431,7 @@
                     );
 
 
-                    alert(
+                    toast(
                         'Produto criado.'
                     );
 
@@ -7126,7 +7448,7 @@
 
                 } catch (err) {
 
-                    alert(
+                    toast(
                         err.message
                     );
 
@@ -7624,7 +7946,7 @@
                 if ($('#calcMaterial') && [...$('#calcMaterial').options].some(o => o.value === materialName)) $('#calcMaterial').value = materialName;
                 if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
                 material = materialPrice(materialName);
-            } catch (e) { alert(e.message); return; }
+            } catch (e) { toast(e.message); return; }
         } else {
             weight = Number($('#cWeight')?.value || 0) || 0;
             time = Number($('#cTime')?.value || 0) || 0;
@@ -7995,7 +8317,7 @@
 
         if (!client) {
 
-            alert(
+            toast(
                 'Cliente não encontrado.'
             );
 
@@ -8285,10 +8607,10 @@
 
                     closeClientDetails();
                     await loadClients();
-                    alert('Cliente excluído com sucesso.');
+                    toast('Cliente excluído com sucesso.');
 
                 } catch (err) {
-                    alert(err.message);
+                    toast(err.message);
                 }
             };
 
@@ -8472,7 +8794,7 @@
                     );
 
 
-                    alert(
+                    toast(
                         'Cliente salvo com sucesso.'
                     );
 
@@ -8492,7 +8814,7 @@
 
                 } catch (err) {
 
-                    alert(
+                    toast(
                         err.message
                     );
 
@@ -9296,7 +9618,7 @@
 
                 if (!customerId) {
 
-                    alert(
+                    toast(
                         'Cliente obrigatório.'
                     );
 
@@ -9423,7 +9745,7 @@
 
                 if (!items.length) {
 
-                    alert(
+                    toast(
                         'Adicione pelo menos um produto com quantidade maior que zero.'
                     );
 
@@ -9481,7 +9803,7 @@
                     );
 
 
-                    alert(
+                    toast(
                         'Pedido salvo com sucesso.'
                     );
 
@@ -9494,7 +9816,7 @@
 
                 } catch (err) {
 
-                    alert(
+                    toast(
                         err.message
                     );
 
@@ -9723,7 +10045,7 @@
                     );
 
             } catch (err) {
-                alert(
+                toast(
                     err.message ||
                     'Não foi possível carregar o pedido.'
                 );
@@ -9732,7 +10054,7 @@
         }
 
         if (!order) {
-            alert('Pedido não encontrado.');
+            toast('Pedido não encontrado.');
             return;
         }
 
@@ -9896,7 +10218,7 @@
             if (customerId) {
                 openClientDetails(customerId);
             } else {
-                alert('Este pedido não possui cliente vinculado.');
+                toast('Este pedido não possui cliente vinculado.');
             }
         };
 
@@ -9942,10 +10264,10 @@
                     closeOrderDetails();
                     await loadOrders();
                     await loadBilling();
-                    alert('Pedido excluído com sucesso.');
+                    toast('Pedido excluído com sucesso.');
 
                 } catch (err) {
-                    alert(err.message);
+                    toast(err.message);
                 }
             };
 
@@ -9966,12 +10288,12 @@
         const order = orderOverride || state.currentOrder;
 
         if (!order) {
-            alert('Pedido não encontrado.');
+            toast('Pedido não encontrado.');
             return;
         }
 
         if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert('O módulo de PDF ainda não carregou. Verifique sua conexão e tente novamente.');
+            toast('O módulo de PDF ainda não carregou. Verifique sua conexão e tente novamente.');
             return;
         }
 
@@ -10109,7 +10431,7 @@
                 order = orders.find(o => orderId(o) === key || String(o?.order_number || o?.number || '').trim() === key);
             } catch {}
         }
-        if (!order) { alert('Pedido não encontrado.'); return; }
+        if (!order) { toast('Pedido não encontrado.'); return; }
         state.currentOrder = order;
         go('pedidos');
         fillOrderForEdit(order);
@@ -10282,7 +10604,7 @@
 
                 if (!order) {
 
-                    alert(
+                    toast(
                         'Nenhum pedido está aberto.'
                     );
 
@@ -10299,7 +10621,7 @@
 
                 if (!id) {
 
-                    alert(
+                    toast(
                         'Este pedido não possui um ID válido.'
                     );
 
@@ -10436,13 +10758,13 @@
                     );
 
 
-                    alert(
+                    toast(
                         'Status e pagamento atualizados.'
                     );
 
                 } catch (err) {
 
-                    alert(
+                    toast(
                         err.message ||
                         'Não foi possível atualizar o pedido.'
                     );
@@ -10607,7 +10929,23 @@
                         paymentStatus:
                             item.paymentStatus ??
                             item.payment_status ??
-                            'Pendente'
+                            'Pendente',
+                        paymentMethod:
+                            item.paymentMethod ??
+                            item.payment_method ??
+                            '',
+                        paymentTermsDays:
+                            Number(
+                                item.paymentTermsDays ??
+                                item.payment_terms_days ??
+                                0
+                            ) || 0,
+                        overdue:
+                            Boolean(
+                                (item.dueDate ?? item.due_date) &&
+                                String(item.paymentStatus ?? item.payment_status ?? 'Pendente') !== 'Pago' &&
+                                String(item.dueDate ?? item.due_date) < dateInputToday()
+                            )
                     })
                 )
                 .filter(
@@ -10616,7 +10954,8 @@
                             item.orderNumber,
                             item.clientName,
                             item.status,
-                            item.paymentStatus
+                            item.paymentStatus,
+                            item.paymentMethod
                         ]
                             .join(' ')
                             .toLowerCase()
@@ -10701,8 +11040,13 @@
                             </div>
 
                             <div class="line">
+                                <span>Pagamento</span>
+                                <b>${esc(item.paymentMethod || '—')}${item.paymentTermsDays ? ' · ' + esc(item.paymentTermsDays) + ' dias' : ''}</b>
+                            </div>
+
+                            <div class="line">
                                 <span>Vencimento</span>
-                                <b>${esc(item.dueDate || '—')}</b>
+                                <b style="${item.overdue ? 'color:var(--danger)' : ''}">${esc(item.dueDate || '—')}${item.overdue ? ' · VENCIDO' : ''}</b>
                             </div>
 
                             <div class="client-actions" style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
@@ -10754,7 +11098,7 @@
 
     $('#savePrice').onclick = async () => {
         const calc = state.lastCalculation;
-        if (!calc) { alert('Faça um cálculo primeiro.'); return; }
+        if (!calc) { toast('Faça um cálculo primeiro.'); return; }
 
         if (state.calcMode === 'reseller' && String($('#calcCustomer')?.value || '').trim()) {
             const customerId = String($('#calcCustomer').value).trim();
@@ -10765,9 +11109,9 @@
                     material: calc.material || '', color: calc.color || '', price: Number(calc.finalPrice || 0),
                     notes: 'Preço negociado salvo pela calculadora.'
                 }});
-                alert('Preço negociado salvo para o cliente.');
+                toast('Preço negociado salvo para o cliente.');
                 return;
-            } catch (err) { alert(err.message); return; }
+            } catch (err) { toast(err.message); return; }
         }
 
         const key = '4maker_saved_calculations';
@@ -10775,9 +11119,952 @@
         try { saved = JSON.parse(localStorage.getItem(key) || '[]'); if (!Array.isArray(saved)) saved=[]; } catch { saved=[]; }
         saved.unshift({ ...calc, id: 'CALC-' + Date.now(), savedAt: new Date().toISOString(), customerId:'' });
         localStorage.setItem(key, JSON.stringify(saved.slice(0,100)));
-        alert('Cálculo salvo no histórico de cálculos.');
+        toast('Cálculo salvo no histórico de cálculos.');
     };
 
+
+
+    /* =========================================================
+       V4.2 — QUALIDADE DE VIDA
+    ========================================================= */
+
+    const ORDER_DRAFT_KEY = '4maker_order_draft_v42';
+    let deferredInstallPrompt = null;
+    let orderDraftTimer = null;
+
+
+    function toast(message, type = 'info', duration = 3600) {
+        const stack = $('#toastStack');
+        if (!stack) return;
+
+        const item = document.createElement('div');
+        item.className = `toast-item ${type}`;
+        item.textContent = String(message ?? '');
+        stack.appendChild(item);
+
+        window.setTimeout(() => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(6px)';
+            item.style.transition = 'opacity .18s ease, transform .18s ease';
+            window.setTimeout(() => item.remove(), 220);
+        }, Math.max(1200, Number(duration) || 3600));
+    }
+
+
+    function dateInputToday() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+
+    function addDaysToInputDate(baseValue, days) {
+        const parts = String(baseValue || dateInputToday()).split('-').map(Number);
+        const date = new Date(parts[0] || 2000, Math.max(0, (parts[1] || 1) - 1), parts[2] || 1, 12, 0, 0, 0);
+        date.setDate(date.getDate() + Math.max(0, Number(days) || 0));
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+
+    function setPaymentTermSelect(select, customInput, days) {
+        if (!select || !customInput) return;
+        const n = Math.max(0, parseInt(days, 10) || 0);
+        const common = ['7', '14', '21', '28', '30', '45', '60'];
+        if (!n) {
+            select.value = '';
+            customInput.value = '';
+            customInput.classList.remove('show');
+            return;
+        }
+        if (common.includes(String(n))) {
+            select.value = String(n);
+            customInput.value = '';
+            customInput.classList.remove('show');
+        } else {
+            select.value = 'custom';
+            customInput.value = String(n);
+            customInput.classList.add('show');
+        }
+    }
+
+
+    function selectedPaymentTerm(select, customInput) {
+        if (!select) return 0;
+        if (select.value === 'custom') {
+            return Math.max(0, parseInt(customInput?.value || 0, 10) || 0);
+        }
+        return Math.max(0, parseInt(select.value || 0, 10) || 0);
+    }
+
+
+    function orderPaymentTermDays() {
+        return selectedPaymentTerm($('#orderPaymentTerm'), $('#orderCustomTerm'));
+    }
+
+
+    function modalPaymentTermDays() {
+        return selectedPaymentTerm($('#orderModalPaymentTerm'), $('#orderModalCustomTerm'));
+    }
+
+
+    function syncOrderPaymentFields({ recalculateDue = true } = {}) {
+        const isBilled = $('#orderPayment')?.value === 'Faturado';
+        const field = $('#orderPaymentTermField');
+        const custom = $('#orderCustomTerm');
+        const select = $('#orderPaymentTerm');
+
+        if (field) field.style.display = isBilled ? '' : 'none';
+        if (custom) custom.classList.toggle('show', isBilled && select?.value === 'custom');
+
+        if (isBilled && recalculateDue) {
+            const days = orderPaymentTermDays();
+            if (days > 0 && $('#orderDueDate')) {
+                $('#orderDueDate').value = addDaysToInputDate(dateInputToday(), days);
+            }
+        }
+    }
+
+
+    function syncModalPaymentFields({ recalculateDue = false } = {}) {
+        const isBilled = $('#orderModalPaymentMethod')?.value === 'Faturado';
+        const field = $('#orderModalTermField');
+        const custom = $('#orderModalCustomTerm');
+        const select = $('#orderModalPaymentTerm');
+
+        if (field) field.style.display = isBilled ? '' : 'none';
+        if (custom) custom.classList.toggle('show', isBilled && select?.value === 'custom');
+
+        if (isBilled && recalculateDue) {
+            const days = modalPaymentTermDays();
+            if (days > 0 && $('#orderModalDueDate')) {
+                $('#orderModalDueDate').value = addDaysToInputDate(dateInputToday(), days);
+            }
+        }
+    }
+
+
+    function applyClientPaymentDefaults() {
+        if (state.currentOrder) return;
+        const id = String($('#orderClient')?.value || '').trim();
+        const client = state.clients.find(c => clientId(c) === id);
+        if (!client) return;
+
+        const method = String(client.default_payment_method || '').trim();
+        const days = Math.max(0, parseInt(client.default_payment_terms_days || 0, 10) || 0);
+
+        if (method && $('#orderPayment')) {
+            $('#orderPayment').value = method;
+        }
+        setPaymentTermSelect($('#orderPaymentTerm'), $('#orderCustomTerm'), days);
+        syncOrderPaymentFields({ recalculateDue: method === 'Faturado' && days > 0 });
+    }
+
+
+    function collectOrderItemsFromForm() {
+        return $$('.order-product')
+            .map(card => {
+                const folder = String(card.querySelector('.order-product-select')?.value || '').trim();
+                const product = state.products.find(p => String(p?.folder || '') === folder);
+                const variants = [...card.querySelectorAll('.variation-row')]
+                    .map(row => ({
+                        material: String(row.querySelector('.variation-material')?.value || ''),
+                        color: String(row.querySelector('.variation-color')?.value || ''),
+                        quantity: parseInt(row.querySelector('.variation-quantity')?.value, 10) || 0,
+                        unit_price: parseFloat(row.querySelector('.variation-price')?.value) || 0
+                    }))
+                    .filter(v => v.quantity > 0);
+
+                return {
+                    product_folder: folder,
+                    product_name: product?.name || folder,
+                    variants
+                };
+            })
+            .filter(item => item.product_folder && item.variants.length);
+    }
+
+
+    function serializeOrderDraft() {
+        return {
+            version: 1,
+            saved_at: new Date().toISOString(),
+            customer_id: String($('#orderClient')?.value || ''),
+            status: String($('#orderStatus')?.value || 'Orçamento'),
+            payment_method: String($('#orderPayment')?.value || ''),
+            payment_terms_days: orderPaymentTermDays(),
+            due_date: String($('#orderDueDate')?.value || ''),
+            items: collectOrderItemsFromForm()
+        };
+    }
+
+
+    function saveOrderDraftNow() {
+        if (state.currentOrder) return;
+        const draft = serializeOrderDraft();
+        const meaningful = draft.customer_id || draft.items.length || draft.payment_method || draft.due_date;
+        if (!meaningful) {
+            localStorage.removeItem(ORDER_DRAFT_KEY);
+            return;
+        }
+        localStorage.setItem(ORDER_DRAFT_KEY, JSON.stringify(draft));
+    }
+
+
+    function scheduleOrderDraftSave() {
+        if (state.currentOrder) return;
+        window.clearTimeout(orderDraftTimer);
+        orderDraftTimer = window.setTimeout(saveOrderDraftNow, 350);
+    }
+
+
+    function readOrderDraft() {
+        try {
+            const value = JSON.parse(localStorage.getItem(ORDER_DRAFT_KEY) || 'null');
+            return value && typeof value === 'object' ? value : null;
+        } catch {
+            return null;
+        }
+    }
+
+
+    function refreshOrderDraftBanner() {
+        const banner = $('#orderDraftBanner');
+        if (!banner) return;
+        const draft = readOrderDraft();
+        banner.classList.toggle('show', Boolean(draft));
+        if (draft && $('#orderDraftText')) {
+            const when = draft.saved_at ? formatDateTime(draft.saved_at) : 'recentemente';
+            $('#orderDraftText').textContent = `Existe um pedido em rascunho salvo em ${when}.`;
+        }
+    }
+
+
+    function discardOrderDraftStorage() {
+        localStorage.removeItem(ORDER_DRAFT_KEY);
+        refreshOrderDraftBanner();
+    }
+
+
+    function restoreOrderDraftToForm() {
+        const draft = readOrderDraft();
+        if (!draft) {
+            refreshOrderDraftBanner();
+            return;
+        }
+
+        state.currentOrder = null;
+        go('pedidos');
+        $('#orderClient').value = String(draft.customer_id || '');
+        $('#orderStatus').value = String(draft.status || 'Orçamento');
+        $('#orderPayment').value = String(draft.payment_method || '');
+        setPaymentTermSelect($('#orderPaymentTerm'), $('#orderCustomTerm'), draft.payment_terms_days || 0);
+        $('#orderDueDate').value = String(draft.due_date || '');
+        $('#orderProducts').innerHTML = '';
+
+        (Array.isArray(draft.items) ? draft.items : []).forEach(item => {
+            const card = addOrderProductCard(String(item.product_folder || ''), { addDefaultVariation: false });
+            (Array.isArray(item.variants) ? item.variants : []).forEach(v => addVariationRow(card, v));
+            if (!item.variants?.length) addVariationRow(card);
+        });
+
+        if (!$('#orderProducts .order-product')) addOrderProductCard();
+        syncOrderPaymentFields({ recalculateDue: false });
+        calculateOrder();
+        refreshOrderDraftBanner();
+        toast('Rascunho restaurado.', 'success');
+    }
+
+
+    function buildGlobalSearchResults(query) {
+        const q = String(query || '').toLowerCase().trim();
+        if (q.length < 2) return [];
+        const results = [];
+
+        state.products.forEach(p => {
+            const hay = [p.name, p.folder, p.category, p.description].join(' ').toLowerCase();
+            if (hay.includes(q)) results.push({ kind: 'PRODUTO', title: p.name || p.folder, detail: p.category || p.folder, action: 'product', id: p.folder });
+        });
+
+        state.clients.forEach(c => {
+            const hay = [c.name, clientDocument(c), c.phone, c.email].join(' ').toLowerCase();
+            if (hay.includes(q)) results.push({ kind: 'CLIENTE', title: c.name || 'Cliente', detail: [clientDocument(c), c.phone].filter(Boolean).join(' • '), action: 'client', id: clientId(c) });
+        });
+
+        state.orders.forEach(o => {
+            const n = String(o.order_number || o.number || orderId(o) || '');
+            const clientName = String(o.customer?.name || o.customer_name || '');
+            const products = (Array.isArray(o.items) ? o.items : []).map(i => i.product_name || i.product_folder).join(' ');
+            const hay = [n, clientName, o.status, o.payment_status, products].join(' ').toLowerCase();
+            if (hay.includes(q)) results.push({ kind: 'PEDIDO', title: `Pedido ${n}`, detail: `${clientName || 'Cliente'} • ${o.status || 'Orçamento'}`, action: 'order', id: orderId(o) || n });
+        });
+
+        return results.slice(0, 20);
+    }
+
+
+    function renderGlobalSearch() {
+        const input = $('#globalSearch');
+        const box = $('#globalSearchResults');
+        if (!input || !box) return;
+        const results = buildGlobalSearchResults(input.value);
+
+        if (!results.length) {
+            box.innerHTML = input.value.trim().length >= 2 ? '<div class="empty">Nenhum resultado.</div>' : '';
+            box.classList.toggle('show', input.value.trim().length >= 2);
+            return;
+        }
+
+        box.innerHTML = results.map(r => `
+            <button type="button" class="global-result" data-action="${esc(r.action)}" data-id="${esc(r.id)}">
+                <span class="kind">${esc(r.kind)}</span>
+                <span><strong>${esc(r.title)}</strong><small>${esc(r.detail || '')}</small></span>
+            </button>
+        `).join('');
+        box.classList.add('show');
+    }
+
+
+    async function handleGlobalResult(button) {
+        const action = button.dataset.action;
+        const id = button.dataset.id;
+        $('#globalSearchResults')?.classList.remove('show');
+        if ($('#globalSearch')) $('#globalSearch').value = '';
+
+        if (action === 'product') {
+            await editProduct(id);
+        } else if (action === 'client') {
+            go('clientes');
+            await openClientDetails(id);
+        } else if (action === 'order') {
+            go('pedidos');
+            await openOrderDetails(id);
+        }
+    }
+
+
+    async function updateCurrentOrderFields(fields, successMessage = 'Pedido atualizado.') {
+        const order = state.currentOrder;
+        const id = orderId(order);
+        if (!id) {
+            toast('Nenhum pedido válido está aberto.', 'error');
+            return null;
+        }
+
+        const response = await api('/api/order', { method: 'PUT', body: { id, ...fields } });
+        await loadOrders();
+        await loadBilling();
+        const updated = state.orders.find(o => orderId(o) === orderId(response?.order) || orderId(o) === id) || response?.order;
+        if (updated) state.currentOrder = updated;
+        toast(successMessage, 'success');
+        if (updated) await openOrderDetails(orderId(updated));
+        return updated;
+    }
+
+
+    async function createOrderFromCalculation() {
+        const calc = state.lastCalculation;
+        if (!calc) {
+            toast('Faça um cálculo primeiro.', 'warning');
+            return;
+        }
+        if (!calc.product) {
+            toast('Selecione um produto na calculadora para criar o pedido.', 'warning');
+            return;
+        }
+        if (state.calcMode === 'cost') {
+            toast('Escolha Preço final ou Revendedor antes de criar o pedido.', 'warning');
+            return;
+        }
+
+        clearOrder();
+        state.currentOrder = null;
+        go('pedidos');
+        fillOrderSelectors();
+
+        if (calc.customerId && $('#orderClient')) {
+            $('#orderClient').value = calc.customerId;
+        }
+        applyClientPaymentDefaults();
+
+        const card = addOrderProductCard(calc.product, { addDefaultVariation: false });
+        const unitPrice = state.calcMode === 'reseller' && Number(calc.resellerPrice || 0) > 0
+            ? Number(calc.resellerPrice)
+            : Number(calc.finalPrice || 0);
+        addVariationRow(card, {
+            material: calc.material || 'PLA',
+            color: calc.color || '',
+            quantity: Math.max(1, Number(calc.quantity || 1) || 1),
+            unit_price: unitPrice
+        });
+
+        $('#orderStatus').value = 'Orçamento';
+        calculateOrder();
+        saveOrderDraftNow();
+        toast('Cálculo adicionado a um novo pedido.', 'success');
+    }
+
+
+    function duplicateCurrentOrder() {
+        const order = state.currentOrder;
+        if (!order) return;
+        const clone = JSON.parse(JSON.stringify(order));
+        closeOrderDetails();
+        state.currentOrder = null;
+        go('pedidos');
+        fillOrderForEdit({
+            ...clone,
+            status: 'Orçamento',
+            payment_method: '',
+            payment_terms_days: 0,
+            due_date: ''
+        });
+        state.currentOrder = null;
+        $('#saveOrder').textContent = 'SALVAR NOVO PEDIDO';
+        $('#clearOrder').textContent = 'CANCELAR E LIMPAR';
+        saveOrderDraftNow();
+        toast('Pedido duplicado como novo orçamento.', 'success');
+    }
+
+
+    async function loadPdfLogoData() {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.naturalWidth || 640;
+                    canvas.height = img.naturalHeight || 640;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                } catch {
+                    resolve(null);
+                }
+            };
+            img.onerror = () => resolve(null);
+            img.src = 'logo.png';
+        });
+    }
+
+
+    downloadOrderPdf = async function(orderOverride = null) {
+        const order = orderOverride || state.currentOrder;
+        if (!order) {
+            toast('Pedido não encontrado.', 'error');
+            return;
+        }
+        if (!window.jspdf?.jsPDF) {
+            toast('O módulo de PDF ainda não carregou.', 'error');
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+        const logoData = await loadPdfLogoData();
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 15;
+        const blue = [45, 124, 255];
+        const dark = [17, 19, 24];
+        const light = [244, 246, 250];
+        const gray = [105, 111, 122];
+        const orderNumber = String(order.order_number || order.number || order.id || '—');
+        const documentType = String(order.status || 'Orçamento') === 'Orçamento' ? 'ORÇAMENTO' : 'PEDIDO';
+        const customer = order.customer || order.customer_snapshot || {};
+        const text = value => String(value ?? '').trim() || '—';
+        const brl = value => money(Number(value || 0));
+        let y = 48;
+
+        function drawHeader(continuation = false) {
+            doc.setFillColor(...dark);
+            doc.rect(0, 0, pageWidth, 36, 'F');
+            doc.setFillColor(...blue);
+            doc.rect(0, 34, pageWidth, 2, 'F');
+
+            if (logoData) {
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(margin, 7, 23, 23, 2, 2, 'F');
+                doc.addImage(logoData, 'PNG', margin + 1.5, 8.5, 20, 20);
+            }
+
+            doc.setTextColor(255, 255, 255);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('4Maker 3D', logoData ? 43 : margin, 15);
+            doc.setFontSize(8.5);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Impressão 3D personalizada', logoData ? 43 : margin, 21);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text(documentType + (continuation ? ' · CONTINUAÇÃO' : ''), pageWidth - margin, 12, { align: 'right' });
+            doc.setFontSize(15);
+            doc.text('#' + orderNumber, pageWidth - margin, 21, { align: 'right' });
+            doc.setTextColor(...dark);
+            y = 47;
+        }
+
+        function ensureSpace(height = 12) {
+            if (y + height <= 270) return;
+            doc.addPage();
+            drawHeader(true);
+        }
+
+        function labelValue(label, value, x, yy, width) {
+            doc.setTextColor(...gray);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            doc.text(label.toUpperCase(), x, yy);
+            doc.setTextColor(...dark);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9.2);
+            const lines = doc.splitTextToSize(text(value), width);
+            doc.text(lines, x, yy + 4.5);
+            return Math.max(9, 4.5 + lines.length * 4);
+        }
+
+        drawHeader(false);
+
+        doc.setFillColor(...light);
+        doc.roundedRect(margin, y, pageWidth - margin * 2, 32, 3, 3, 'F');
+        const customerName = customer.name || order.customer_name || order.customerName || '—';
+        labelValue('Cliente', customerName, margin + 5, y + 6, 75);
+        labelValue('CPF / CNPJ', customer.cpf_cnpj || customer.document, margin + 88, y + 6, 43);
+        labelValue('Telefone', customer.phone, margin + 137, y + 6, 37);
+        labelValue('E-mail', customer.email, margin + 5, y + 19, 82);
+        labelValue('Data', formatDateTime(order.created_at), margin + 96, y + 19, 78);
+        y += 39;
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...dark);
+        doc.text('Itens', margin, y);
+        y += 5;
+
+        const tableX = [margin, 82, 137, 152, 181];
+        doc.setFillColor(...blue);
+        doc.roundedRect(margin, y, pageWidth - margin * 2, 8, 2, 2, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7.8);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PRODUTO', tableX[0] + 2, y + 5.2);
+        doc.text('MATERIAL / COR', tableX[1], y + 5.2);
+        doc.text('QTD', tableX[2], y + 5.2);
+        doc.text('UNIT.', tableX[3], y + 5.2);
+        doc.text('TOTAL', pageWidth - margin - 2, y + 5.2, { align: 'right' });
+        y += 11;
+
+        const items = Array.isArray(order.items) ? order.items : [];
+        for (const item of items) {
+            const variants = Array.isArray(item.variants) && item.variants.length ? item.variants : [{}];
+            for (let i = 0; i < variants.length; i++) {
+                const v = variants[i];
+                ensureSpace(12);
+                const productName = i === 0 ? text(item.product_name || item.product_folder) : '↳';
+                const productLines = doc.splitTextToSize(productName, 61);
+                const mat = [text(v.material), text(v.color)].filter(x => x !== '—').join(' · ') || '—';
+                const matLines = doc.splitTextToSize(mat, 50);
+                const rowHeight = Math.max(8, Math.max(productLines.length, matLines.length) * 4 + 2);
+
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', i === 0 ? 'bold' : 'normal');
+                doc.setFontSize(8.2);
+                doc.text(productLines, tableX[0] + 2, y);
+                doc.setFont('helvetica', 'normal');
+                doc.text(matLines, tableX[1], y);
+                doc.text(String(Number(v.quantity || 0) || 0), tableX[2] + 2, y);
+                doc.text(brl(v.unit_price || v.unitPrice), tableX[3], y);
+                doc.text(brl((Number(v.quantity || 0) || 0) * (Number(v.unit_price || v.unitPrice || 0) || 0)), pageWidth - margin - 2, y, { align: 'right' });
+                y += rowHeight;
+                doc.setDrawColor(226, 229, 235);
+                doc.line(margin, y - 2, pageWidth - margin, y - 2);
+            }
+        }
+
+        ensureSpace(46);
+        y += 4;
+        const subtotal = Number(order.subtotal ?? order.totals?.subtotal ?? 0) || 0;
+        const discount = Number(order.volume_discount_value ?? order.totals?.discount ?? 0) || 0;
+        const discountPercent = Number(order.volume_discount_percent ?? 0) || 0;
+        const total = Number(order.total ?? order.totals?.total ?? 0) || 0;
+
+        const totalsX = 124;
+        doc.setFillColor(...light);
+        doc.roundedRect(totalsX, y, pageWidth - margin - totalsX, 29, 3, 3, 'F');
+        doc.setTextColor(...gray);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.text('Subtotal', totalsX + 5, y + 7);
+        doc.text(brl(subtotal), pageWidth - margin - 5, y + 7, { align: 'right' });
+        doc.text(`Desconto${discountPercent ? ` (${discountPercent}%)` : ''}`, totalsX + 5, y + 14);
+        doc.text('- ' + brl(discount), pageWidth - margin - 5, y + 14, { align: 'right' });
+        doc.setTextColor(...dark);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('TOTAL', totalsX + 5, y + 23);
+        doc.text(brl(total), pageWidth - margin - 5, y + 23, { align: 'right' });
+        y += 36;
+
+        ensureSpace(35);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Condições', margin, y);
+        y += 6;
+        doc.setFillColor(...light);
+        doc.roundedRect(margin, y, pageWidth - margin * 2, 25, 3, 3, 'F');
+        const method = text(order.payment_method || 'Não definida');
+        const terms = Number(order.payment_terms_days || 0) > 0 ? `${Number(order.payment_terms_days)} dias` : '—';
+        labelValue('Pagamento', method, margin + 5, y + 6, 48);
+        labelValue('Prazo', terms, margin + 62, y + 6, 32);
+        labelValue('Vencimento', order.due_date, margin + 103, y + 6, 36);
+        labelValue('Situação', order.payment_status || 'Pendente', margin + 148, y + 6, 26);
+        y += 31;
+
+        if (String(order.notes || '').trim()) {
+            ensureSpace(24);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9.5);
+            doc.text('Observações', margin, y);
+            y += 5;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            const notes = doc.splitTextToSize(String(order.notes), pageWidth - margin * 2);
+            doc.text(notes, margin, y);
+        }
+
+        const pages = doc.getNumberOfPages();
+        for (let i = 1; i <= pages; i++) {
+            doc.setPage(i);
+            doc.setDrawColor(225, 228, 234);
+            doc.line(margin, 282, pageWidth - margin, 282);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...gray);
+            doc.text('4Maker 3D · documento comercial gerado pelo painel administrativo', margin, 287);
+            doc.text(`Página ${i} de ${pages}`, pageWidth - margin, 287, { align: 'right' });
+        }
+
+        doc.save(`${documentType === 'ORÇAMENTO' ? 'Orcamento' : 'Pedido'}-${orderNumber.replace(/[^a-z0-9_-]/gi, '_')}.pdf`);
+        toast('PDF gerado com sucesso.', 'success');
+    };
+
+
+    const openOrderDetailsV41 = openOrderDetails;
+    openOrderDetails = async function(id) {
+        await openOrderDetailsV41(id);
+        const order = state.currentOrder;
+        if (!order) return;
+
+        if ($('#orderModalPaymentMethod')) $('#orderModalPaymentMethod').value = String(order.payment_method || '');
+        setPaymentTermSelect($('#orderModalPaymentTerm'), $('#orderModalCustomTerm'), order.payment_terms_days || 0);
+        syncModalPaymentFields({ recalculateDue: false });
+
+        $$('#quickStatusButtons [data-quick-status]').forEach(button => {
+            button.classList.toggle('current', button.dataset.quickStatus === String(order.status || 'Orçamento'));
+        });
+
+        const details = $('#orderDetails');
+        if (details && Number(order.payment_terms_days || 0) > 0) {
+            const grid = details.querySelector('.order-detail-grid');
+            if (grid && !grid.querySelector('[data-v42-term]')) {
+                grid.insertAdjacentHTML('beforeend', `<div class="order-detail" data-v42-term><span>Prazo</span><strong>${esc(order.payment_terms_days)} dias</strong></div>`);
+            }
+        }
+    };
+
+
+    const fillOrderForEditV41 = fillOrderForEdit;
+    fillOrderForEdit = function(order) {
+        fillOrderForEditV41(order);
+        setPaymentTermSelect($('#orderPaymentTerm'), $('#orderCustomTerm'), order?.payment_terms_days || 0);
+        syncOrderPaymentFields({ recalculateDue: false });
+    };
+
+
+    const openClientDetailsV41 = openClientDetails;
+    openClientDetails = async function(id) {
+        await openClientDetailsV41(id);
+        const client = state.currentClient;
+        const grid = $('#clientDetails');
+        if (!client || !grid) return;
+        const payment = String(client.default_payment_method || '').trim() || '—';
+        const term = Number(client.default_payment_terms_days || 0) > 0 ? `${Number(client.default_payment_terms_days)} dias` : '—';
+        if (!grid.querySelector('[data-v42-payment]')) {
+            grid.insertAdjacentHTML('beforeend', `
+                <div class="client-detail" data-v42-payment><span>Pagamento padrão</span><strong>${esc(payment)}</strong></div>
+                <div class="client-detail"><span>Prazo padrão</span><strong>${esc(term)}</strong></div>
+            `);
+        }
+    };
+
+
+    const originalEditClientModal = $('#editClientModal')?.onclick;
+    if ($('#editClientModal')) {
+        $('#editClientModal').onclick = () => {
+            const client = state.currentClient;
+            if (client) {
+                $('#clientDefaultPayment').value = String(client.default_payment_method || '');
+                $('#clientDefaultTerm').value = Number(client.default_payment_terms_days || 0) || '';
+            }
+            originalEditClientModal?.();
+        };
+    }
+
+
+    $('#clientForm')?.addEventListener('submit', async event => {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        const form = event.currentTarget;
+        const editingId = String(form.dataset.editingId || '').trim();
+        const client = {
+            ...(editingId ? { id: editingId } : {}),
+            name: $('#clientName').value.trim(),
+            cpf_cnpj: $('#clientDocument').value.trim(),
+            phone: $('#clientPhone').value.trim(),
+            email: $('#clientEmail').value.trim(),
+            type: $('#clientType').value,
+            margin: String($('#clientMargin')?.value || '').trim() === '' ? null : num($('#clientMargin')),
+            default_payment_method: String($('#clientDefaultPayment')?.value || '').trim(),
+            default_payment_terms_days: Math.max(0, parseInt($('#clientDefaultTerm')?.value || 0, 10) || 0),
+            address: $('#clientAddress').value.trim(),
+            notes: $('#clientNotes').value.trim()
+        };
+
+        if (!client.name) {
+            toast('Nome do cliente é obrigatório.', 'warning');
+            return;
+        }
+
+        try {
+            await api('/api/client', { method: editingId ? 'PUT' : 'POST', body: client });
+            toast('Cliente salvo com sucesso.', 'success');
+            form.reset();
+            delete form.dataset.editingId;
+            $('#clientFormCard').style.display = 'none';
+            await loadClients();
+        } catch (err) {
+            toast(err.message || 'Não foi possível salvar o cliente.', 'error');
+        }
+    }, true);
+
+
+    $('#saveOrder').onclick = async () => {
+        const customerId = String($('#orderClient')?.value || '').trim();
+        if (!customerId) {
+            toast('Cliente obrigatório.', 'warning');
+            return;
+        }
+
+        const result = calculateOrder();
+        const items = collectOrderItemsFromForm();
+        if (!items.length) {
+            toast('Adicione pelo menos um produto com quantidade maior que zero.', 'warning');
+            return;
+        }
+
+        const editingId = String(state.currentOrder?.id || state.currentOrder?.order_number || '').trim();
+        const payload = {
+            ...(editingId ? { id: editingId } : {}),
+            customer_id: customerId,
+            status: $('#orderStatus').value,
+            payment_method: $('#orderPayment').value,
+            payment_terms_days: orderPaymentTermDays(),
+            due_date: $('#orderDueDate').value,
+            items,
+            client_calculation: result
+        };
+
+        const button = $('#saveOrder');
+        const oldText = button.textContent;
+        button.disabled = true;
+        button.textContent = editingId ? 'ATUALIZANDO...' : 'SALVANDO...';
+
+        try {
+            await api('/api/order', { method: editingId ? 'PUT' : 'POST', body: payload });
+            toast(editingId ? 'Pedido atualizado com sucesso.' : 'Pedido criado com sucesso.', 'success');
+            discardOrderDraftStorage();
+            clearOrder();
+            setPaymentTermSelect($('#orderPaymentTerm'), $('#orderCustomTerm'), 0);
+            syncOrderPaymentFields({ recalculateDue: false });
+            await loadOrders();
+            await loadBilling();
+        } catch (err) {
+            toast(err.message || 'Não foi possível salvar o pedido.', 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = state.currentOrder ? 'ATUALIZAR PEDIDO' : 'SALVAR PEDIDO';
+            if (!state.currentOrder && oldText === 'SALVAR NOVO PEDIDO') button.textContent = 'SALVAR PEDIDO';
+        }
+    };
+
+
+    $('#saveOrderStatus').onclick = async () => {
+        const order = state.currentOrder;
+        if (!order) {
+            toast('Nenhum pedido está aberto.', 'warning');
+            return;
+        }
+
+        const button = $('#saveOrderStatus');
+        const old = button.textContent;
+        button.disabled = true;
+        button.textContent = 'SALVANDO...';
+        try {
+            await updateCurrentOrderFields({
+                status: $('#orderModalProductionStatus').value,
+                payment_status: $('#orderModalPaymentStatus').value,
+                payment_method: $('#orderModalPaymentMethod').value,
+                payment_terms_days: modalPaymentTermDays(),
+                amount_paid: Number($('#orderModalAmountPaid').value || 0) || 0,
+                due_date: $('#orderModalDueDate').value || '',
+                ...(String($('#orderModalPaymentStatus').value) === 'Pago' ? { payment_received_date: dateInputToday() } : {})
+            }, 'Status e pagamento atualizados.');
+        } catch (err) {
+            toast(err.message || 'Não foi possível atualizar o pedido.', 'error');
+        } finally {
+            button.disabled = false;
+            button.textContent = old;
+        }
+    };
+
+
+    $('#markOrderPaid')?.addEventListener('click', async () => {
+        const order = state.currentOrder;
+        if (!order) return;
+        try {
+            await updateCurrentOrderFields({
+                payment_status: 'Pago',
+                amount_paid: Number(order.total || 0) || 0,
+                payment_received_date: dateInputToday()
+            }, 'Pedido marcado como pago.');
+        } catch (err) {
+            toast(err.message || 'Não foi possível marcar como pago.', 'error');
+        }
+    });
+
+
+    $$('#quickStatusButtons [data-quick-status]').forEach(button => {
+        button.addEventListener('click', async () => {
+            try {
+                await updateCurrentOrderFields({ status: button.dataset.quickStatus }, `Status alterado para ${button.dataset.quickStatus}.`);
+            } catch (err) {
+                toast(err.message || 'Não foi possível alterar o status.', 'error');
+            }
+        });
+    });
+
+
+    $('#duplicateOrderModal')?.addEventListener('click', duplicateCurrentOrder);
+    $('#createOrderFromCalc')?.addEventListener('click', createOrderFromCalculation);
+
+
+    $('#orderPayment')?.addEventListener('change', () => {
+        syncOrderPaymentFields({ recalculateDue: true });
+        scheduleOrderDraftSave();
+    });
+    $('#orderPaymentTerm')?.addEventListener('change', () => {
+        syncOrderPaymentFields({ recalculateDue: true });
+        scheduleOrderDraftSave();
+    });
+    $('#orderCustomTerm')?.addEventListener('input', () => {
+        syncOrderPaymentFields({ recalculateDue: true });
+        scheduleOrderDraftSave();
+    });
+    $('#orderClient')?.addEventListener('change', () => {
+        applyClientPaymentDefaults();
+        scheduleOrderDraftSave();
+    });
+
+    $('#orderModalPaymentMethod')?.addEventListener('change', () => syncModalPaymentFields({ recalculateDue: true }));
+    $('#orderModalPaymentTerm')?.addEventListener('change', () => syncModalPaymentFields({ recalculateDue: true }));
+    $('#orderModalCustomTerm')?.addEventListener('input', () => syncModalPaymentFields({ recalculateDue: true }));
+
+
+    $('#orderProducts')?.addEventListener('input', scheduleOrderDraftSave);
+    $('#orderProducts')?.addEventListener('change', scheduleOrderDraftSave);
+    $('#orderStatus')?.addEventListener('change', scheduleOrderDraftSave);
+    $('#orderDueDate')?.addEventListener('change', scheduleOrderDraftSave);
+
+    $('#restoreOrderDraft')?.addEventListener('click', restoreOrderDraftToForm);
+    $('#discardOrderDraft')?.addEventListener('click', () => {
+        discardOrderDraftStorage();
+        toast('Rascunho descartado.');
+    });
+
+
+    const originalClearOrder = clearOrder;
+    clearOrder = function() {
+        originalClearOrder();
+        setPaymentTermSelect($('#orderPaymentTerm'), $('#orderCustomTerm'), 0);
+        syncOrderPaymentFields({ recalculateDue: false });
+    };
+    $('#clearOrder').onclick = () => {
+        discardOrderDraftStorage();
+        clearOrder();
+    };
+
+
+    $('#globalSearch')?.addEventListener('input', renderGlobalSearch);
+    $('#globalSearch')?.addEventListener('focus', renderGlobalSearch);
+    $('#globalSearchResults')?.addEventListener('click', event => {
+        const button = event.target.closest('.global-result');
+        if (button) handleGlobalResult(button);
+    });
+    document.addEventListener('click', event => {
+        if (!event.target.closest('.top-search')) $('#globalSearchResults')?.classList.remove('show');
+    });
+
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        });
+    }
+
+    window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        if ($('#installAdminHint')) $('#installAdminHint').textContent = 'Aplicativo pronto para instalar neste dispositivo.';
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        if ($('#installAdminApp')) $('#installAdminApp').textContent = '✓ 4Maker Admin instalado';
+        if ($('#installAdminHint')) $('#installAdminHint').textContent = 'O atalho já está instalado.';
+        toast('4Maker Admin instalado.', 'success');
+    });
+
+    $('#installAdminApp')?.addEventListener('click', async () => {
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            toast('O 4Maker Admin já está aberto como aplicativo.');
+            return;
+        }
+
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice.catch(() => null);
+            deferredInstallPrompt = null;
+            return;
+        }
+
+        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        if (isIOS) {
+            toast('No iPhone/iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.', 'info', 7000);
+        } else {
+            toast('Use a opção “Instalar aplicativo” ou “Adicionar à tela inicial” do menu do navegador.', 'info', 6500);
+        }
+    });
+
+
+    syncOrderPaymentFields({ recalculateDue: false });
+    syncModalPaymentFields({ recalculateDue: false });
+    refreshOrderDraftBanner();
 
     /* =========================================================
        CONFIGURAÇÕES
@@ -11318,11 +12605,11 @@
 
             renderSettings();
 
-            alert('Configurações salvas com sucesso.');
+            toast('Configurações salvas com sucesso.');
 
         } catch (err) {
 
-            alert(
+            toast(
                 'Não foi possível salvar as configurações: ' +
                 (err.message || 'Erro desconhecido.')
             );

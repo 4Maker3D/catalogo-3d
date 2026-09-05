@@ -1,0 +1,35 @@
+{
+  "name": "4Maker 3D Admin",
+  "short_name": "4Maker Admin",
+  "description": "Painel administrativo da 4Maker 3D",
+  "id": "./login.html",
+  "start_url": "./login.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#08090d",
+  "theme_color": "#2d7cff",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "640x640",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Abrir painel",
+      "short_name": "Painel",
+      "url": "./painel.html#dashboard",
+      "icons": [
+        {
+          "src": "logo.png",
+          "sizes": "640x640",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
