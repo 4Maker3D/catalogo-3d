@@ -1,49 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>4Maker 3D — Worker V3.4</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 24px;
-  background: #111;
-  color: #eee;
-}
-main {
-  max-width: 900px;
-  margin: auto;
-}
-h1 { margin-top: 0; }
-pre {
-  white-space: pre-wrap;
-  word-break: break-word;
-  background: #1d1d1d;
-  padding: 20px;
-  border-radius: 10px;
-  overflow: auto;
-}
-.note {
-  background: #222;
-  padding: 14px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-}
-</style>
-</head>
-<body>
-<main>
-<h1>4Maker 3D — Worker V3.4</h1>
-<div class="note">
-Este arquivo é apenas um recipiente HTML para facilitar o download.
-O código real do Worker está dentro do bloco abaixo. Para usar no Cloudflare/GitHub,
-extraia o conteúdo do bloco de código e salve como <strong>worker.js</strong>.
-</div>
-<pre id="code"></pre>
-<script>
-const workerCode = `const JSON_HEADERS = {
+const JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
   "Cache-Control": "no-store"
 };
@@ -80,7 +35,7 @@ export default {
         new URL(request.url);
 
       const path =
-        url.pathname.replace(/\\/+$/, "") || "/";
+        url.pathname.replace(/\/+$/, "") || "/";
 
 
       /* =====================================================
@@ -725,7 +680,7 @@ async function signSession(
     );
 
   const data =
-    \`\${header}.\${body}\`;
+    `${header}.${body}`;
 
   const signature =
     await hmac(
@@ -734,7 +689,7 @@ async function signSession(
     );
 
   return (
-    \`\${data}.\${signature}\`
+    `${data}.${signature}`
   );
 }
 
@@ -760,7 +715,7 @@ async function verifySession(
 
   const expected =
     await hmac(
-      \`\${header}.\${body}\`,
+      `${header}.${body}`,
       secret
     );
 
@@ -939,20 +894,20 @@ async function github(
   env
 ) {
   const url =
-    \`https://api.github.com/repos/\` +
-    \`\${encodeURIComponent(
+    `https://api.github.com/repos/` +
+    `${encodeURIComponent(
       env.GITHUB_OWNER
-    )}/\` +
-    \`\${encodeURIComponent(
+    )}/` +
+    `${encodeURIComponent(
       env.GITHUB_REPO
-    )}/contents/\${path}\`;
+    )}/contents/${path}`;
 
   const headers = {
     "Accept":
       "application/vnd.github+json",
 
     "Authorization":
-      \`Bearer \${env.GITHUB_TOKEN}\`,
+      `Bearer ${env.GITHUB_TOKEN}`,
 
     "X-GitHub-Api-Version":
       env.GITHUB_API_VERSION ||
@@ -980,10 +935,10 @@ async function getGitHubJson(
 ) {
   const response =
     await github(
-      \`\${path}?ref=\${encodeURIComponent(
+      `${path}?ref=${encodeURIComponent(
         env.GITHUB_BRANCH ||
         "main"
-      )}\`,
+      )}`,
       {
         method: "GET"
       },
@@ -996,10 +951,10 @@ async function getGitHubJson(
 
     const error =
       new Error(
-        \`GitHub \${response.status} em \${path}: \${text.slice(
+        `GitHub ${response.status} em ${path}: ${text.slice(
           0,
           300
-        )}\`
+        )}`
       );
 
     error.status =
@@ -1021,10 +976,10 @@ async function getFile(
 ) {
   const response =
     await github(
-      \`\${path}?ref=\${encodeURIComponent(
+      `${path}?ref=${encodeURIComponent(
         env.GITHUB_BRANCH ||
         "main"
-      )}\`,
+      )}`,
       {
         method: "GET"
       },
@@ -1043,10 +998,10 @@ async function getFile(
 
     const error =
       new Error(
-        \`GitHub \${response.status} em \${path}: \${text.slice(
+        `GitHub ${response.status} em ${path}: ${text.slice(
           0,
           300
-        )}\`
+        )}`
       );
 
     error.status =
@@ -1123,10 +1078,10 @@ async function putFile(
 
     const error =
       new Error(
-        \`GitHub \${response.status} em \${path}: \${text.slice(
+        `GitHub ${response.status} em ${path}: ${text.slice(
           0,
           500
-        )}\`
+        )}`
       );
 
     error.status =
@@ -1241,21 +1196,10 @@ async function calculatePrice(
       ? costBeforeCommission / (1 - commissionPercent)
       : costBeforeCommission;
 
-  const requestedMargin =
-    Math.max(0, Math.min(99.99, numberOrZero(
-      body.margin_percent ?? settings.default_margin_percent
-    ))) / 100;
-
-  const resellerMargin =
-    Math.max(0, Math.min(99.99, numberOrZero(
-      body.reseller_margin_percent ?? settings.default_reseller_margin_percent
-    ))) / 100;
-
-  const finalPrice =
-    baseCost / (1 - requestedMargin);
-
-  const resellerPrice =
-    baseCost / (1 - resellerMargin);
+  const requestedMargin = Math.max(0, numberOrZero(body.margin_percent ?? settings.default_margin_percent)) / 100;
+  const resellerMargin = Math.max(0, numberOrZero(body.reseller_margin_percent ?? settings.default_reseller_margin_percent)) / 100;
+  const finalPrice = baseCost * (1 + requestedMargin);
+  const resellerPrice = baseCost * (1 + resellerMargin);
 
   const rounding = settings.rounding;
   const applyRounding = value => {
@@ -1336,9 +1280,9 @@ async function listProducts(
   ) {
     const productFile =
       await getFile(
-        \`Modelos/\${encodeURIComponent(
+        `Modelos/${encodeURIComponent(
           folder
-        )}/produto.json\`,
+        )}/produto.json`,
         env
       );
 
@@ -1359,9 +1303,9 @@ async function listProducts(
 
     let dataFile =
       await getFile(
-        \`Modelos/\${encodeURIComponent(
+        `Modelos/${encodeURIComponent(
           folder
-        )}/dados.json\`,
+        )}/dados.json`,
         env
       );
 
@@ -1375,13 +1319,13 @@ async function listProducts(
         );
 
       await putFile(
-        \`Modelos/\${encodeURIComponent(
+        `Modelos/${encodeURIComponent(
           folder
-        )}/dados.json\`,
+        )}/dados.json`,
         encodeUtf8(
           starter
         ),
-        \`4Maker 3D: criar dados.json de \${folder}\`,
+        `4Maker 3D: criar dados.json de ${folder}`,
         env
       );
 
@@ -1390,9 +1334,9 @@ async function listProducts(
 
       dataFile =
         await getFile(
-          \`Modelos/\${encodeURIComponent(
+          `Modelos/${encodeURIComponent(
             folder
-          )}/dados.json\`,
+          )}/dados.json`,
           env
         );
     }
@@ -1462,9 +1406,9 @@ async function getProduct(
 ) {
   const productFile =
     await getFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/produto.json\`,
+      )}/produto.json`,
       env
     );
 
@@ -1501,9 +1445,9 @@ async function getProduct(
 
   let dataFile =
     await getFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/dados.json\`,
+      )}/dados.json`,
       env
     );
 
@@ -1520,21 +1464,21 @@ async function getProduct(
       );
 
     await putFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/dados.json\`,
+      )}/dados.json`,
       encodeUtf8(
         starter
       ),
-      \`4Maker 3D: criar dados.json de \${folder}\`,
+      `4Maker 3D: criar dados.json de ${folder}`,
       env
     );
 
     dataFile =
       await getFile(
-        \`Modelos/\${encodeURIComponent(
+        `Modelos/${encodeURIComponent(
           folder
-        )}/dados.json\`,
+        )}/dados.json`,
         env
       );
 
@@ -1592,7 +1536,7 @@ async function updateProduct(
 
   const folder =
     safeFolder(
-      body?.folder
+      body?.folder || body?.product_folder || body?.produto?.folder
     );
 
   if (!folder) {
@@ -1634,17 +1578,17 @@ async function updateProduct(
 
   const productFile =
     await getFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/produto.json\`,
+      )}/produto.json`,
       env
     );
 
   let dataFile =
     await getFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/dados.json\`,
+      )}/dados.json`,
       env
     );
 
@@ -1661,13 +1605,13 @@ async function updateProduct(
   }
 
   await putFile(
-    \`Modelos/\${encodeURIComponent(
+    `Modelos/${encodeURIComponent(
       folder
-    )}/produto.json\`,
+    )}/produto.json`,
     encodeUtf8(
       produto
     ),
-    \`4Maker 3D: atualizar produto \${folder}\`,
+    `4Maker 3D: atualizar produto ${folder}`,
     env,
     productFile.sha
   );
@@ -1684,13 +1628,13 @@ async function updateProduct(
   }
 
   await putFile(
-    \`Modelos/\${encodeURIComponent(
+    `Modelos/${encodeURIComponent(
       folder
-    )}/dados.json\`,
+    )}/dados.json`,
     encodeUtf8(
       dados
     ),
-    \`4Maker 3D: atualizar dados \${folder}\`,
+    `4Maker 3D: atualizar dados ${folder}`,
     env,
     dataFile?.sha ||
       null
@@ -1798,9 +1742,9 @@ async function createProduct(
 
   const existing =
     await getFile(
-      \`Modelos/\${encodeURIComponent(
+      `Modelos/${encodeURIComponent(
         folder
-      )}/produto.json\`,
+      )}/produto.json`,
       env
     );
 
@@ -1817,33 +1761,33 @@ async function createProduct(
   }
 
   await putFile(
-    \`Modelos/\${encodeURIComponent(
+    `Modelos/${encodeURIComponent(
       folder
-    )}/produto.json\`,
+    )}/produto.json`,
     encodeUtf8(
       produto
     ),
-    \`4Maker 3D: criar produto \${folder}\`,
+    `4Maker 3D: criar produto ${folder}`,
     env
   );
 
   await putFile(
-    \`Modelos/\${encodeURIComponent(
+    `Modelos/${encodeURIComponent(
       folder
-    )}/dados.json\`,
+    )}/dados.json`,
     encodeUtf8(
       dados
     ),
-    \`4Maker 3D: criar dados \${folder}\`,
+    `4Maker 3D: criar dados ${folder}`,
     env
   );
 
   await putFile(
-    \`Modelos/\${encodeURIComponent(
+    `Modelos/${encodeURIComponent(
       folder
-    )}/modelo.stl\`,
+    )}/modelo.stl`,
     stlBase64,
-    \`4Maker 3D: adicionar STL \${folder}\`,
+    `4Maker 3D: adicionar STL ${folder}`,
     env
   );
 
@@ -2372,7 +2316,7 @@ async function createClient(
     encodeUtf8(
       clients
     ),
-    \`4Maker 3D: criar cliente \${client.name}\`,
+    `4Maker 3D: criar cliente ${client.name}`,
     env,
     file.sha
   );
@@ -2442,7 +2386,7 @@ async function deleteClient(
   await putFile(
     ADMIN_FILES.clients,
     encodeUtf8(clients),
-    \`4Maker 3D: excluir cliente \${removed?.name || id}\`,
+    `4Maker 3D: excluir cliente ${removed?.name || id}`,
     env,
     file.sha
   );
@@ -2588,7 +2532,7 @@ async function updateClient(
     encodeUtf8(
       clients
     ),
-    \`4Maker 3D: atualizar cliente \${id}\`,
+    `4Maker 3D: atualizar cliente ${id}`,
     env,
     file.sha
   );
@@ -2847,7 +2791,7 @@ async function savePrice(
     encodeUtf8(
       prices
     ),
-    \`4Maker 3D: salvar preço negociado \${productFolder}\`,
+    `4Maker 3D: salvar preço negociado ${productFolder}`,
     env,
     file.sha
   );
@@ -3177,7 +3121,7 @@ async function createOrder(
     encodeUtf8(
       orders
     ),
-    \`4Maker 3D: criar pedido \${order.order_number}\`,
+    `4Maker 3D: criar pedido ${order.order_number}`,
     env,
     ordersFile.sha
   );
@@ -3347,7 +3291,7 @@ async function updateOrder(
     encodeUtf8(
       orders
     ),
-    \`4Maker 3D: atualizar pedido \${updated.order_number}\`,
+    `4Maker 3D: atualizar pedido ${updated.order_number}`,
     env,
     file.sha
   );
@@ -3422,7 +3366,7 @@ async function deleteOrder(
   await putFile(
     ADMIN_FILES.orders,
     encodeUtf8(orders),
-    \`4Maker 3D: excluir pedido \${removed?.order_number || id}\`,
+    `4Maker 3D: excluir pedido ${removed?.order_number || id}`,
     env,
     file.sha
   );
@@ -3502,7 +3446,7 @@ async function getBilling(
           String(
             order.created_at || ""
           ) <=
-          \`\${to}T23:59:59.999Z\`
+          `${to}T23:59:59.999Z`
       );
   }
 
@@ -3621,6 +3565,8 @@ async function rebuildBillingFile(
       pending: Math.max(0, numberOrZero(order.total) - numberOrZero(order.amount_paid)),
       estimated_cost: numberOrZero(order.estimated_cost),
       estimated_profit: numberOrZero(order.estimated_profit),
+      received: numberOrZero(order.amount_paid),
+      profit: numberOrZero(order.estimated_profit),
       status: order.status || "",
       payment_status: order.payment_status || "Pendente",
       payment_method: order.payment_method || "",
@@ -3754,7 +3700,7 @@ async function updateBillingFile(
     encodeUtf8(
       billing
     ),
-    \`4Maker 3D: atualizar faturamento \${order.order_number}\`,
+    `4Maker 3D: atualizar faturamento ${order.order_number}`,
     env,
     file.sha
   );
@@ -3798,7 +3744,7 @@ async function ensureJsonFile(
 
   if (!created) {
     throw new Error(
-      \`Arquivo criado mas não pôde ser recuperado: \${path}\`
+      `Arquivo criado mas não pôde ser recuperado: ${path}`
     );
   }
 
@@ -4105,7 +4051,7 @@ async function nextOrderNumber(
           order.order_number ||
           ""
         ).replace(
-          /\\D/g,
+          /\D/g,
           ""
         ),
         10
@@ -4144,7 +4090,7 @@ function generateId(
           .toString(36)
           .slice(2);
 
-  return \`\${prefix}-\${random}\`;
+  return `${prefix}-${random}`;
 }
 
 
@@ -4219,7 +4165,7 @@ function safeFolder(
 
   if (
     folder.includes("/") ||
-    folder.includes("\\\\") ||
+    folder.includes("\\") ||
     folder.includes("..")
   ) {
     return null;
@@ -4249,7 +4195,7 @@ function encodeUtf8(
           value,
           null,
           4
-        ) + "\\n"
+        ) + "\n"
       )
     )
   );
@@ -4303,11 +4249,11 @@ function base64urlBytes(
 
   return btoa(binary)
     .replace(
-      /\\+/g,
+      /\+/g,
       "-"
     )
     .replace(
-      /\\//g,
+      /\//g,
       "_"
     )
     .replace(
@@ -4372,7 +4318,7 @@ function decodeBase64Utf8(
 ) {
   const clean =
     value.replace(
-      /\\s/g,
+      /\s/g,
       ""
     );
 
@@ -4393,9 +4339,3 @@ function decodeBase64Utf8(
       bytes
     );
 }
-`;
-document.getElementById("code").textContent = workerCode;
-</script>
-</main>
-</body>
-</html>
