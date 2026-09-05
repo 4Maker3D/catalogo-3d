@@ -29,5 +29,21 @@
         "payment_method": "Boleto",
         "due_date": "2222-05-22",
         "updated_at": "2026-09-05T19:41:40.342Z"
+    },
+    {
+        "order_id": "PED-ecefa1ce-3801-4555-b83c-fa92d295803b",
+        "order_number": "00002",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "customer_name": "Teste",
+        "total": 240,
+        "amount_paid": 0,
+        "pending": 240,
+        "estimated_cost": 0,
+        "estimated_profit": 240,
+        "status": "Confirmado",
+        "payment_status": "Pendente",
+        "payment_method": "PIX",
+        "due_date": "",
+        "updated_at": "2026-09-05T19:43:48.777Z"
     }
 ]
