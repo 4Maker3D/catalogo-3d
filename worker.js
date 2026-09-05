@@ -456,7 +456,7 @@ function corsHeaders(
       "Content-Type, Authorization",
 
     "Access-Control-Allow-Methods":
-      "GET, POST, PUT, OPTIONS",
+      "GET, POST, PUT, DELETE, OPTIONS",
 
     "Vary":
       "Origin"
@@ -919,13 +919,58 @@ async function github(
     ...(options?.headers || {})
   };
 
-  return fetch(
-    url,
-    {
-      ...options,
-      headers
+  const retryableStatuses =
+    new Set([
+      502,
+      503,
+      504
+    ]);
+
+  const maxAttempts = 3;
+
+  let response = null;
+
+  for (
+    let attempt = 1;
+    attempt <= maxAttempts;
+    attempt++
+  ) {
+    try {
+      response =
+        await fetch(
+          url,
+          {
+            ...options,
+            headers
+          }
+        );
+    } catch (error) {
+      if (attempt >= maxAttempts) {
+        throw error;
+      }
+
+      await sleep(
+        250 * attempt
+      );
+
+      continue;
     }
-  );
+
+    if (
+      !retryableStatuses.has(
+        response.status
+      ) ||
+      attempt >= maxAttempts
+    ) {
+      return response;
+    }
+
+    await sleep(
+      250 * attempt
+    );
+  }
+
+  return response;
 }
 
 
@@ -1175,9 +1220,33 @@ async function calculatePrice(
     );
   }
 
-  const effectiveWeight = weight * (1 + waste);
-  const filamentCost = effectiveWeight * numberOrZero(material.price_per_kg) / 1000;
-  const machineCost = printTime * numberOrZero(settings.machine_hour_cost);
+  const materialPricePerKg =
+    numberOrZero(
+      material.price_per_kg
+    );
+
+  const rawFilamentCost =
+    weight *
+    materialPricePerKg /
+    1000;
+
+  const wasteCost =
+    rawFilamentCost *
+    waste;
+
+  const effectiveWeight =
+    weight *
+    (1 + waste);
+
+  const filamentCost =
+    rawFilamentCost +
+    wasteCost;
+
+  const machineCost =
+    printTime *
+    numberOrZero(
+      settings.machine_hour_cost
+    );
 
   const extraCosts =
     numberOrZero(settings.costs.finishing) +
@@ -1186,20 +1255,55 @@ async function calculatePrice(
     numberOrZero(settings.costs.other);
 
   const commissionPercent =
-    Math.max(0, numberOrZero(settings.costs.commission_percent)) / 100;
+    Math.max(
+      0,
+      numberOrZero(
+        settings.costs.commission_percent
+      )
+    ) / 100;
 
   const costBeforeCommission =
-    filamentCost + machineCost + extraCosts;
+    filamentCost +
+    machineCost +
+    extraCosts;
 
   const baseCost =
     commissionPercent < 1
-      ? costBeforeCommission / (1 - commissionPercent)
+      ? costBeforeCommission /
+        (1 - commissionPercent)
       : costBeforeCommission;
 
-  const requestedMargin = Math.max(0, numberOrZero(body.margin_percent ?? settings.default_margin_percent)) / 100;
-  const resellerMargin = Math.max(0, numberOrZero(body.reseller_margin_percent ?? settings.default_reseller_margin_percent)) / 100;
-  const finalPrice = baseCost * (1 + requestedMargin);
-  const resellerPrice = baseCost * (1 + resellerMargin);
+  const requestedMargin =
+    Math.max(
+      0,
+      numberOrZero(
+        body.margin_percent ??
+        settings.default_margin_percent
+      )
+    ) / 100;
+
+  const resellerMargin =
+    Math.max(
+      0,
+      numberOrZero(
+        body.reseller_margin_percent ??
+        settings.default_reseller_margin_percent
+      )
+    ) / 100;
+
+  // Margens de revenda são somadas sobre o mesmo custo-base.
+  // Ex.: custo 51,33 + 70% 4Maker + 30% revendedor = 102,66 final.
+  const resellerPrice =
+    baseCost *
+    (1 + requestedMargin);
+
+  const finalPrice =
+    baseCost *
+    (
+      1 +
+      requestedMargin +
+      resellerMargin
+    );
 
   const rounding = settings.rounding;
   const applyRounding = value => {
@@ -1221,7 +1325,9 @@ async function calculatePrice(
         effective_weight_g: roundMoney(effectiveWeight),
         waste_percent: roundMoney(waste * 100),
         material: material.name,
-        material_price_per_kg: numberOrZero(material.price_per_kg),
+        material_price_per_kg: materialPricePerKg,
+        raw_filament_cost: roundMoney(rawFilamentCost),
+        waste_cost: roundMoney(wasteCost),
         filament_cost: roundMoney(filamentCost),
         machine_cost: roundMoney(machineCost),
         extra_costs: roundMoney(extraCosts),
@@ -1231,7 +1337,8 @@ async function calculatePrice(
         final_price: finalRounded,
         reseller_price: resellerRounded,
         estimated_profit_final: roundMoney(finalRounded - baseCost),
-        estimated_profit_reseller: roundMoney(resellerRounded - baseCost)
+        estimated_profit_reseller: roundMoney(resellerRounded - baseCost),
+        reseller_profit: roundMoney(finalRounded - resellerRounded)
       }
     },
     200,
@@ -1275,121 +1382,145 @@ async function listProducts(
 
   const products = [];
 
+  const failures = [];
+
   for (
     const folder of folders
   ) {
-    const productFile =
-      await getFile(
-        `Modelos/${encodeURIComponent(
-          folder
-        )}/produto.json`,
-        env
-      );
-
-    if (!productFile) {
-      continue;
-    }
-
-    let product;
-
     try {
-      product =
-        JSON.parse(
-          productFile.content
-        );
-    } catch {
-      continue;
-    }
-
-    let dataFile =
-      await getFile(
-        `Modelos/${encodeURIComponent(
-          folder
-        )}/dados.json`,
-        env
-      );
-
-    let dataCreated =
-      false;
-
-    if (!dataFile) {
-      const starter =
-        defaultDados(
-          product
+      const productFile =
+        await getFile(
+          `Modelos/${encodeURIComponent(
+            folder
+          )}/produto.json`,
+          env
         );
 
-      await putFile(
-        `Modelos/${encodeURIComponent(
-          folder
-        )}/dados.json`,
-        encodeUtf8(
-          starter
-        ),
-        `4Maker 3D: criar dados.json de ${folder}`,
-        env
-      );
+      if (!productFile) {
+        continue;
+      }
 
-      dataCreated =
-        true;
+      let product;
 
-      dataFile =
+      try {
+        product =
+          JSON.parse(
+            productFile.content
+          );
+      } catch {
+        failures.push({
+          folder,
+          error:
+            "produto.json inválido."
+        });
+
+        continue;
+      }
+
+      let dataFile =
         await getFile(
           `Modelos/${encodeURIComponent(
             folder
           )}/dados.json`,
           env
         );
-    }
 
-    products.push({
-      folder,
+      let dataCreated =
+        false;
 
-      name:
-        product.name ||
+      if (!dataFile) {
+        const starter =
+          defaultDados(
+            product
+          );
+
+        await putFile(
+          `Modelos/${encodeURIComponent(
+            folder
+          )}/dados.json`,
+          encodeUtf8(
+            starter
+          ),
+          `4Maker 3D: criar dados.json de ${folder}`,
+          env
+        );
+
+        dataCreated =
+          true;
+
+        dataFile =
+          await getFile(
+            `Modelos/${encodeURIComponent(
+              folder
+            )}/dados.json`,
+            env
+          );
+      }
+
+      products.push({
         folder,
 
-      category:
-        product.category ||
-        "",
+        name:
+          product.name ||
+          folder,
 
-      description:
-        product.description ||
-        "",
+        category:
+          product.category ||
+          "",
 
-      materials:
-        product.materials ||
-        "",
+        description:
+          product.description ||
+          "",
 
-      available_materials:
-        Array.isArray(
-          product.available_materials
-        )
-          ? product.available_materials
-          : [],
+        materials:
+          product.materials ||
+          "",
 
-      customization:
-        product.customization ||
-        "",
+        available_materials:
+          Array.isArray(
+            product.available_materials
+          )
+            ? product.available_materials
+            : [],
 
-      colors:
-        Array.isArray(
-          product.colors
-        )
-          ? product.colors
-          : [],
+        customization:
+          product.customization ||
+          "",
 
-      hasData:
-        true,
+        colors:
+          Array.isArray(
+            product.colors
+          )
+            ? product.colors
+            : [],
 
-      dataCreated
-    });
+        hasData:
+          Boolean(dataFile),
+
+        dataCreated
+      });
+    } catch (error) {
+      console.error(
+        `Falha ao carregar produto ${folder}:`,
+        error
+      );
+
+      failures.push({
+        folder,
+        error:
+          error?.message ||
+          "Falha ao carregar produto."
+      });
+    }
   }
 
   return json(
     {
       products,
       total:
-        products.length
+        products.length,
+
+      failures
     },
     200,
     origin,
@@ -2278,6 +2409,21 @@ async function createClient(
         body.phone || ""
       ).trim(),
 
+    type:
+      String(
+        body.type || ""
+      ).trim(),
+
+    margin:
+      body.margin === null ||
+      body.margin === "" ||
+      typeof body.margin ===
+        "undefined"
+        ? null
+        : numberOrZero(
+            body.margin
+          ),
+
     address:
       String(
         body.address || ""
@@ -2494,6 +2640,26 @@ async function updateClient(
         current.phone ??
         ""
       ).trim(),
+
+    type:
+      String(
+        body.type ??
+        current.type ??
+        ""
+      ).trim(),
+
+    margin:
+      body.margin === null
+        ? null
+        : typeof body.margin ===
+            "undefined"
+          ? current.margin ??
+            null
+          : body.margin === ""
+            ? null
+            : numberOrZero(
+                body.margin
+              ),
 
     address:
       String(
@@ -3126,10 +3292,17 @@ async function createOrder(
     ordersFile.sha
   );
 
-  await updateBillingFile(
-    order,
-    env
-  );
+  try {
+    await updateBillingFile(
+      order,
+      env
+    );
+  } catch (error) {
+    console.error(
+      "Pedido criado, mas o faturamento não pôde ser atualizado:",
+      error
+    );
+  }
 
   return json(
     {
@@ -3188,7 +3361,10 @@ async function updateOrder(
     orders.findIndex(
       order =>
         String(
-          order.id
+          order.id || ""
+        ) === id ||
+        String(
+          order.order_number || ""
         ) === id
     );
 
@@ -3296,10 +3472,17 @@ async function updateOrder(
     file.sha
   );
 
-  await updateBillingFile(
-    updated,
-    env
-  );
+  try {
+    await updateBillingFile(
+      updated,
+      env
+    );
+  } catch (error) {
+    console.error(
+      "Pedido atualizado, mas o faturamento não pôde ser atualizado:",
+      error
+    );
+  }
 
   return json(
     {
@@ -3348,7 +3531,13 @@ async function deleteOrder(
 
   const index =
     orders.findIndex(
-      order => String(order?.id || "") === id
+      order =>
+        String(
+          order?.id || ""
+        ) === id ||
+        String(
+          order?.order_number || ""
+        ) === id
     );
 
   if (index < 0) {
@@ -3371,9 +3560,20 @@ async function deleteOrder(
     file.sha
   );
 
-  // Rebuild billing from the remaining orders so the dashboard
-  // does not keep revenue from a deleted order.
-  await rebuildBillingFile(orders, env);
+  // Rebuild do faturamento é secundário: se o pedido já foi
+  // excluído, uma falha temporária do GitHub não deve transformar
+  // a exclusão concluída em "Failed to fetch" no painel.
+  try {
+    await rebuildBillingFile(
+      orders,
+      env
+    );
+  } catch (error) {
+    console.error(
+      "Pedido excluído, mas o faturamento não pôde ser reconstruído:",
+      error
+    );
+  }
 
   return json(
     { ok: true, id },
@@ -4030,6 +4230,14 @@ function snapshotCustomer(
       customer.phone ||
       "",
 
+    type:
+      customer.type ||
+      "",
+
+    margin:
+      customer.margin ??
+      null,
+
     address:
       customer.address ||
       ""
@@ -4079,6 +4287,22 @@ async function nextOrderNumber(
 /* =========================================================
    UTILITÁRIOS
    ========================================================= */
+
+function sleep(
+  ms
+) {
+  return new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        Math.max(
+          0,
+          numberOrZero(ms)
+        )
+      )
+  );
+}
+
 
 function generateId(
   prefix
