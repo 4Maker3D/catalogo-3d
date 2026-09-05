@@ -56,12 +56,12 @@
         "pending": 360,
         "estimated_cost": 0,
         "estimated_profit": 360,
-        "status": "Em produção",
+        "status": "Confirmado",
         "payment_status": "Pendente",
         "payment_method": "Faturado",
         "payment_terms_days": 21,
         "due_date": "2026-09-26",
         "payment_received_date": "",
-        "updated_at": "2026-09-05T20:57:16.164Z"
+        "updated_at": "2026-09-05T20:57:20.966Z"
     }
 ]
