@@ -20,25 +20,28 @@
             {
                 "product_folder": "Vaso Autoirrigável Redondo",
                 "product_name": "Vaso Autoirrigável Redondo",
+                "quantity": 1,
                 "variants": [
                     {
                         "material": "PLA",
                         "color": "",
                         "quantity": 1,
-                        "unit_price": 0
+                        "unit_price": 105,
+                        "unit_cost": 0,
+                        "subtotal": 105,
+                        "cost": 0
                     }
                 ],
-                "quantity": 1,
-                "unit_price": 0,
-                "unit_cost": 0
+                "subtotal": 105,
+                "cost": 0
             }
         ],
-        "subtotal": 0,
+        "subtotal": 105,
         "volume_discount_percent": 0,
         "volume_discount_value": 0,
-        "total": 0,
+        "total": 105,
         "estimated_cost": 0,
-        "estimated_profit": 0,
+        "estimated_profit": 105,
         "status": "Em produção",
         "payment": {
             "method": "",
@@ -47,7 +50,10 @@
         },
         "notes": "",
         "created_at": "2026-09-04T20:04:32.244Z",
-        "updated_at": "2026-09-04T20:04:32.244Z"
+        "updated_at": "2026-09-05T18:59:03.560Z",
+        "payment_method": "",
+        "amount_paid": 0,
+        "due_date": ""
     },
     {
         "id": "PED-c8732601-fc6c-4e70-897b-c76eaae3225c",
