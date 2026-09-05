@@ -65,71 +65,35 @@
             {
                 "product_folder": "Vaso Autoirrigável Redondo",
                 "product_name": "Vaso Autoirrigável Redondo",
-                "quantity": 14,
+                "quantity": 1,
                 "variants": [
                     {
                         "material": "PLA",
                         "color": "",
                         "quantity": 1,
-                        "unit_price": 12,
+                        "unit_price": 0,
                         "unit_cost": 0,
-                        "subtotal": 12,
-                        "cost": 0
-                    },
-                    {
-                        "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
-                        "unit_price": 5,
-                        "unit_cost": 0,
-                        "subtotal": 5,
-                        "cost": 0
-                    },
-                    {
-                        "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
-                        "unit_price": 64,
-                        "unit_cost": 0,
-                        "subtotal": 64,
-                        "cost": 0
-                    },
-                    {
-                        "material": "PLA",
-                        "color": "",
-                        "quantity": 1,
-                        "unit_price": 17,
-                        "unit_cost": 0,
-                        "subtotal": 17,
-                        "cost": 0
-                    },
-                    {
-                        "material": "PLA",
-                        "color": "",
-                        "quantity": 10,
-                        "unit_price": 22,
-                        "unit_cost": 0,
-                        "subtotal": 220,
+                        "subtotal": 0,
                         "cost": 0
                     }
                 ],
-                "subtotal": 318,
+                "subtotal": 0,
                 "cost": 0
             }
         ],
-        "subtotal": 318,
-        "volume_discount_percent": 5,
-        "volume_discount_value": 15.9,
-        "total": 302.1,
+        "subtotal": 0,
+        "volume_discount_percent": 0,
+        "volume_discount_value": 0,
+        "total": 0,
         "estimated_cost": 0,
-        "estimated_profit": 302.1,
+        "estimated_profit": 0,
         "status": "Orçamento",
         "payment_status": "Pendente",
-        "payment_method": "PIX",
+        "payment_method": "Boleto",
         "amount_paid": 0,
         "due_date": "2222-05-22",
         "notes": "",
         "created_at": "2026-09-05T17:18:28.224Z",
-        "updated_at": "2026-09-05T17:18:28.224Z"
+        "updated_at": "2026-09-05T17:19:12.973Z"
     }
 ]
