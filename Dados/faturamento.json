@@ -51,17 +51,17 @@
         "order_number": "00003",
         "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
         "customer_name": "Teste",
-        "total": 1368,
+        "total": 1567.5,
         "amount_paid": 0,
-        "pending": 1368,
+        "pending": 1567.5,
         "estimated_cost": 0,
-        "estimated_profit": 1368,
+        "estimated_profit": 1567.5,
         "status": "Confirmado",
         "payment_status": "Pendente",
         "payment_method": "Faturado",
         "payment_terms_days": 21,
         "due_date": "2026-09-26",
         "payment_received_date": "",
-        "updated_at": "2026-09-05T21:06:17.159Z"
+        "updated_at": "2026-09-05T21:26:05.422Z"
     }
 ]
