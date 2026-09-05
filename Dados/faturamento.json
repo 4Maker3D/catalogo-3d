@@ -45,5 +45,23 @@
         "payment_method": "PIX",
         "due_date": "",
         "updated_at": "2026-09-05T20:22:05.038Z"
+    },
+    {
+        "order_id": "PED-44713895-4c30-47c2-932e-7fcc2fc55f06",
+        "order_number": "00003",
+        "customer_id": "be3e5d21-ca23-4164-86dc-9a9a119a67e1",
+        "customer_name": "Teste",
+        "total": 360,
+        "amount_paid": 0,
+        "pending": 360,
+        "estimated_cost": 0,
+        "estimated_profit": 360,
+        "status": "Confirmado",
+        "payment_status": "Pendente",
+        "payment_method": "Faturado",
+        "payment_terms_days": 21,
+        "due_date": "2026-09-26",
+        "payment_received_date": "",
+        "updated_at": "2026-09-05T20:56:45.344Z"
     }
 ]
