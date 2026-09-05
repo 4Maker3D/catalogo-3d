@@ -7185,6 +7185,19 @@
                     ? 'none'
                     : 'flex';
 
+
+        const customerField = $('#calcCustomer')?.closest('.field');
+        const colorField = $('#calcColor')?.closest('.field');
+        const targetField = $('#targetPriceField');
+        const saveButton = $('#savePrice');
+
+        if (customerField) customerField.style.display = mode === 'reseller' ? '' : 'none';
+        if (colorField) colorField.style.display = mode === 'reseller' ? '' : 'none';
+        if (targetField) targetField.style.display = mode === 'reseller' ? '' : 'none';
+        if (saveButton) saveButton.textContent = mode === 'reseller' && $('#calcCustomer')?.value
+            ? 'SALVAR PREÇO NEGOCIADO'
+            : 'SALVAR CÁLCULO';
+
     }
 
 
@@ -7448,643 +7461,115 @@
     ========================================================= */
 
     async function calculate() {
+        let weight = 0, time = 0, materialName = 'PLA';
+        let material = materialPrice(materialName);
 
-        let weight =
-            0;
-
-        let time =
-            0;
-
-        let material =
-            89;
-
-        let materialName =
-            'PLA';
-
-
-        if (
-            state.calcInputMode ===
-            'product'
-        ) {
-
-            const folder =
-                $('#calcProduct')
-                    .value;
-
-
-            if (!folder) {
-
-                return;
-
-            }
-
-
+        if (state.calcInputMode === 'product') {
+            const folder = String($('#calcProduct')?.value || '').trim();
+            if (!folder) return;
             try {
-
-                const d =
-                    await api(
-
-                        '/api/product?folder=' +
-                        encodeURIComponent(
-                            folder
-                        )
-
-                    );
-
-
-                weight =
-
-                    parseFloat(
-                        (d?.dados || {})
-                            .filament_weight_g
-                    ) ||
-
-                    parseFloat(
-                        (d?.dados || {})
-                            .weight_g
-                    ) ||
-
-                    0;
-
-
-                time =
-
-                    parseFloat(
-                        (d?.dados || {})
-                            .print_time_h
-                    ) ||
-
-                    0;
-
-
-                materialName =
-                    d.dados.material ||
-                    'PLA';
-
-
-                material =
-                    materialPrice(
-                        materialName
-                    );
-
-            } catch (e) {
-
-                alert(
-                    e.message
-                );
-
-                return;
-
-            }
-
+                const d = await api('/api/product?folder=' + encodeURIComponent(folder));
+                const dados = d?.dados || {};
+                weight = Number(dados.filament_weight_g ?? dados.weight_g ?? 0) || 0;
+                time = Number(dados.print_time_h ?? 0) || 0;
+                materialName = String(dados.material || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+                if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
+                material = materialPrice(materialName);
+            } catch (e) { alert(e.message); return; }
         } else {
-
-            weight =
-                parseFloat(
-                    $('#cWeight')
-                        .value
-                ) || 0;
-
-
-            time =
-                parseFloat(
-                    $('#cTime')
-                        .value
-                ) || 0;
-
-
-            materialName =
-                $('#cMaterialSelect')
-                    .value ||
-                'PLA';
-
-
-            material =
-                materialPrice(
-                    materialName
-                );
-
+            weight = Number($('#cWeight')?.value || 0) || 0;
+            time = Number($('#cTime')?.value || 0) || 0;
+            materialName = String($('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
+            material = materialPrice(materialName);
         }
 
+        const quantity = Math.max(1, parseInt($('#cQuantity')?.value || 1, 10) || 1);
+        const wastePercent = Math.max(0, Number($('#setWaste')?.value || 0) || 0);
+        const wasteFactor = wastePercent / 100;
+        const filamentBase = weight * material / 1000;
+        const wasteCost = filamentBase * wasteFactor;
+        const filament = filamentBase;
+        const machine = time * (Number($('#setMachine')?.value || 2) || 2);
+        const finishing = Number($('#cFinishing')?.value || 0) || 0;
+        const painting = Number($('#cPainting')?.value || 0) || 0;
+        const packaging = Number($('#cPackaging')?.value || 0) || 0;
+        const other = Number($('#cOther')?.value || 0) || 0;
+        const commissionPercent = Math.max(0, Number($('#cCommission')?.value || 0) || 0) / 100;
 
-        const quantity =
-            Math.max(
+        const baseCosts = filament + wasteCost + machine + finishing + painting + packaging + other;
+        const costBeforeCommission = baseCosts;
+        const makerMarkup = Math.max(0, Number($('#cMargin')?.value || 0) || 0) / 100;
+        const minimumMarkup = Math.max(0, Number($('#setMinimumMargin')?.value || 0) || 0) / 100;
+        const effectiveMakerMarkup = Math.max(makerMarkup, minimumMarkup);
+        const resellerMarkup = Math.max(0, Number($('#cResellerMargin')?.value || 0) || 0) / 100;
+        const targetPrice = Number($('#cTargetPrice')?.value || 0) || 0;
 
-                1,
+        let resellerPrice = 0, customerPrice = 0, unitPrice = costBeforeCommission;
 
-                parseInt(
-                    $('#cQuantity')
-                        .value
-                ) || 1
-
-            );
-
-
-        const waste =
-            Math.max(
-
-                0,
-
-                parseFloat(
-                    $('#setWaste')
-                        .value
-                ) || 0
-
-            ) / 100;
-
-
-        const effectiveWeight =
-            weight *
-            (1 + waste);
-
-
-        const filament =
-            effectiveWeight *
-            material /
-            1000;
-
-
-        const machine =
-            time *
-            (
-                parseFloat(
-                    $('#setMachine')
-                        .value
-                ) || 2
-            );
-
-
-        const finishing =
-            parseFloat(
-                $('#cFinishing')
-                    .value
-            ) || 0;
-
-
-        const painting =
-            parseFloat(
-                $('#cPainting')
-                    .value
-            ) || 0;
-
-
-        const packaging =
-            parseFloat(
-                $('#cPackaging')
-                    .value
-            ) || 0;
-
-
-        const other =
-            parseFloat(
-                $('#cOther')
-                    .value
-            ) || 0;
-
-
-        const baseCosts =
-            filament +
-            machine +
-            finishing +
-            painting +
-            packaging +
-            other;
-
-
-        const commissionPercent =
-            (
-                parseFloat(
-                    $('#cCommission')
-                        .value
-                ) || 0
-            ) / 100;
-
-
-        /*
-         * Comissão é tratada como percentual do preço de venda.
-         * Portanto o preço precisa ser calculado considerando
-         * a comissão na equação da margem.
-         */
-
-        const margin =
-            (
-                parseFloat(
-                    $('#cMargin')
-                        .value
-                ) || 0
-            ) / 100;
-
-
-        const minimumMargin =
-            (
-                parseFloat(
-                    $('#setMinimumMargin')
-                        .value
-                ) || 0
-            ) / 100;
-
-
-        let unitCost =
-            baseCosts;
-
-
-        let unitPrice =
-            unitCost;
-
-
-        let resellerPrice =
-            0;
-
-
-        let customerPrice =
-            0;
-
-
-        if (
-            state.calcMode ===
-            'cost'
-        ) {
-
-            unitPrice =
-                unitCost;
-
+        if (state.calcMode === 'cost') {
+            unitPrice = costBeforeCommission;
+        } else if (state.calcMode === 'final') {
+            // Percentual é acréscimo sobre o custo. 100% = custo x 2.
+            unitPrice = costBeforeCommission * (1 + effectiveMakerMarkup);
+        } else if (state.calcMode === 'reseller') {
+            // 70% 4Maker + 30% revendedor = 100% de acréscimo total, não multiplicação sequencial.
+            resellerPrice = costBeforeCommission * (1 + effectiveMakerMarkup);
+            customerPrice = targetPrice > 0
+                ? targetPrice
+                : costBeforeCommission * (1 + effectiveMakerMarkup + resellerMarkup);
+            unitPrice = resellerPrice;
         }
 
-
-        if (
-            state.calcMode ===
-            'final'
-        ) {
-
-            const effectiveMarkup =
-                Math.max(
-                    margin,
-                    minimumMargin
-                );
-
-            unitPrice =
-                unitCost * (1 + effectiveMarkup) /
-                Math.max(0.000001, (1 - commissionPercent));
-
-        }
-
-
-        if (
-            state.calcMode ===
-            'reseller'
-        ) {
-
-            const effective4MakerMarkup =
-                Math.max(
-                    margin,
-                    minimumMargin
-                );
-
-            resellerPrice =
-                unitCost * (1 + effective4MakerMarkup) /
-                Math.max(0.000001, (1 - commissionPercent));
-
-
-            const resellerMargin =
-
-                (
-                    parseFloat(
-                        $('#cResellerMargin')
-                            .value
-                    ) || 0
-                ) / 100;
-
-
-            const targetPrice =
-
-                parseFloat(
-                    $('#cTargetPrice')
-                        .value
-                ) || 0;
-
-
-            if (
-                targetPrice > 0
-            ) {
-                customerPrice = targetPrice;
-            } else {
-                customerPrice =
-                    resellerPrice * (1 + resellerMargin);
+        const volumeDiscount = getVolumeDiscount(quantity);
+        if (volumeDiscount > 0) {
+            if (state.calcMode === 'reseller') {
+                resellerPrice *= (1 - volumeDiscount);
+                customerPrice *= (1 - volumeDiscount);
+            } else if (state.calcMode !== 'cost') {
+                unitPrice *= (1 - volumeDiscount);
             }
-
-
-            unitPrice =
-                resellerPrice;
-
         }
 
-
-        /*
-         * Desconto por volume.
-         *
-         * O desconto é aplicado somente ao preço comercial,
-         * nunca ao custo.
-         */
-
-        const volumeDiscount =
-            getVolumeDiscount(
-                quantity
-            );
-
-
-        if (
-            volumeDiscount > 0
-        ) {
-
-            if (
-                state.calcMode ===
-                'reseller'
-            ) {
-
-                customerPrice *=
-                    1 -
-                    volumeDiscount;
-
-
-                /*
-                 * Nunca deixa o preço final cair abaixo
-                 * do preço necessário para preservar
-                 * a margem mínima da 4Maker.
-                 */
-
-                const minimum4MakerPrice =
-
-                    unitCost * (1 + minimumMargin);
-
-
-                customerPrice =
-                    Math.max(
-                        customerPrice,
-                        minimum4MakerPrice
-                    );
-
+        const rounding = Number($('#cRounding')?.value || 0) || 0;
+        if (rounding > 0) {
+            if (state.calcMode === 'reseller') {
+                resellerPrice = roundUp(resellerPrice, rounding);
+                customerPrice = roundUp(customerPrice, rounding);
             } else {
-
-                unitPrice *=
-                    1 -
-                    volumeDiscount;
-
-
-                const minimum4MakerPrice =
-
-                    unitCost * (1 + minimumMargin);
-
-
-                unitPrice =
-                    Math.max(
-                        unitPrice,
-                        minimum4MakerPrice
-                    );
-
+                unitPrice = roundUp(unitPrice, rounding);
             }
-
         }
 
+        // Comissão é um custo adicional calculado sobre o valor efetivamente recebido pela 4Maker.
+        const revenueFor4MakerUnit = state.calcMode === 'reseller' ? resellerPrice : unitPrice;
+        const commission = state.calcMode === 'cost' ? 0 : revenueFor4MakerUnit * commissionPercent;
+        const totalCost = costBeforeCommission + commission;
+        const finalUnitPrice = state.calcMode === 'reseller' ? customerPrice : unitPrice;
+        const finalTotal = finalUnitPrice * quantity;
+        const profit = (revenueFor4MakerUnit - totalCost) * quantity;
 
-        const rounding =
-            parseFloat(
-                $('#cRounding')
-                    .value
-            ) || 0;
-
-
-        if (
-            rounding > 0
-        ) {
-
-            if (
-                state.calcMode ===
-                'reseller'
-            ) {
-
-                resellerPrice =
-                    roundUp(
-                        resellerPrice,
-                        rounding
-                    );
-
-
-                customerPrice =
-                    roundUp(
-                        customerPrice,
-                        rounding
-                    );
-
-            } else {
-
-                unitPrice =
-                    roundUp(
-                        unitPrice,
-                        rounding
-                    );
-
-            }
-
-        }
-
-
-        const commission =
-            (state.calcMode === 'cost')
-                ? 0
-                : (state.calcMode === 'reseller' ? resellerPrice : unitPrice) * commissionPercent;
-
-
-        const totalCost =
-            baseCosts +
-            commission;
-
-
-        const finalUnitPrice =
-
-            state.calcMode ===
-            'reseller'
-
-                ?
-
-                customerPrice
-
-                :
-
-                unitPrice;
-
-        const negotiatedPrice = Number($('#cTargetPrice')?.value || 0);
-        const hasNegotiated = Boolean(
-            $('#calcCustomer')?.value &&
-            negotiatedPrice > 0 &&
-            $('#cTargetPrice')?.dataset.negotiatedPrice === 'true'
-        );
-
-        const effectiveFinalUnitPrice =
-            hasNegotiated && state.calcMode !== 'cost'
-                ? negotiatedPrice
-                : finalUnitPrice;
-
-
-        const finalTotal =
-            effectiveFinalUnitPrice *
-            quantity;
-
-
-        const revenueFor4Maker =
-            state.calcMode === 'reseller'
-                ? resellerPrice
-                : effectiveFinalUnitPrice;
-
-        const profit =
-            revenueFor4Maker -
-            totalCost;
-
-
-        $('#rFilament')
-            .textContent =
-                money(
-                    filament
-                );
-
-
-        $('#rMachine')
-            .textContent =
-                money(
-                    machine
-                );
-
-
-        $('#rFinishing')
-            .textContent =
-                money(
-                    finishing
-                );
-
-
-        $('#rPainting')
-            .textContent =
-                money(
-                    painting
-                );
-
-
-        $('#rPackaging')
-            .textContent =
-                money(
-                    packaging
-                );
-
-
-        $('#rCommission')
-            .textContent =
-                money(
-                    commission
-                );
-
-
-        $('#rOther')
-            .textContent =
-                money(
-                    other
-                );
-
-
-        $('#rTotal')
-            .textContent =
-                money(
-                    totalCost
-                );
-
-
-        $('#rReseller')
-            .textContent =
-                money(
-                    resellerPrice
-                );
-
-
-        $('#rCustomer')
-            .textContent =
-                money(
-                    effectiveFinalUnitPrice
-                );
-
-
-        $('#rProfit')
-            .textContent =
-                money(
-                    profit
-                );
-
-
-        $('#price')
-            .textContent =
-                money(
-                    effectiveFinalUnitPrice
-                );
-
-
-        const discountText =
-            volumeDiscount > 0
-
-                ?
-
-                `Desconto por volume aplicado: ${volumeDiscount}%`
-
-                :
-
-                'Sem desconto por volume para esta quantidade.';
-
-
-        $('#volumeInfo')
-            .textContent =
-                discountText;
-
+        $('#rFilament').textContent = money(filament);
+        $('#rMachine').textContent = money(machine);
+        $('#rFinishing').textContent = money(finishing);
+        $('#rPainting').textContent = money(painting);
+        $('#rPackaging').textContent = money(packaging);
+        $('#rCommission').textContent = money(commission);
+        $('#rOther').textContent = money(other + wasteCost);
+        $('#rTotal').textContent = money(totalCost);
+        $('#rReseller').textContent = money(resellerPrice);
+        $('#rCustomer').textContent = money(finalUnitPrice);
+        $('#rProfit').textContent = money(profit);
+        $('#price').textContent = money(finalUnitPrice);
+        $('#volumeInfo').textContent = volumeDiscount > 0 ? `Desconto por volume aplicado: ${volumeDiscount}%` : 'Sem desconto por volume para esta quantidade.';
 
         state.lastCalculation = {
-
-            product:
-                $('#calcProduct')
-                    ?.value ||
-                '',
-
-            material:
-                materialName,
-
-            weight,
-            effectiveWeight,
-
-            time,
-
-            quantity,
-
-            cost:
-                totalCost,
-
-            resellerPrice,
-
-            finalPrice:
-                effectiveFinalUnitPrice,
-
-            customerId:
-                String($('#calcCustomer')?.value || ''),
-
-            color:
-                String($('#calcColor')?.value || ''),
-
-            total:
-                finalTotal,
-
-            volumeDiscount,
-
-            profit,
-
-            calculatedAt:
-                new Date()
-                    .toISOString()
-
+            product: String($('#calcProduct')?.value || ''), material: materialName, weight, effectiveWeight: weight * (1 + wasteFactor),
+            time, quantity, cost: totalCost, resellerPrice, finalPrice: finalUnitPrice, customerId: String($('#calcCustomer')?.value || ''),
+            color: String($('#calcColor')?.value || ''), total: finalTotal, volumeDiscount, profit, calculatedAt: new Date().toISOString(),
+            filamentBaseCost: filament, wasteCost, wastePercent, makerMarkup: effectiveMakerMarkup * 100, resellerMarkup: resellerMarkup * 100
         };
 
+        if ($('#savePrice')) $('#savePrice').textContent = state.calcMode === 'reseller' && $('#calcCustomer')?.value ? 'SALVAR PREÇO NEGOCIADO' : 'SALVAR CÁLCULO';
     }
 
 
@@ -8257,6 +7742,7 @@
             renderClients();
 
             fillOrderSelectors();
+            fillCalcCustomers();
 
             updateDashboard();
 
@@ -8278,139 +7764,43 @@
 
     function renderClients() {
 
-        const q =
-            (
-                $('#clientSearch')
-                    ?.value ||
-                ''
-            )
-                .toLowerCase()
-                .trim();
+        const q = String($('#clientSearch')?.value || '').toLowerCase().trim();
 
-
-        const list =
-            state.clients
-                .filter(
-                    c => {
-
-                        const haystack = [
-
-                            c?.name,
-                            clientDocument(c),
-                            c?.phone,
-                            c?.email
-
-                        ]
-                            .map(
-                                v =>
-                                    String(
-                                        v ??
-                                        ''
-                                    )
-                            )
-                            .join(' ')
-                            .toLowerCase();
-
-                        return haystack.includes(q);
-
-                    }
-                );
-
+        const list = state.clients.filter(c => {
+            const haystack = [c?.name, clientDocument(c), c?.phone, c?.email]
+                .map(v => String(v ?? ''))
+                .join(' ')
+                .toLowerCase();
+            return haystack.includes(q);
+        });
 
         if (!list.length) {
-
-            $('#clients').innerHTML =
-
-                '<div class="empty">' +
-
-                'Nenhum cliente cadastrado.' +
-
-                '</div>';
-
+            $('#clients').innerHTML = '<div class="empty">Nenhum cliente cadastrado.</div>';
             return;
-
         }
 
+        $('#clients').innerHTML = list.map(c => {
+            const id = clientId(c);
+            return `
+                <article class="client-card" data-client-id="${esc(id)}" tabindex="0" role="button" aria-label="Abrir cliente ${esc(c?.name || 'Cliente')}">
+                    <div class="client-info">
+                        <h3>${esc(c?.name || 'Cliente')}</h3>
+                        <p>${esc(clientDocument(c))}${c?.phone ? ' • ' + esc(c.phone) : ''}</p>
+                        <p>${esc(clientType(c))}</p>
+                    </div>
+                </article>`;
+        }).join('');
 
-        $('#clients').innerHTML =
-
-            list.map(
-
-                c => {
-
-                    const id =
-                        clientId(c);
-
-                    return `
-
-                        <article
-                            class="client-card"
-                            data-client-id="${esc(id)}"
-                        >
-
-                            <div class="client-info">
-
-                                <h3>
-                                    ${esc(
-                                        c?.name ||
-                                        'Cliente'
-                                    )}
-                                </h3>
-
-                                <p>
-                                    ${esc(
-                                        clientDocument(c)
-                                    )}
-                                    ${
-                                        c?.phone
-                                            ? ' • ' +
-                                              esc(
-                                                  c.phone
-                                              )
-                                            : ''
-                                    }
-                                </p>
-
-                                <p>
-                                    ${esc(
-                                        clientType(c)
-                                    )}
-                                </p>
-
-                            </div>
-
-                            <div class="client-actions">
-
-                                <button
-                                    type="button"
-                                    class="btn small client-open-btn"
-                                >
-                                    Ver detalhes
-                                </button>
-
-                            </div>
-
-                        </article>
-
-                    `;
-
+        $$('#clients .client-card').forEach(card => {
+            const id = String(card.dataset.clientId || '');
+            card.addEventListener('click', () => openClientDetails(id));
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openClientDetails(id);
                 }
-
-            ).join('');
-
-
-        $$('#clients .client-open-btn')
-            .forEach(
-                button => {
-                    const card = button.closest('.client-card');
-                    const id = String(card?.dataset.clientId || '');
-                    button.addEventListener(
-                        'click',
-                        () => openClientDetails(id)
-                    );
-                }
-            );
-
+            });
+        });
     }
 
 
@@ -9639,7 +9029,7 @@
 
 
                 const editingId =
-                    String(state.currentOrder?.id || '').trim();
+                    String(state.currentOrder?.id || state.currentOrder?.order_number || '').trim();
 
                 const order = {
 
@@ -10303,7 +9693,7 @@
             const defaultRow = card.querySelector('.variation-row');
             if (defaultRow) defaultRow.remove();
 
-            const variants = Array.isArray(item?.variants) ? item.variants : [];
+            const variants = Array.isArray(item?.variants) ? item.variants : (Array.isArray(item?.product_variants) ? item.product_variants : (item?.material || item?.color || item?.quantity ? [item] : []));
             variants.forEach(v => {
                 addVariationRow(card);
                 const row = card.querySelectorAll('.variation-row').at(-1);
@@ -10441,80 +9831,31 @@
        PREÇO NEGOCIADO
     ========================================================= */
 
-    $('#savePrice')
-        .onclick =
-            async () => {
+    $('#savePrice').onclick = async () => {
+        const calc = state.lastCalculation;
+        if (!calc) { alert('Faça um cálculo primeiro.'); return; }
 
-                if (
-                    !state.lastCalculation
-                ) {
+        if (state.calcMode === 'reseller' && String($('#calcCustomer')?.value || '').trim()) {
+            const customerId = String($('#calcCustomer').value).trim();
+            try {
+                await api('/api/price', { method:'POST', body:{
+                    customer_id: customerId, product_folder: calc.product,
+                    product_name: state.products.find(p => String(p?.folder || '') === calc.product)?.name || calc.product,
+                    material: calc.material || '', color: calc.color || '', price: Number(calc.resellerPrice || calc.finalPrice || 0),
+                    notes: 'Preço negociado salvo pela calculadora.'
+                }});
+                alert('Preço negociado salvo para o cliente.');
+                return;
+            } catch (err) { alert(err.message); return; }
+        }
 
-                    alert(
-                        'Faça um cálculo primeiro.'
-                    );
-
-                    return;
-
-                }
-
-
-                const customer =
-                    $('#calcCustomer')?.value ||
-                    $('#orderClient')?.value ||
-                    '';
-
-
-                try {
-
-                    const calc =
-                        state.lastCalculation || {};
-
-                    if (!customer) {
-                        alert('Selecione um cliente.');
-                        return;
-                    }
-
-                    if (!calc.product) {
-                        alert('Selecione um produto e faça o cálculo primeiro.');
-                        return;
-                    }
-
-                    await api(
-                        '/api/price',
-                        {
-                            method: 'POST',
-                            body: {
-                                customer_id: customer,
-                                product_folder: calc.product,
-                                product_name:
-                                    state.products.find(
-                                        p =>
-                                            String(p?.folder || '') ===
-                                            String(calc.product || '')
-                                    )?.name || calc.product,
-                                material: calc.material || '',
-                                color: calc.color || '',
-                                price:
-                                    Number(calc.finalPrice || 0),
-                                notes: ''
-                            }
-                        }
-                    );
-
-
-                    alert(
-                        'Preço negociado salvo com sucesso.'
-                    );
-
-                } catch (err) {
-
-                    alert(
-                        err.message
-                    );
-
-                }
-
-            };
+        const key = '4maker_saved_calculations';
+        let saved = [];
+        try { saved = JSON.parse(localStorage.getItem(key) || '[]'); if (!Array.isArray(saved)) saved=[]; } catch { saved=[]; }
+        saved.unshift({ ...calc, id: 'CALC-' + Date.now(), savedAt: new Date().toISOString(), customerId:'' });
+        localStorage.setItem(key, JSON.stringify(saved.slice(0,100)));
+        alert('Cálculo salvo no histórico de cálculos.');
+    };
 
 
     /* =========================================================
