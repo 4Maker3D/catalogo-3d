@@ -1048,6 +1048,69 @@ body.dark .scroll-indicator {
 </script>
 
 
+<!-- =========================
+     SERVICE WORKER / ATUALIZAÇÃO
+========================= -->
+
+<script>
+(function () {
+
+    const controllerReloadKey =
+        "4maker-sw-controller-v4.2.3.3";
+
+    if (!("serviceWorker" in navigator)) {
+        return;
+    }
+
+    let reloadingForNewController = false;
+
+    navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        function () {
+
+            if (
+                reloadingForNewController ||
+                sessionStorage.getItem(controllerReloadKey) === "1"
+            ) {
+                return;
+            }
+
+            reloadingForNewController = true;
+            sessionStorage.setItem(
+                controllerReloadKey,
+                "1"
+            );
+
+            window.location.reload();
+        }
+    );
+
+    window.addEventListener(
+        "load",
+        async function () {
+
+            try {
+                const registration =
+                    await navigator.serviceWorker.register(
+                        "./service-worker.js",
+                        { updateViaCache: "none" }
+                    );
+
+                await registration.update();
+            }
+            catch (error) {
+                console.warn(
+                    "Não foi possível atualizar o Service Worker:",
+                    error
+                );
+            }
+        }
+    );
+
+})();
+</script>
+
+
 <script type="module">
 
 import * as THREE from 'three';
@@ -1073,6 +1136,35 @@ from 'three/addons/loaders/RGBELoader.js';
 ===================================================== */
 
 let product = null;
+
+/*
+   Token único desta abertura da página.
+   Ele impede que um Service Worker antigo, ainda cache-first,
+   reutilize produto.json/modelo.stl de uma visita anterior.
+*/
+
+const publicResourceNonce =
+    Date.now().toString(36) +
+    "-" +
+    Math.random().toString(36).slice(2);
+
+
+function freshPublicResourceUrl(path) {
+
+    const url =
+        new URL(
+            path,
+            window.location.href
+        );
+
+    url.searchParams.set(
+        "_4mcb",
+        publicResourceNonce
+    );
+
+    return url.href;
+}
+
 
 let modelName =
     new URLSearchParams(
@@ -1160,7 +1252,10 @@ async function loadProductData() {
 
         const response =
             await fetch(
-                productJsonPath
+                freshPublicResourceUrl(
+                    productJsonPath
+                ),
+                { cache: "no-store" }
             );
 
 
@@ -1557,7 +1652,9 @@ function loadSTL() {
 
     loader.load(
 
-        stlPath,
+        freshPublicResourceUrl(
+            stlPath
+        ),
 
 
         function(geometry) {

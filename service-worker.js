@@ -1,4 +1,4 @@
-const CACHE_NAME = '4maker-admin-v4.2.3.2';
+const CACHE_NAME = '4maker-admin-v4.2.3.3';
 const STATIC_ASSETS = [
   './login.html',
   './painel.html',
@@ -6,32 +6,51 @@ const STATIC_ASSETS = [
   './manifest.webmanifest'
 ];
 
-function isMutableProductJson(url) {
+const CACHE_BUST_PARAM = '_4mcb';
+
+function decodedPathname(url) {
   let pathname = url.pathname;
 
   try {
     pathname = decodeURIComponent(pathname);
   } catch (_) {
-    // Se a URL tiver escape inválido, apenas use o pathname original.
+    // Escape inválido: use o pathname original.
   }
 
-  return /\/Modelos\/produtos\.json$/i.test(pathname) ||
-    /\/Modelos\/[^/]+\/produto\.json$/i.test(pathname);
+  return pathname;
 }
 
-async function networkFirstMutableJson(request) {
+function isMutableProductResource(url) {
+  const pathname = decodedPathname(url);
+
+  return /\/Modelos\/produtos\.json$/i.test(pathname) ||
+    /\/Modelos\/[^/]+\/produto\.json$/i.test(pathname) ||
+    /\/Modelos\/[^/]+\/modelo\.stl$/i.test(pathname);
+}
+
+function stableMutableCacheKey(url) {
+  const stable = new URL(url.href);
+  stable.searchParams.delete(CACHE_BUST_PARAM);
+  return stable.href;
+}
+
+async function networkFirstMutableResource(request, url) {
+  const cacheKey = stableMutableCacheKey(url);
+
   try {
-    const response = await fetch(request, { cache: 'no-store' });
+    const networkRequest = new Request(request, { cache: 'no-store' });
+    const response = await fetch(networkRequest);
 
     if (response.ok) {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(cacheKey, response.clone());
     }
 
-    // HTTP 404/500 é uma resposta atual da rede: não ressuscite JSON antigo.
+    // 404/500 atuais da rede devem ser respeitados.
+    // Não ressuscite uma versão antiga apenas porque existe em cache.
     return response;
   } catch (error) {
-    const cached = await caches.match(request);
+    const cached = await caches.match(cacheKey);
     if (cached) return cached;
     throw error;
   }
@@ -64,8 +83,8 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  if (isMutableProductJson(url)) {
-    event.respondWith(networkFirstMutableJson(request));
+  if (isMutableProductResource(url)) {
+    event.respondWith(networkFirstMutableResource(request, url));
     return;
   }
 

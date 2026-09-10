@@ -1,13 +1,13 @@
 # 4Maker 3D — Catálogo 3D + Painel Administrativo
 
-Versão administrativa/documentada: **V4.2.3.2**  
+Versão administrativa/documentada: **V4.2.3.3**  
 Base funcional: **V4.2.3-FINAL**  
 Backend: **Cloudflare Worker + GitHub REST API**  
 Frontend público: **GitHub Pages + Three.js**
 
 Este repositório reúne o catálogo público 3D e o painel administrativo da 4Maker 3D. O catálogo permanece público e independente do painel. Operações administrativas são feitas pelo Cloudflare Worker, que mantém a credencial do GitHub fora do navegador.
 
-A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adicionou a sincronização automática de `Modelos/produtos.json`. A V4.2.3.2 corrige a compatibilidade do índice com a chave `products` usada no repositório publicado e muda o cache dos JSONs públicos mutáveis de produto para network-first.
+A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adicionou a sincronização automática de `Modelos/produtos.json`. A V4.2.3.2 corrigiu a compatibilidade do índice com a chave `products` e adotou network-first para JSONs públicos mutáveis. A **V4.2.3.3** fecha o caso reproduzido em navegador real em que um Service Worker antigo ainda podia servir recursos de produto em cache: o visualizador agora registra/atualiza o Service Worker e solicita `produto.json` e `modelo.stl` com uma chave única por abertura da página.
 
 ---
 
@@ -137,7 +137,7 @@ Formato atual:
 }
 ```
 
-A chave canônica publicada é `products`. Por retrocompatibilidade, o Worker V4.2.3.2 também aceita um índice legado que use somente `produtos`, preservando a chave encontrada durante a gravação. Um arquivo contendo simultaneamente as duas chaves é tratado como ambíguo e bloqueia a mutação.
+A chave canônica publicada é `products`. Por retrocompatibilidade, o Worker V4.2.3.3 também aceita um índice legado que use somente `produtos`, preservando a chave encontrada durante a gravação. Um arquivo contendo simultaneamente as duas chaves é tratado como ambíguo e bloqueia a mutação.
 
 A partir da **V4.2.3.1**, o cadastro de produto mantém esse índice automaticamente sincronizado; a V4.2.3.2 corrige a compatibilidade com o formato `products` do repositório publicado.
 
@@ -156,7 +156,7 @@ O produto `Teste`, criado no repositório operacional antes deste hotfix, foi ad
 
 ---
 
-## 4. Fluxo de cadastro de produto — V4.2.3.2
+## 4. Fluxo de cadastro de produto — V4.2.3.3
 
 Antes do hotfix:
 
@@ -335,7 +335,7 @@ O Worker distingue:
 
 Um arquivo existente inválido não deve ser convertido silenciosamente em `[]` ou `{}` e depois sobrescrito.
 
-Esse comportamento também é usado pela sincronização de `Modelos/produtos.json` introduzida na V4.2.3.1 e mantida na V4.2.3.2.
+Esse comportamento também é usado pela sincronização de `Modelos/produtos.json` introduzida na V4.2.3.1 e mantida na V4.2.3.3.
 
 ---
 
@@ -359,7 +359,7 @@ Produtos com dados de produção incompletos não devem parecer automaticamente 
 
 ## 9. Calculadora e fórmulas comerciais
 
-As fórmulas centrais validadas na V4.2.3 permanecem preservadas nas V4.2.3.1 e V4.2.3.2.
+As fórmulas centrais validadas na V4.2.3 permanecem preservadas nas V4.2.3.1, V4.2.3.2 e V4.2.3.3.
 
 Considere:
 
@@ -393,7 +393,7 @@ A comissão é tratada por gross-up, preservando o líquido desejado da 4Maker.
 
 A margem do revendedor é percentual do preço público.
 
-A política de centavos existente continua preservada; V4.2.3.1 e V4.2.3.2 não tentam resolver D08/CALC-001.
+A política de centavos existente continua preservada; V4.2.3.1, V4.2.3.2 e V4.2.3.3 não tentam resolver D08/CALC-001.
 
 ### Caso de referência
 
@@ -638,7 +638,7 @@ O nome completo do produto é repetido nas variações. Não voltar a usar seta 
 
 O PDF não deve expor custo, comissão, margem ou lucro internos.
 
-A V4.2.3.2 não altera o PDF.
+A V4.2.3.3 não altera o PDF.
 
 ---
 
@@ -678,6 +678,8 @@ A V4.2.3.2 promoveu apenas o recorte de cache que foi reproduzido em navegador r
 - assets estáticos continuam com a estratégia cache-first existente;
 - navegações continuam network-first, mas respostas de erro deixam de ser gravadas no cache;
 - o nome do cache foi incrementado, e a ativação remove caches antigos `4maker-admin-*`.
+
+Na V4.2.3.3, `modelo.stl` também entra no grupo mutável network-first. O visualizador adiciona `_4mcb=<token-da-abertura>` às URLs de JSON e STL. O Service Worker atual remove apenas esse parâmetro ao formar a chave estável do fallback offline; assim, a estratégia contorna controladores antigos sem fazer o cache atual crescer a cada visita.
 
 O restante de D02/PWA continua adiado para V4.3; esta versão não redesenha a estratégia geral.
 
@@ -753,7 +755,7 @@ HTTP 401 continua seguindo o fluxo de encerramento/retorno ao login.
 
 ## 24. Itens explicitamente preservados
 
-As versões V4.2.3/V4.2.3.1/V4.2.3.2 não devem alterar sem nova necessidade e validação:
+As versões V4.2.3/V4.2.3.1/V4.2.3.2/V4.2.3.3 não devem alterar sem nova necessidade e validação:
 
 - segredo GitHub somente no Worker;
 - autenticação das rotas internas;
@@ -839,7 +841,7 @@ A aprovação foi funcional no ambiente de testes Node VM + GitHub em memória +
 
 ### V4.2.3.2 — Compatibilidade do índice + cache de produto
 
-Correção atual:
+Correções desta etapa:
 
 - a chave publicada do índice é `products`;
 - o Worker aceita `products` e, por retrocompatibilidade, o legado `produtos`;
@@ -853,6 +855,17 @@ Correção atual:
 ---
 
 ## 26. Deploy
+
+### V4.2.3.3 — Atualização robusta do visualizador
+
+- `index.html` passa a registrar `service-worker.js` e chamar `registration.update()`;
+- uma troca real de controller provoca no máximo um reload controlado por sessão para ativar a versão nova sem loop;
+- cada abertura do visualizador gera um token `_4mcb` e o adiciona às requisições de `produto.json` e `modelo.stl`;
+- esse token faz um Service Worker antigo cache-first falhar em encontrar a chave antiga e buscar o recurso atual na rede;
+- o Service Worker V4.2.3.3 usa network-first para `produto.json`, `Modelos/produtos.json` e `modelo.stl`;
+- o cache atual remove `_4mcb` ao armazenar o fallback offline, evitando acumular uma cópia por visita;
+- respostas HTTP 404/500 atuais não são substituídas por conteúdo antigo; fallback ocorre apenas em falha real de rede;
+- `painel.html`, `worker.js`, regras comerciais, PDF e dados permanecem inalterados nesta etapa.
 
 ### Worker
 
@@ -868,20 +881,21 @@ Secrets e Vars permanecem no ambiente Cloudflare e não devem ser colocados no r
 
 ### Painel
 
-Na V4.2.3.2 o `painel.html` continua idêntico à V4.2.3-FINAL.
+Na V4.2.3.3 o `painel.html` continua idêntico à V4.2.3-FINAL.
 
 Painel e Worker devem continuar sendo tratados como um conjunto de mesma geração funcional, principalmente por causa de `expected_revision`, contratos de preço e contexto de cotação.
 
-### Hotfix V4.2.3.2
+### Hotfix V4.2.3.3
 
-Arquivos que precisam ser publicados para o hotfix:
+Arquivos alterados da V4.2.3.2 para a V4.2.3.3:
 
 ```text
-worker.js
-Modelos/produtos.json
+index.html
 service-worker.js
 README.md   # documentação; não é requisito de runtime
 ```
+
+`worker.js` e `Modelos/produtos.json` permanecem byte a byte iguais à V4.2.3.2, mantendo a sincronização automática do índice e a entrada `Teste`.
 
 **Preserve `Modelos/Teste/` no repositório real.** Essa pasta foi criada depois do ZIP V4.2.3-FINAL utilizado como base local e não está contida naquele baseline.
 
@@ -926,7 +940,7 @@ Para rollback de código:
 - **não substitua `Dados/*.json` do ambiente real por JSONs antigos de um checkpoint**;
 - não substitua `Modelos/` atual por uma cópia antiga que não contenha produtos cadastrados depois do checkpoint.
 
-No hotfix V4.2.3.2, reverter código sem reverter dados é preferível a restaurar todo o ZIP antigo. Se houver rollback do Service Worker, considere também o efeito do nome/versionamento do cache.
+No hotfix V4.2.3.3, reverter código sem reverter dados é preferível a restaurar todo o ZIP antigo. Se houver rollback do Service Worker, considere também o efeito do nome/versionamento do cache.
 
 ---
 
@@ -999,8 +1013,8 @@ Essas decisões devem ser guiadas por problema real, escala, concorrência, lat�
 
 ## 31. Estado desta documentação
 
-Este README descreve o comportamento até **V4.2.3.2**.
+Este README descreve o comportamento até **V4.2.3.3**.
 
-A V4.2.3-FINAL é a baseline funcional das correções A/B/C. A V4.2.3.1 introduziu a sincronização do índice; a V4.2.3.2 corrige esse hotfix para o formato `products` do repositório publicado e corrige o cache reproduzido no visualizador 3D. A entrada `Teste` permanece no índice e sua pasta operacional existente deve ser preservada.
+A V4.2.3-FINAL é a baseline funcional das correções A/B/C. A V4.2.3.1 introduziu a sincronização do índice; a V4.2.3.2 corrigiu o formato `products` e adotou network-first para dados públicos mutáveis. A V4.2.3.3 adiciona recuperação contra Service Worker antigo: `index.html` atualiza o registro e usa cache-busting por abertura para `produto.json` e `modelo.stl`, enquanto o Service Worker atual normaliza a chave do cache para evitar acúmulo de versões. A entrada `Teste` permanece no índice e sua pasta operacional existente deve ser preservada.
 
 O status de I01/SEC-001 continua **PENDENTE** e nenhuma alegação de exposição ou isolamento definitivo deve ser feita sem verificação no ambiente publicado.
