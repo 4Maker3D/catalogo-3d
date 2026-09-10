@@ -1,13 +1,13 @@
 # 4Maker 3D — Catálogo 3D + Painel Administrativo
 
-Versão administrativa/documentada: **V4.2.3.1**  
+Versão administrativa/documentada: **V4.2.3.2**  
 Base funcional: **V4.2.3-FINAL**  
 Backend: **Cloudflare Worker + GitHub REST API**  
 Frontend público: **GitHub Pages + Three.js**
 
 Este repositório reúne o catálogo público 3D e o painel administrativo da 4Maker 3D. O catálogo permanece público e independente do painel. Operações administrativas são feitas pelo Cloudflare Worker, que mantém a credencial do GitHub fora do navegador.
 
-A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adiciona um hotfix pequeno para manter `Modelos/produtos.json` sincronizado ao cadastrar novos produtos.
+A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adicionou a sincronização automática de `Modelos/produtos.json`. A V4.2.3.2 corrige a compatibilidade do índice com a chave `products` usada no repositório publicado e muda o cache dos JSONs públicos mutáveis de produto para network-first.
 
 ---
 
@@ -129,7 +129,7 @@ Formato atual:
 
 ```json
 {
-    "produtos": [
+    "products": [
         {
             "folder": "Nome do Produto"
         }
@@ -137,7 +137,9 @@ Formato atual:
 }
 ```
 
-A partir da **V4.2.3.1**, o cadastro de produto mantém esse índice automaticamente sincronizado.
+A chave canônica publicada é `products`. Por retrocompatibilidade, o Worker V4.2.3.2 também aceita um índice legado que use somente `produtos`, preservando a chave encontrada durante a gravação. Um arquivo contendo simultaneamente as duas chaves é tratado como ambíguo e bloqueia a mutação.
+
+A partir da **V4.2.3.1**, o cadastro de produto mantém esse índice automaticamente sincronizado; a V4.2.3.2 corrige a compatibilidade com o formato `products` do repositório publicado.
 
 Regras da sincronização:
 
@@ -154,7 +156,7 @@ O produto `Teste`, criado no repositório operacional antes deste hotfix, foi ad
 
 ---
 
-## 4. Fluxo de cadastro de produto — V4.2.3.1
+## 4. Fluxo de cadastro de produto — V4.2.3.2
 
 Antes do hotfix:
 
@@ -223,7 +225,7 @@ PUT  /api/product
 
 `GET /api/products` continua listando as pastas existentes em `Modelos/` e pode criar `dados.json` inicial para produto que ainda não possua o arquivo.
 
-`POST /api/product`, além de criar os três arquivos da pasta, sincroniza `Modelos/produtos.json` na V4.2.3.1.
+`POST /api/product`, além de criar os três arquivos da pasta, sincroniza `Modelos/produtos.json`. Na V4.2.3.2 o Worker reconhece a chave canônica `products` e o legado `produtos`, sem substituir silenciosamente uma estrutura incompatível.
 
 ### Configurações
 
@@ -333,7 +335,7 @@ O Worker distingue:
 
 Um arquivo existente inválido não deve ser convertido silenciosamente em `[]` ou `{}` e depois sobrescrito.
 
-Esse comportamento também é usado pela sincronização de `Modelos/produtos.json` da V4.2.3.1.
+Esse comportamento também é usado pela sincronização de `Modelos/produtos.json` introduzida na V4.2.3.1 e mantida na V4.2.3.2.
 
 ---
 
@@ -357,7 +359,7 @@ Produtos com dados de produção incompletos não devem parecer automaticamente 
 
 ## 9. Calculadora e fórmulas comerciais
 
-As fórmulas centrais validadas na V4.2.3 foram preservadas na V4.2.3.1.
+As fórmulas centrais validadas na V4.2.3 permanecem preservadas nas V4.2.3.1 e V4.2.3.2.
 
 Considere:
 
@@ -391,7 +393,7 @@ A comissão é tratada por gross-up, preservando o líquido desejado da 4Maker.
 
 A margem do revendedor é percentual do preço público.
 
-A política de centavos existente continua preservada; a V4.2.3.1 não tenta resolver D08/CALC-001.
+A política de centavos existente continua preservada; V4.2.3.1 e V4.2.3.2 não tentam resolver D08/CALC-001.
 
 ### Caso de referência
 
@@ -636,7 +638,7 @@ O nome completo do produto é repetido nas variações. Não voltar a usar seta 
 
 O PDF não deve expor custo, comissão, margem ou lucro internos.
 
-A V4.2.3.1 não altera o PDF.
+A V4.2.3.2 não altera o PDF.
 
 ---
 
@@ -665,7 +667,19 @@ O rascunho local de novos pedidos usa:
 
 O rascunho não é apagado automaticamente no logout para evitar perda de trabalho.
 
-A política ampla de cache PWA permanece para V4.3/D02; não foi alterada na V4.2.3.1.
+A V4.2.3.2 promoveu apenas o recorte de cache que foi reproduzido em navegador real:
+
+- `Modelos/<produto>/produto.json` usa **network-first**;
+- `Modelos/produtos.json` usa **network-first**;
+- a busca de rede usa `cache: no-store` para não reutilizar a resposta HTTP antiga;
+- somente respostas `2xx` são atualizadas no Cache Storage;
+- em falha real de rede, uma cópia previamente armazenada pode ser usada como fallback offline;
+- respostas HTTP atuais como 404/500 não são substituídas por um JSON antigo;
+- assets estáticos continuam com a estratégia cache-first existente;
+- navegações continuam network-first, mas respostas de erro deixam de ser gravadas no cache;
+- o nome do cache foi incrementado, e a ativação remove caches antigos `4maker-admin-*`.
+
+O restante de D02/PWA continua adiado para V4.3; esta versão não redesenha a estratégia geral.
 
 ---
 
@@ -739,7 +753,7 @@ HTTP 401 continua seguindo o fluxo de encerramento/retorno ao login.
 
 ## 24. Itens explicitamente preservados
 
-As versões V4.2.3/V4.2.3.1 não devem alterar sem nova necessidade e validação:
+As versões V4.2.3/V4.2.3.1/V4.2.3.2 não devem alterar sem nova necessidade e validação:
 
 - segredo GitHub somente no Worker;
 - autenticação das rotas internas;
@@ -817,17 +831,24 @@ A aprovação foi funcional no ambiente de testes Node VM + GitHub em memória +
 
 ### V4.2.3.1 — Sincronização do índice de produtos
 
-Hotfix atual:
+- `createProduct()` passou a validar e sincronizar `Modelos/produtos.json`;
+- evita duplicação, preserva campos existentes e usa SHA atual;
+- conflito de SHA recebe uma releitura/merge controlado;
+- conteúdo inválido bloqueia a operação em vez de virar lista vazia;
+- a entrada `Teste` foi incluída no índice sem recriar os arquivos do produto.
 
-- `createProduct()` valida `Modelos/produtos.json` antes de criar um produto;
-- após criar `produto.json`, `dados.json` e `modelo.stl`, sincroniza o índice;
-- evita duplicar a mesma pasta;
-- preserva entradas/campos existentes;
-- usa SHA atual;
-- trata conflito de SHA com uma releitura/merge controlado;
-- conteúdo inválido bloqueia a operação e não é substituído por lista vazia;
-- adiciona a entrada `Teste` ao índice, sem recriar os arquivos desse produto;
-- atualiza este README.
+### V4.2.3.2 — Compatibilidade do índice + cache de produto
+
+Correção atual:
+
+- a chave publicada do índice é `products`;
+- o Worker aceita `products` e, por retrocompatibilidade, o legado `produtos`;
+- a sincronização preserva a chave existente e todos os campos extras;
+- estruturas ambíguas/incompatíveis falham explicitamente;
+- `produto.json` e `Modelos/produtos.json` passam a network-first no Service Worker;
+- o cache antigo é invalidado pela troca do `CACHE_NAME`;
+- resposta HTTP de erro não ressuscita um JSON antigo;
+- `painel.html`, fórmulas, pedidos, PDF, catálogo 3D e demais contratos da V4.2.3 permanecem inalterados.
 
 ---
 
@@ -847,17 +868,18 @@ Secrets e Vars permanecem no ambiente Cloudflare e não devem ser colocados no r
 
 ### Painel
 
-Na V4.2.3.1 o `painel.html` não foi alterado em relação à V4.2.3-FINAL.
+Na V4.2.3.2 o `painel.html` continua idêntico à V4.2.3-FINAL.
 
 Painel e Worker devem continuar sendo tratados como um conjunto de mesma geração funcional, principalmente por causa de `expected_revision`, contratos de preço e contexto de cotação.
 
-### Hotfix V4.2.3.1
+### Hotfix V4.2.3.2
 
 Arquivos que precisam ser publicados para o hotfix:
 
 ```text
 worker.js
 Modelos/produtos.json
+service-worker.js
 README.md   # documentação; não é requisito de runtime
 ```
 
@@ -872,7 +894,7 @@ Depois da implantação, conferir em navegador real:
 1. login;
 2. painel e navegação;
 3. produto `Teste` aparecendo no fluxo que depende de `Modelos/produtos.json`;
-4. visualização 3D do `Teste`;
+4. visualização 3D do `Teste` na aba normal, sem limpar cache e sem usar guia anônima;
 5. cadastrar um produto de teste controlado e confirmar entrada automática no índice;
 6. confirmar que repetir/editar não cria entrada duplicada;
 7. calculadora com o cenário de referência R$ 102,67;
@@ -882,7 +904,7 @@ Depois da implantação, conferir em navegador real:
 11. pagamento/data;
 12. PDF visual.
 
-Os testes locais não substituem validação real de navegador, cache, rede, GitHub e Worker publicado.
+Os testes locais incluem simulação do Service Worker, mas não substituem o smoke test final no navegador/rede/GitHub/Worker publicados.
 
 ---
 
@@ -904,7 +926,7 @@ Para rollback de código:
 - **não substitua `Dados/*.json` do ambiente real por JSONs antigos de um checkpoint**;
 - não substitua `Modelos/` atual por uma cópia antiga que não contenha produtos cadastrados depois do checkpoint.
 
-No hotfix V4.2.3.1, reverter `worker.js` sem reverter dados é preferível a restaurar todo o ZIP antigo.
+No hotfix V4.2.3.2, reverter código sem reverter dados é preferível a restaurar todo o ZIP antigo. Se houver rollback do Service Worker, considere também o efeito do nome/versionamento do cache.
 
 ---
 
@@ -977,8 +999,8 @@ Essas decisões devem ser guiadas por problema real, escala, concorrência, lat�
 
 ## 31. Estado desta documentação
 
-Este README descreve o comportamento até **V4.2.3.1**.
+Este README descreve o comportamento até **V4.2.3.2**.
 
-A V4.2.3-FINAL foi a baseline funcional usada para este hotfix. A V4.2.3.1 altera somente o necessário para sincronizar o índice de produtos e atualizar a documentação, além da entrada estática `Teste` em `Modelos/produtos.json`.
+A V4.2.3-FINAL é a baseline funcional das correções A/B/C. A V4.2.3.1 introduziu a sincronização do índice; a V4.2.3.2 corrige esse hotfix para o formato `products` do repositório publicado e corrige o cache reproduzido no visualizador 3D. A entrada `Teste` permanece no índice e sua pasta operacional existente deve ser preservada.
 
 O status de I01/SEC-001 continua **PENDENTE** e nenhuma alegação de exposição ou isolamento definitivo deve ser feita sem verificação no ambiente publicado.

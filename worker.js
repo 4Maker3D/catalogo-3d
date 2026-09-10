@@ -1927,6 +1927,77 @@ const PRODUCT_INDEX_PATH =
   "Modelos/produtos.json";
 
 
+function productIndexList(
+  index
+) {
+  const hasProducts =
+    Object.prototype.hasOwnProperty.call(
+      index,
+      "products"
+    );
+
+  const hasProdutos =
+    Object.prototype.hasOwnProperty.call(
+      index,
+      "produtos"
+    );
+
+  if (
+    hasProducts &&
+    hasProdutos
+  ) {
+    throw storedDataError(
+      PRODUCT_INDEX_PATH,
+      'Estrutura ambígua: use apenas "products" ou o legado "produtos".'
+    );
+  }
+
+  const key =
+    hasProducts
+      ? "products"
+      : hasProdutos
+        ? "produtos"
+        : null;
+
+  if (
+    !key ||
+    !Array.isArray(
+      index[key]
+    )
+  ) {
+    throw storedDataError(
+      PRODUCT_INDEX_PATH,
+      'Era esperada a propriedade "products" como lista (ou "produtos" no formato legado).'
+    );
+  }
+
+  for (
+    const entry of
+    index[key]
+  ) {
+    if (
+      !entry ||
+      typeof entry !==
+        "object" ||
+      Array.isArray(entry) ||
+      typeof entry.folder !==
+        "string" ||
+      !entry.folder.trim()
+    ) {
+      throw storedDataError(
+        PRODUCT_INDEX_PATH,
+        `Existe uma entrada inválida na lista "${key}".`
+      );
+    }
+  }
+
+  return {
+    key,
+    list: index[key]
+  };
+}
+
+
 async function readProductIndex(
   env
 ) {
@@ -1950,50 +2021,40 @@ async function readProductIndex(
       PRODUCT_INDEX_PATH
     );
 
-  if (
-    !Array.isArray(
-      index.produtos
-    )
-  ) {
-    throw storedDataError(
-      PRODUCT_INDEX_PATH,
-      'Era esperada a propriedade "produtos" como lista.'
+  const collection =
+    productIndexList(
+      index
     );
-  }
-
-  for (
-    const entry of
-    index.produtos
-  ) {
-    if (
-      !entry ||
-      typeof entry !==
-        "object" ||
-      Array.isArray(entry) ||
-      typeof entry.folder !==
-        "string" ||
-      !entry.folder.trim()
-    ) {
-      throw storedDataError(
-        PRODUCT_INDEX_PATH,
-        'Existe uma entrada inválida na lista "produtos".'
-      );
-    }
-  }
 
   return {
     file,
-    index
+    index,
+    key: collection.key
   };
 }
 
 
 function productIndexWithFolder(
   index,
+  key,
   folder
 ) {
+  const collection =
+    productIndexList(
+      index
+    );
+
+  if (
+    collection.key !== key
+  ) {
+    throw storedDataError(
+      PRODUCT_INDEX_PATH,
+      "A estrutura do índice mudou durante a atualização."
+    );
+  }
+
   const exists =
-    index.produtos.some(
+    collection.list.some(
       entry =>
         entry.folder ===
         folder
@@ -2009,8 +2070,8 @@ function productIndexWithFolder(
   return {
     index: {
       ...index,
-      produtos: [
-        ...index.produtos,
+      [key]: [
+        ...collection.list,
         {
           folder
         }
@@ -2035,6 +2096,7 @@ async function syncProductIndex(
   let next =
     productIndexWithFolder(
       current.index,
+      current.key,
       folder
     );
 
@@ -2072,6 +2134,7 @@ async function syncProductIndex(
   next =
     productIndexWithFolder(
       current.index,
+      current.key,
       folder
     );
 
