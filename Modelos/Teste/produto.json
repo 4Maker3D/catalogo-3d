@@ -1,0 +1,14 @@
+{
+    "name": "Teste",
+    "category": "Teste",
+    "description": "Teste",
+    "materials": "PLA • PETG • ABS • ASA • TPU • TPE • PA • Nylon • PC • Fibra de Carbono • Fibra de Vidro • HIPS",
+    "customization": "Teste",
+    "colors": [
+        {
+            "name": "Branco",
+            "hex": 16777215,
+            "swatch": 16777215
+        }
+    ]
+}
