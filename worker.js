@@ -410,9 +410,9 @@ export default {
       return json(
         {
           error:
-            status === 500
+            error?.publicMessage || (status === 500
               ? "Erro interno da API."
-              : "Falha ao acessar o GitHub.",
+              : "Falha ao acessar o GitHub."),
 
           detail:
             error?.message || "",
@@ -1058,21 +1058,28 @@ async function getFile(
     throw error;
   }
 
-  const data =
-    await response.json();
+  let data, content;
+  try {
+    data = await response.json();
+    if (!data || Array.isArray(data) || typeof data !== "object" ||
+        typeof data.sha !== "string" || !data.sha ||
+        data.encoding !== "base64" || typeof data.content !== "string" ||
+        !data.content.trim()) {
+      throw new Error("Metadata sem conteúdo base64 e revisão suficientes.");
+    }
+    content = decodeBase64Utf8(data.content);
+  } catch (error) {
+    throw storedDataError(path, error.message || "Conteúdo indisponível.");
+  }
 
-  return {
-    sha: data.sha,
+  // Um JSON existente inválido nunca pode ser substituído por defaults.
+  if (path.endsWith(".json")) {
+    const isCollection = [ADMIN_FILES.clients, ADMIN_FILES.orders,
+      ADMIN_FILES.prices, ADMIN_FILES.billing].includes(path);
+    parseJsonSafe(content, isCollection ? [] : {}, path);
+  }
 
-    content:
-      data.content
-        ? decodeBase64Utf8(
-            data.content
-          )
-        : "",
-
-    raw: data
-  };
+  return { sha: data.sha, content, raw: data };
 }
 
 
@@ -1156,13 +1163,23 @@ async function calculatePrice(
       .json()
       .catch(() => null);
 
-  if (!body || typeof body !== "object") {
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
     return json(
       { error: "Dados de cálculo inválidos." },
       400,
       origin,
       env
     );
+  }
+
+  const weight = commercialNumber(firstNumericValue(body.weight_g, body.filament_weight_g), "Peso do filamento");
+  const printTime = commercialNumber(body.print_time_h, "Tempo de impressão");
+  const quantity = commercialNumber(body.quantity, "Quantidade", { defaultValue: 1, min: 1, integer: true });
+  for (const key of ["waste_percent", "finishing", "painting", "packaging", "other", "margin_percent", "target_price", "rounding_increment"]) {
+    if (body[key] !== undefined) commercialNumber(body[key], key);
+  }
+  for (const key of ["commission_percent", "reseller_margin_percent"]) {
+    if (body[key] !== undefined) commercialNumber(body[key], key, { max: 95 });
   }
 
   const settingsFile =
@@ -1173,17 +1190,10 @@ async function calculatePrice(
       env
     );
 
-  const settings =
-    normalizeSettings(
-      parseJsonSafe(
-        settingsFile.content,
-        defaultSettings()
-      )
-    );
-
-  const weight = Math.max(0, numberOrZero(body.weight_g));
-  const printTime = Math.max(0, numberOrZero(body.print_time_h));
-  const quantity = Math.max(1, Math.floor(numberOrZero(body.quantity) || 1));
+  const rawSettings = parseJsonSafe(settingsFile.content, defaultSettings());
+  validateCommercialSettings(rawSettings);
+  const settings = normalizeSettings(rawSettings);
+  validateCommercialSettings(settings);
   const waste = Math.max(0, numberOrZero(body.waste_percent ?? settings.waste_percent)) / 100;
   const materialName = String(body.material || "").trim();
   const mode = ["cost", "final", "reseller"].includes(String(body.mode || ""))
@@ -1235,6 +1245,8 @@ async function calculatePrice(
     packaging +
     other;
 
+  commercialNumber(productionCost, "Custo de produção calculado");
+
   const commissionPercent =
     Math.min(
       0.95,
@@ -1282,15 +1294,19 @@ async function calculatePrice(
 
   const targetPrice = Math.max(0, numberOrZero(body.target_price));
   const negotiatedPrice = Boolean(body.negotiated_price);
+  if (body.target_price_type !== undefined && !["public", "net"].includes(body.target_price_type)) throw commercialInputError("Tipo de preço alvo inválido.");
+  const targetIsNet = negotiatedPrice && mode === "reseller" && body.target_price_type === "net";
 
   const makerMinimumRevenue =
     productionCost *
     (1 + minimumMarkup) /
     (1 - commissionPercent);
 
+  if (targetIsNet && targetPrice < makerMinimumRevenue) throw commercialInputError("A compra negociada está abaixo do piso informado. Recalcule ou renegocie explicitamente.");
+
   let publicPrice =
     targetPrice > 0
-      ? targetPrice
+      ? (targetIsNet ? targetPrice / (1 - resellerMarginRate) : targetPrice)
       : productionCost *
         (1 + effectiveMarkup) /
         (1 - commissionPercent);
@@ -1408,6 +1424,11 @@ async function calculatePrice(
       ? resellerProfitUnit / publicPrice * 100
       : 0;
 
+  for (const value of [publicPrice, makerRevenue, totalCost, makerProfitUnit,
+    resellerProfitUnit, publicPrice * quantity, makerProfitUnit * quantity]) {
+    if (!Number.isFinite(value)) throw commercialInputError("O cálculo excede os limites numéricos. Revise os valores informados.");
+  }
+
   return json(
     {
       ok: true,
@@ -1439,6 +1460,7 @@ async function calculatePrice(
         configured_volume_discount_percent: roundMoney(configuredVolumeDiscount * 100),
         applied_volume_discount_percent: roundMoney(appliedVolumeDiscount * 100),
         negotiated_price: negotiatedPrice,
+        target_price_type: targetIsNet ? "net" : "public",
         floor_limited: floorLimited,
         commercial_warning: commercialWarning,
         public_price: roundMoney(publicPrice),
@@ -1740,6 +1762,7 @@ async function getProduct(
   return json(
     {
       folder,
+      revision: await recordRevision({ produto: product, dados }),
 
       produto:
         product,
@@ -1845,6 +1868,8 @@ async function updateProduct(
       env
     );
   }
+
+  await requireEditRevision(body.expected_revision, { produto: JSON.parse(productFile.content), dados: dataFile ? JSON.parse(dataFile.content) : defaultDados(JSON.parse(productFile.content)) });
 
   await putFile(
     `Modelos/${encodeURIComponent(
@@ -2241,7 +2266,8 @@ async function getSettings(
 
   return json(
     {
-      settings
+      settings,
+      revision: await recordRevision(JSON.parse(file.content))
     },
     200,
     origin,
@@ -2276,6 +2302,8 @@ async function updateSettings(
     );
   }
 
+  validateCommercialSettings(body.settings || body);
+
   const settings =
     normalizeSettings(
       body.settings ||
@@ -2302,7 +2330,8 @@ async function updateSettings(
   return json(
     {
       ok: true,
-      settings
+      settings,
+      revision: await recordRevision(settings)
     },
     200,
     origin,
@@ -2440,6 +2469,7 @@ async function listClients(
 
   return json(
     {
+      revisions: await recordRevisions(clients),
       clients:
         Array.isArray(
           clients
@@ -2739,6 +2769,8 @@ async function updateClient(
   const current =
     clients[index];
 
+  await requireEditRevision(body.expected_revision, current);
+
   clients[index] = {
     ...current,
 
@@ -3000,6 +3032,10 @@ async function savePrice(
       []
     );
 
+  if (!["public", "net"].includes(body.price_type)) {
+    throw commercialInputError("Escolha o tipo do acordo: preço público (public) ou compra/líquido (net). Acordos legados não são convertidos automaticamente.");
+  }
+
   const now =
     new Date().toISOString();
 
@@ -3049,7 +3085,10 @@ async function savePrice(
     );
   }
 
+  const previous = existingIndex >= 0 ? prices[existingIndex] : {};
   const record = {
+    ...previous,
+    price_type: body.price_type,
     id:
       existingIndex >= 0
         ? prices[
@@ -3067,7 +3106,7 @@ async function savePrice(
 
     product_name:
       String(
-        body?.product_name ||
+        body?.product_name ?? previous.product_name ??
         ""
       ).trim(),
 
@@ -3082,7 +3121,7 @@ async function savePrice(
 
     notes:
       String(
-        body?.notes || ""
+        body?.notes ?? previous.notes ?? ""
       ).trim(),
 
     created_at:
@@ -3205,7 +3244,8 @@ async function listOrders(
 
   return json(
     {
-      orders
+      orders,
+      revisions: await recordRevisions(orders)
     },
     200,
     origin,
@@ -3359,7 +3399,10 @@ async function createOrder(
       settings
     );
 
+  await validateOrderQuote(body.quote_context, customerId, items, totals, settingsFile);
+
   const order = {
+    ...(body.quote_context ? { quote_context: body.quote_context } : {}),
     id:
       generateId(
         "PED"
@@ -3393,11 +3436,9 @@ async function createOrder(
     estimated_cost:
       totals.cost,
 
-    estimated_profit:
-      roundMoney(
-        totals.total -
-        totals.cost
-      ),
+    cost_known: totals.cost_known,
+    profit_basis_complete: totals.profit_basis_complete,
+    estimated_profit: totals.profit_basis_complete ? roundMoney(totals.total - totals.cost) : null,
 
     status:
       body.status ||
@@ -3449,6 +3490,8 @@ async function createOrder(
     updated_at:
       now
   };
+
+  Object.assign(order, coherentPayment(body, {}, order.total));
 
   orders.push(
     order
@@ -3515,6 +3558,11 @@ async function updateOrder(
     );
   }
 
+  if (Object.prototype.hasOwnProperty.call(body, "items") &&
+      (!Array.isArray(body.items) || !body.items.length)) {
+    throw commercialInputError("O pedido precisa ter pelo menos um item válido.");
+  }
+
   const file =
     await ensureJsonFile(
       ADMIN_FILES.orders,
@@ -3555,9 +3603,18 @@ async function updateOrder(
   const current =
     orders[index];
 
+  await requireEditRevision(body.expected_revision, current);
+  if (Array.isArray(body.items)) body.items.forEach(item => normalizeOrderItem(item));
+  const targetCustomerId = String(body.customer_id ?? current.customer_id ?? "").trim();
+  const commercialChanged = commercialItemsKey(targetCustomerId, body.items || current.items) !== commercialItemsKey(current.customer_id, current.items);
+  const renegotiate = body.pricing_action === "renegotiate";
+  if (commercialChanged && !renegotiate) throw commercialInputError("Alteração comercial exige renegociação explícita. Status, pagamento e observações preservam o contrato histórico.");
+  if (renegotiate && !Array.isArray(body.items)) body.items = current.items;
+  if (Array.isArray(body.items)) body.items = preserveUnchangedVariantCosts(body.items, current.items);
+
   let recalculated = null;
 
-  if (Array.isArray(body.items) && body.items.length) {
+  if (renegotiate && Array.isArray(body.items) && body.items.length) {
     const settingsFile =
       await ensureJsonFile(
         ADMIN_FILES.settings,
@@ -3580,10 +3637,21 @@ async function updateOrder(
         normalizedItems,
         settings
       );
+    await validateOrderQuote(body.quote_context, targetCustomerId, normalizedItems, recalculated, settingsFile);
+  }
+
+  let newCustomer = null;
+  if (targetCustomerId !== String(current.customer_id || "")) {
+    const clientsFile = await ensureJsonFile(ADMIN_FILES.clients, [], "4Maker 3D: criar clientes.json", env);
+    newCustomer = JSON.parse(clientsFile.content).find(client => String(client.id) === targetCustomerId);
+    if (!newCustomer) throw commercialInputError("Cliente da renegociação não encontrado.");
   }
 
   const updated = {
     ...current,
+    ...(renegotiate ? { quote_context: body.quote_context || null, contract_updated_at: new Date().toISOString() } : {}),
+    ...(newCustomer ? { customer: { ...(current.customer || {}), ...snapshotCustomer(newCustomer) },
+      ...(current.customer_snapshot ? { customer_snapshot: { ...current.customer_snapshot, ...newCustomer } } : {}) } : {}),
 
     ...(recalculated
       ? {
@@ -3593,7 +3661,9 @@ async function updateOrder(
           volume_discount_value: recalculated.volume_discount_value,
           total: recalculated.total,
           estimated_cost: recalculated.cost,
-          estimated_profit: roundMoney(recalculated.total - recalculated.cost)
+          estimated_profit: recalculated.profit_basis_complete ? roundMoney(recalculated.total - recalculated.cost) : null,
+          cost_known: recalculated.cost_known,
+          profit_basis_complete: recalculated.profit_basis_complete
         }
       : {}),
 
@@ -3655,6 +3725,8 @@ async function updateOrder(
     updated_at:
       new Date().toISOString()
   };
+
+  Object.assign(updated, coherentPayment(body, current, updated.total));
 
   orders[index] =
     updated;
@@ -3900,8 +3972,7 @@ async function getBilling(
   return json(
     {
       billing: {
-        orders:
-          filtered,
+        orders: filtered.map(order => { const info = orderCostInfo(order); return { ...order, ...info, estimated_cost: info.cost_known ? order.estimated_cost : null, estimated_profit: info.profit_basis_complete ? order.estimated_profit : null }; }),
 
         total_orders:
           filtered.length,
@@ -3921,15 +3992,10 @@ async function getBilling(
             pending
           ),
 
-        total_cost:
-          roundMoney(
-            totalCost
-          ),
+        total_cost: filtered.every(order => orderCostInfo(order).cost_known) ? roundMoney(totalCost) : null,
 
-        estimated_profit:
-          roundMoney(
-            totalProfit
-          ),
+        profit_basis_complete: filtered.every(order => orderCostInfo(order).profit_basis_complete),
+        estimated_profit: filtered.every(order => orderCostInfo(order).profit_basis_complete) ? roundMoney(totalProfit) : null,
 
         average_ticket:
           filtered.length
@@ -3953,6 +4019,7 @@ async function rebuildBillingFile(
 ) {
   const billing =
     orders.map(order => ({
+      ...orderCostInfo(order),
       order_id: order.id,
       order_number: order.order_number,
       customer_id: order.customer_id,
@@ -3960,10 +4027,10 @@ async function rebuildBillingFile(
       total: numberOrZero(order.total),
       amount_paid: numberOrZero(order.amount_paid),
       pending: Math.max(0, numberOrZero(order.total) - numberOrZero(order.amount_paid)),
-      estimated_cost: numberOrZero(order.estimated_cost),
-      estimated_profit: numberOrZero(order.estimated_profit),
+      estimated_cost: orderCostInfo(order).cost_known ? order.estimated_cost : null,
+      estimated_profit: orderCostInfo(order).profit_basis_complete ? order.estimated_profit : null,
       received: numberOrZero(order.amount_paid),
-      profit: numberOrZero(order.estimated_profit),
+      profit: orderCostInfo(order).profit_basis_complete ? order.estimated_profit : null,
       status: order.status || "",
       payment_status: order.payment_status || "Pendente",
       payment_method: order.payment_method || "",
@@ -4020,7 +4087,9 @@ async function updateBillingFile(
         )
     );
 
+  const costInfo = orderCostInfo(order);
   const record = {
+    ...costInfo,
     order_id:
       order.id,
 
@@ -4055,15 +4124,9 @@ async function updateBillingFile(
         )
       ),
 
-    estimated_cost:
-      numberOrZero(
-        order.estimated_cost
-      ),
+    estimated_cost: costInfo.cost_known ? order.estimated_cost : null,
 
-    estimated_profit:
-      numberOrZero(
-        order.estimated_profit
-      ),
+    estimated_profit: costInfo.profit_basis_complete ? order.estimated_profit : null,
 
     status:
       order.status ||
@@ -4137,6 +4200,7 @@ async function ensureJsonFile(
     );
 
   if (file) {
+    parseJsonSafe(file.content, defaultValue, path);
     return file;
   }
 
@@ -4172,6 +4236,23 @@ async function ensureJsonFile(
 function normalizeOrderItem(
   item
 ) {
+  if (!item || typeof item !== "object" || Array.isArray(item) ||
+      !String(item.product_folder || "").trim() ||
+      !Array.isArray(item.variants) || !item.variants.length) {
+    throw commercialInputError("Cada item precisa de um produto e pelo menos uma variação válida.");
+  }
+  for (const variant of item.variants) {
+    if (!variant || typeof variant !== "object" || Array.isArray(variant)) {
+      throw commercialInputError("Variação de pedido inválida.");
+    }
+    commercialNumber(variant.quantity, "Quantidade", { min: 1, integer: true });
+    commercialNumber(variant.unit_price, "Preço unitário");
+    if (variant.unit_cost !== undefined && variant.unit_cost !== null) commercialNumber(variant.unit_cost, "Custo unitário");
+    for (const key of ["production_unit_cost", "commission_unit_cost", "commission_percent"]) {
+      if (variant[key] !== undefined && variant[key] !== null) commercialNumber(variant[key], key, key === "commission_percent" ? { max: 95 } : {});
+    }
+  }
+
   const variants =
     Array.isArray(
       item?.variants
@@ -4205,7 +4286,13 @@ function normalizeOrderItem(
               )
             );
 
+          commercialNumber(quantity * unitPrice, "Subtotal da variação");
+          commercialNumber(quantity * unitCost, "Custo da variação");
+
+          const costInfo = variantCostInfo(variant);
           return {
+            ...variant,
+            ...costInfo,
             material:
               String(
                 variant?.material ||
@@ -4223,8 +4310,7 @@ function normalizeOrderItem(
             unit_price:
               unitPrice,
 
-            unit_cost:
-              unitCost,
+            unit_cost: costInfo.cost_known ? unitCost : null,
 
             subtotal:
               roundMoney(
@@ -4232,11 +4318,7 @@ function normalizeOrderItem(
                 unitPrice
               ),
 
-            cost:
-              roundMoney(
-                quantity *
-                unitCost
-              )
+            cost: costInfo.cost_known ? roundMoney(quantity * unitCost) : null
           };
         }
       )
@@ -4296,7 +4378,11 @@ function normalizeOrderItem(
       0
     );
 
-  return {
+  const allCostsKnown = normalizedVariants.every(variant => variant.cost_known);
+  const normalized = {
+    ...item,
+    cost_known: allCostsKnown,
+    profit_basis_complete: normalizedVariants.every(variant => variant.profit_basis_complete),
     product_folder:
       String(
         item?.product_folder ||
@@ -4320,11 +4406,13 @@ function normalizeOrderItem(
         subtotal
       ),
 
-    cost:
-      roundMoney(
-        cost
-      )
+    cost: allCostsKnown ? roundMoney(cost) : null
   };
+  commercialNumber(normalized.quantity, "Quantidade normalizada", { min: 1, integer: true });
+  commercialNumber(normalized.subtotal, "Subtotal normalizado");
+  if (normalized.cost_known) commercialNumber(normalized.cost, "Custo normalizado");
+  if (!normalized.variants.length) throw commercialInputError("O pedido não pode conter item vazio.");
+  return normalized;
 }
 
 
@@ -4332,6 +4420,15 @@ function calculateOrderTotals(
   items,
   settings = defaultSettings()
 ) {
+  if (!Array.isArray(items) || !items.length) {
+    throw commercialInputError("O pedido precisa ter pelo menos um item válido.");
+  }
+  validateCommercialSettings(settings);
+  for (const item of items) {
+    commercialNumber(item?.quantity, "Quantidade do item", { min: 1, integer: true });
+    commercialNumber(item?.subtotal, "Subtotal do item");
+    if (item?.cost_known !== false) commercialNumber(item?.cost, "Custo do item", { defaultValue: 0 });
+  }
   const subtotal =
     items.reduce(
       (sum, item) =>
@@ -4394,7 +4491,13 @@ function calculateOrderTotals(
     subtotal -
     discountValue;
 
-  return {
+  for (const value of [subtotal, cost, totalQuantity, discountValue, total]) {
+    commercialNumber(value, "Total calculado");
+  }
+  const costsKnown = items.every(item => item.cost_known === true);
+  const totals = {
+    cost_known: costsKnown,
+    profit_basis_complete: items.every(item => item.profit_basis_complete === true),
     subtotal:
       roundMoney(
         subtotal
@@ -4413,11 +4516,11 @@ function calculateOrderTotals(
         total
       ),
 
-    cost:
-      roundMoney(
-        cost
-      )
+    cost: costsKnown ? roundMoney(cost) : null
   };
+  for (const key of ["subtotal", "volume_discount_percent", "volume_discount_value", "total"]) commercialNumber(totals[key], "Total monetário");
+  if (costsKnown) commercialNumber(totals.cost, "Custo monetário");
+  return totals;
 }
 
 
@@ -4545,6 +4648,188 @@ function generateId(
 }
 
 
+// V4.2.3-B: revisão do registro lido; o SHA do arquivo continua protegendo o PUT.
+// V4.2.3-C: contrato comercial e contenção de cotações fora do contexto.
+function commercialItemsKey(customerId, items) {
+  return JSON.stringify([String(customerId || ""), (items || []).map(item => [
+    String(item.product_folder || item.folder || item.product?.folder || ""),
+    (item.variants || item.product_variants || (item.quantity ? [item] : [])).map(v => [
+      String(v.material || ""), String(v.color || ""), numberOrZero(v.quantity),
+      roundMoney(v.unit_price ?? v.unitPrice)
+    ]).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+  ])]);
+}
+
+async function validateOrderQuote(context, customerId, items, totals, settingsFile) {
+  if (!context) return;
+  if (context.version !== 1 || !["calculator", "agreement"].includes(context.source) ||
+      !["final", "reseller"].includes(context.channel) ||
+      context.signature !== commercialItemsKey(customerId, items)) {
+    throw commercialInputError("A cotação não corresponde ao cliente, itens ou quantidades do pedido. Refaça a cotação antes de salvar.");
+  }
+  if (!context.settings_revision || context.settings_revision !== await recordRevision(JSON.parse(settingsFile.content))) {
+    throw commercialInputError("As configurações mudaram ou não foram confirmadas. Atualize e refaça a cotação.");
+  }
+  const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  if (context.quantity !== quantity || context.volume_discount_percent !== totals.volume_discount_percent) {
+    throw commercialInputError("A quantidade ou faixa de volume mudou. Refaça a cotação.");
+  }
+  const expectedTotal = commercialNumber(context.expected_total, "Total da cotação");
+  // Mantém a política de centavos existente: o preço unitário do pedido é arredondado antes do total.
+  const tolerance = quantity * 0.005 + 0.011;
+  if (Math.abs(totals.total - expectedTotal) > tolerance) {
+    throw commercialInputError("O total não preserva o preço cotado/protegido. Refaça a cotação.");
+  }
+  if (context.minimum_unit_revenue !== null && context.minimum_unit_revenue !== undefined) {
+    const minimum = commercialNumber(context.minimum_unit_revenue, "Piso da cotação");
+    if (totals.total + tolerance < minimum * quantity) {
+      throw commercialInputError("O pedido ficaria abaixo do piso da cotação. Refaça o cálculo.");
+    }
+  }
+}
+
+async function recordRevision(record) {
+  const canonical = value => Array.isArray(value) ? value.map(canonical)
+    : value && typeof value === "object"
+      ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]))
+      : value;
+  const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(canonical(record))));
+  return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function recordRevisions(records) {
+  return Object.fromEntries(await Promise.all(records.filter(record => record?.id).map(async record =>
+    [String(record.id), await recordRevision(record)])));
+}
+
+async function requireEditRevision(expected, current) {
+  if (!expected || expected !== await recordRevision(current)) {
+    const error = new Error("Este registro mudou ou a revisão da edição não foi informada. Sua edição foi mantida na tela. Reabra o registro para conferir os dados antes de salvar novamente.");
+    error.status = 409;
+    error.publicMessage = error.message;
+    throw error;
+  }
+}
+
+function variantCostInfo(variant) {
+  const finite = value => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(String(value).replace(",", "."))) && Number(String(value).replace(",", ".")) >= 0;
+  const known = variant?.cost_known !== false && finite(variant?.unit_cost);
+  const commissionKnown = variant?.commission_known !== false && finite(variant?.commission_percent) && finite(variant?.commission_unit_cost);
+  return { cost_known: known, commission_known: commissionKnown,
+    profit_basis_complete: known && commissionKnown && variant?.cost_includes_commission === true };
+}
+
+function orderCostInfo(order) {
+  const variants = (order?.items || []).flatMap(item => item.variants || item.product_variants || []);
+  const known = order?.estimated_cost !== null && order?.estimated_cost !== undefined &&
+    Number.isFinite(Number(order.estimated_cost)) && variants.length > 0 && variants.every(v => variantCostInfo(v).cost_known);
+  const complete = known && variants.every(v => variantCostInfo(v).profit_basis_complete);
+  return { cost_known: known, profit_basis_complete: complete };
+}
+
+function preserveUnchangedVariantCosts(items, previousItems) {
+  return items.map((item, index) => {
+    const previous = previousItems?.[index];
+    if (item.product_folder !== previous?.product_folder) return item;
+    return { ...item, variants: (item.variants || []).map(variant => {
+      if (Object.prototype.hasOwnProperty.call(variant, "unit_cost") || variant.cost_known === false) return variant;
+      const matches = (previous.variants || []).filter(old =>
+        String(old.material || "") === String(variant.material || "") && String(old.color || "") === String(variant.color || "") &&
+        numberOrZero(old.quantity) === numberOrZero(variant.quantity) && numberOrZero(old.unit_price) === numberOrZero(variant.unit_price));
+      if (matches.length !== 1) return variant;
+      const preserved = {};
+      for (const key of ["unit_cost", "cost_known", "production_unit_cost", "commission_percent", "commission_unit_cost", "commission_known", "cost_includes_commission", "profit_basis_complete"]) {
+        if (Object.prototype.hasOwnProperty.call(matches[0], key)) preserved[key] = matches[0][key];
+      }
+      return { ...variant, ...preserved };
+    }) };
+  });
+}
+
+function coherentPayment(body, current, total) {
+  const status = body.payment_status ?? current.payment_status ?? "Pendente";
+  const amount = body.amount_paid === undefined ? numberOrZero(current.amount_paid) : commercialNumber(body.amount_paid, "Valor recebido");
+  const previousAmount = numberOrZero(current.amount_paid);
+  const changed = status !== (current.payment_status || "Pendente") || amount !== previousAmount;
+  if (changed && (amount > total || (status === "Pago" && Math.abs(amount - total) > 0.005) ||
+      (status === "Parcial" && !(amount > 0 && amount < total)) || (status === "Pendente" && amount > 0))) {
+    throw commercialInputError("Pagamento incoerente: confira situação e valor recebido. Pago exige o total; Parcial exige valor entre zero e o total.");
+  }
+  const newReceipt = amount > previousAmount;
+  let date = current.payment_received_date || "";
+  if (newReceipt) {
+    date = body.payment_received_date || new Date().toISOString().slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date + "T12:00:00Z"))) {
+      throw commercialInputError("Data de recebimento inválida.");
+    }
+  }
+  return { payment_status: status, amount_paid: amount, payment_received_date: date };
+}
+
+function commercialInputError(message) {
+  const error = new Error(message);
+  error.status = 400;
+  error.publicMessage = message;
+  return error;
+}
+
+function firstNumericValue(...values) {
+  return values.find(value => value !== null && value !== undefined &&
+    !(typeof value === "string" && !value.trim()));
+}
+
+function commercialNumber(value, label, { defaultValue, min = 0, max = Infinity, integer = false } = {}) {
+  if (value === undefined && defaultValue !== undefined) value = defaultValue;
+  const number = typeof value === "number" ? value
+    : typeof value === "string" && value.trim() ? Number(value.replace(",", ".")) : NaN;
+  if (!Number.isFinite(number) || number < min || number > max ||
+      (integer && !Number.isInteger(number))) {
+    throw commercialInputError(`${label}: informe um número finito${integer ? " e inteiro" : ""} entre ${min} e ${Number.isFinite(max) ? max : "o limite numérico"}.`);
+  }
+  return number;
+}
+
+function validateCommercialSettings(settings) {
+  if (!settings || typeof settings !== "object" || Array.isArray(settings)) {
+    throw commercialInputError("As configurações precisam ser um objeto válido.");
+  }
+  for (const key of ["machine_hour_cost", "default_margin_percent", "minimum_margin_percent", "waste_percent"]) {
+    if (settings[key] !== undefined) commercialNumber(settings[key], key);
+  }
+  if (settings.default_reseller_margin_percent !== undefined) {
+    commercialNumber(settings.default_reseller_margin_percent, "Margem do revendedor", { max: 95 });
+  }
+  if (settings.costs !== undefined) {
+    if (!settings.costs || typeof settings.costs !== "object" || Array.isArray(settings.costs)) {
+      throw commercialInputError("Custos adicionais inválidos.");
+    }
+    for (const key of ["finishing", "painting", "packaging", "other", "commission_percent"]) {
+      if (settings.costs[key] !== undefined) commercialNumber(settings.costs[key], key,
+        key === "commission_percent" ? { max: 95 } : {});
+    }
+  }
+  if (settings.rounding !== undefined) {
+    if (!settings.rounding || typeof settings.rounding !== "object" || Array.isArray(settings.rounding)) {
+      throw commercialInputError("Configuração de arredondamento inválida.");
+    }
+    if (settings.rounding.increment !== undefined) commercialNumber(settings.rounding.increment, "Degrau comercial");
+  }
+  if (settings.materials !== undefined) {
+    if (!Array.isArray(settings.materials)) throw commercialInputError("Lista de materiais inválida.");
+    for (const material of settings.materials) commercialNumber(material?.price_per_kg, "Preço por kg");
+  }
+  if (settings.volume_discounts !== undefined) {
+    if (!Array.isArray(settings.volume_discounts)) throw commercialInputError("Faixas de volume inválidas.");
+    for (const tier of settings.volume_discounts) {
+      const min = commercialNumber(tier?.min, "Início da faixa", { min: 1, integer: true });
+      if (tier?.max !== null && tier?.max !== "" && tier?.max !== undefined) {
+        commercialNumber(tier.max, "Fim da faixa", { min, integer: true });
+      }
+      commercialNumber(tier?.discount_percent, "Desconto por volume", { max: 100 });
+    }
+  }
+}
+
 function numberOrZero(
   value
 ) {
@@ -4580,18 +4865,36 @@ function roundMoney(
 
 function parseJsonSafe(
   text,
-  fallback
+  fallback,
+  path = "arquivo de dados"
 ) {
+  let value;
   try {
-    const value =
-      JSON.parse(
-        text
-      );
-
-    return value;
+    if (typeof text !== "string" || !text.trim()) {
+      throw new Error("Conteúdo vazio inesperado.");
+    }
+    value = JSON.parse(text);
   } catch {
-    return fallback;
+    throw storedDataError(path, "JSON vazio ou inválido.");
   }
+  const validShape = Array.isArray(fallback)
+    ? Array.isArray(value)
+    : value !== null && typeof value === "object" && !Array.isArray(value);
+  if (!validShape) {
+    throw storedDataError(path, Array.isArray(fallback)
+      ? "Era esperada uma lista de registros."
+      : "Era esperado um objeto de configuração ou produto.");
+  }
+  return value;
+}
+
+function storedDataError(path, detail) {
+  const message = `Não foi possível ler ${path}. ${detail} Os dados existentes foram preservados.`;
+  const error = new Error(message);
+  error.status = 422;
+  error.publicMessage = message;
+  error.githubPath = path;
+  return error;
 }
 
 

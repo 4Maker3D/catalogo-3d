@@ -4165,6 +4165,8 @@
                     </div>
 
 
+                    <p id="orderContractStatus" class="small muted" role="status"></p>
+                    <button id="renegotiateOrder" type="button" class="btn" style="display:none">CONFIRMAR RENEGOCIAÇÃO MANUAL</button>
                     <div style="margin-top:18px">
 
                         <button
@@ -4997,6 +4999,11 @@
                     </div>
 
 
+                    <label for="savePriceType" class="small muted">Tipo do acordo a salvar</label>
+                    <select id="savePriceType" style="width:100%;margin-top:6px">
+                        <option value="public">Preço público</option>
+                        <option value="net">Preço de compra / líquido</option>
+                    </select>
                     <button
                         class="btn primary"
                         id="savePrice"
@@ -5253,6 +5260,14 @@
 
         currentOrder: null,
 
+        editingOrder: null,
+        viewOrderRevision: null,
+        orderRevisions: {},
+        clientRevisions: {},
+        settingsRevision: null,
+        orderQuote: null,
+        orderRenegotiation: null,
+
         calcMode: 'cost',
 
         calcInputMode: 'product',
@@ -5412,7 +5427,10 @@
         const d =
             await r.json()
                 .catch(
-                    () => ({})
+                    () => {
+                        if (r.ok) throw new Error('A resposta de leitura é inválida. Os dados anteriores foram preservados.');
+                        return {};
+                    }
                 );
 
 
@@ -5887,20 +5905,28 @@
 
     async function loadProducts() {
 
+        setReadStatus('products', 'loading');
+        let nextProducts = [];
+        const enrichmentFailures = [];
+
         try {
 
             $('#apiState').textContent =
-                'Conectado. Carregando produtos reais...';
+                'Carregando produtos...';
 
             const d =
                 await api('/api/products');
+
+            if (!Array.isArray(d?.products) || (Array.isArray(d?.failures) && d.failures.length)) {
+                throw new Error('Não foi possível confirmar a lista completa de produtos. Tente atualizar novamente.');
+            }
 
             const rawProducts =
                 Array.isArray(d?.products)
                     ? d.products
                     : [];
 
-            state.products =
+            nextProducts =
                 rawProducts
                     .map(
                         (p, index) =>
@@ -5918,7 +5944,7 @@
              * categoria/descrição como se tivessem sido apagadas.
              */
             const needsEnrichment =
-                state.products.filter(
+                nextProducts.filter(
                     p =>
                         !p.category ||
                         !p.description ||
@@ -6016,6 +6042,7 @@
                                     };
 
                                 } catch {
+                                    enrichmentFailures.push(p.folder);
                                     return p;
                                 }
                             }
@@ -6029,12 +6056,15 @@
                         )
                     );
 
-                state.products =
-                    state.products.map(
+                nextProducts =
+                    nextProducts.map(
                         p =>
                             byFolder.get(String(p.folder)) || p
                     );
             }
+
+            if (enrichmentFailures.length) throw new Error('Alguns produtos não puderam ser atualizados. A última lista foi preservada.');
+            state.products = nextProducts;
 
             $('#mProducts').textContent =
                 state.products.length;
@@ -6054,6 +6084,7 @@
                 '</span>';
 
             updateDashboard();
+            setReadStatus('products', 'success', null, state.products.length);
 
         } catch (e) {
 
@@ -6061,8 +6092,7 @@
                 e.message ||
                 'Erro ao carregar produtos.';
 
-            $('#products').innerHTML =
-                '<div class="empty">Não foi possível carregar os produtos.</div>';
+            setReadStatus('products', 'error', e);
         }
 
     }
@@ -6752,7 +6782,8 @@
                         c.hex ??
                         0xffffff
 
-                    )
+                    ),
+                    c
 
                 );
 
@@ -6777,7 +6808,8 @@
 
         name = '',
 
-        hex = '#ffffff'
+        hex = '#ffffff',
+        original = null
 
     ) {
 
@@ -6789,17 +6821,20 @@
 
         row.className =
             'color-row';
+        row._originalColor = original ? JSON.parse(JSON.stringify(original)) : null;
 
 
         row.innerHTML = `
 
             <input
-                type="color"
+                type="color" class="color-swatch"
+                title="Amostra de cor" aria-label="Amostra de cor"
                 value="${hex}"
             >
 
 
-            <input
+            <input type="color" class="color-model" title="Cor do modelo 3D" aria-label="Cor do modelo 3D" value="${original ? decimalToHex(original.hex ?? original.swatch ?? 0xffffff) : hex}">
+            <input class="color-name"
                 value="${esc(name)}"
                 placeholder="Nome"
                 style="
@@ -6841,6 +6876,19 @@
 
     }
 
+
+    function collectColorRow(row) {
+        const original = row._originalColor;
+        const swatch = row.querySelector('.color-swatch').value;
+        const model = row.querySelector('.color-model').value;
+        const name = row.querySelector('.color-name').value;
+        if (!original) return { name, hex: hexToDecimal(model), swatch: hexToDecimal(swatch) };
+        const result = { ...original };
+        if (name !== String(original.name || '')) result.name = name;
+        if (model !== decimalToHex(original.hex ?? original.swatch ?? 0xffffff)) result.hex = hexToDecimal(model);
+        if (swatch !== decimalToHex(original.swatch ?? original.hex ?? 0xffffff)) result.swatch = hexToDecimal(swatch);
+        return result;
+    }
 
     function decimalToHex(
         n
@@ -6987,52 +7035,7 @@
                             .value,
 
 
-                    colors:
-
-                        [
-                            ...$('#colors')
-                                .querySelectorAll(
-                                    '.color-row'
-                                )
-                        ]
-                            .map(
-
-                                r => {
-
-                                    const h =
-                                        r
-                                            .querySelector(
-                                                'input[type=color]'
-                                            )
-                                            .value;
-
-
-                                    return {
-
-                                        name:
-                                            r
-                                                .querySelectorAll(
-                                                    'input'
-                                                )[1]
-                                                .value,
-
-
-                                        hex:
-                                            hexToDecimal(
-                                                h
-                                            ),
-
-
-                                        swatch:
-                                            hexToDecimal(
-                                                h
-                                            )
-
-                                    };
-
-                                }
-
-                            )
+                    colors: [...$('#colors').querySelectorAll('.color-row')].map(collectColorRow)
 
                 };
 
@@ -7147,6 +7150,7 @@
                             body: {
 
                                 folder: currentFolder,
+                                expected_revision: state.current.revision || "",
 
                                 produto:
                                     p,
@@ -7551,6 +7555,10 @@
         mode
     ) {
 
+        invalidateCalculation();
+        state.calcPriceRequest = (state.calcPriceRequest || 0) + 1;
+        state.calcPricePending = false;
+
         state.calcMode =
             mode;
 
@@ -7624,11 +7632,12 @@
         const targetField = $('#targetPriceField');
         const saveButton = $('#savePrice');
 
-        if (customerField) customerField.style.display = mode === 'reseller' ? '' : 'none';
+        if (customerField) customerField.style.display = mode === 'cost' ? 'none' : '';
+        if ($('#savePriceType')) $('#savePriceType').style.display = mode === 'reseller' ? '' : 'none';
         if (materialField) materialField.style.display = '';
         if (mode !== 'reseller') {
             const target = $('#cTargetPrice');
-            if (target) { target.value = ''; delete target.dataset.negotiatedPrice; }
+            if (target) { target.value = ''; delete target.dataset.negotiatedPrice; setCalculatorPriceType('public'); }
         }
         if (targetField) targetField.style.display = mode === 'reseller' ? '' : 'none';
         if (saveButton) saveButton.textContent = mode === 'reseller' && $('#calcCustomer')?.value
@@ -7672,6 +7681,8 @@
     $('#calcProductMode')
         .onclick = () => {
 
+            invalidateCalculation();
+
             state.calcInputMode =
                 'product';
 
@@ -7706,6 +7717,8 @@
 
     $('#calcManualMode')
         .onclick = () => {
+
+            invalidateCalculation();
 
             state.calcInputMode =
                 'manual';
@@ -7761,7 +7774,19 @@
         if ($('#cMaterialSelect')) $('#cMaterialSelect').value = select.value;
     }
 
+    function setCalculatorPriceType(type) {
+        const target = $('#cTargetPrice');
+        if (target) target.dataset.priceType = type;
+        const label = $('#targetPriceField')?.querySelector('label');
+        if (label) label.textContent = type === 'net' ? 'Compra / líquido negociado' : 'Preço público desejado';
+    }
+
     async function loadCalcNegotiatedPrice() {
+
+        const requestId = (state.calcPriceRequest || 0) + 1;
+        state.calcPriceRequest = requestId;
+        state.calcPricePending = false;
+        invalidateCalculation();
 
         if (state.calcMode !== 'reseller') {
             return;
@@ -7783,11 +7808,15 @@
         if (target) {
             target.value = '';
             delete target.dataset.negotiatedPrice;
+            setCalculatorPriceType('public');
         }
 
         if (!customerId || !folder) {
             return;
         }
+
+        const selection = negotiatedSelectionKey();
+        state.calcPricePending = true;
 
         try {
 
@@ -7798,6 +7827,9 @@
                     '&productFolder=' +
                     encodeURIComponent(folder)
                 );
+
+            if (requestId !== state.calcPriceRequest || selection !== negotiatedSelectionKey()) return;
+            if (!Array.isArray(d?.prices)) throw new Error('Não foi possível confirmar os preços negociados.');
 
             const prices =
                 Array.isArray(d?.prices)
@@ -7815,7 +7847,8 @@
                 prices.filter(
                     x =>
                         String(x?.customer_id || '').trim() === customerId &&
-                        String(x?.product_folder || '').trim() === folder
+                        String(x?.product_folder || '').trim() === folder &&
+                        (!String(x?.color || '').trim() || String(x.color).trim() === String($('#calcColor')?.value || '').trim())
                 );
 
             const newest = (a, b) =>
@@ -7839,16 +7872,27 @@
                     )
                     .sort(newest)[0];
 
+            if (found && !["public", "net"].includes(found.price_type)) {
+                calculationStatus("Acordo legado sem tipo: informe um preço público ou recalcule sem aplicar esse acordo.");
+                toast("Acordo legado sem tipo. O valor não foi aplicado; escolha um preço ou refaça o cálculo.", "warning");
+                return;
+            }
             if (found && target) {
+                setCalculatorPriceType(found.price_type);
                 target.value =
                     Number(found.price || 0).toFixed(2);
 
                 target.dataset.negotiatedPrice =
                     'true';
+                invalidateCalculation('Preço negociado carregado. Recalcule antes de usar.');
             }
 
-        } catch {
-            /* Preço negociado é opcional; cálculo continua normalmente. */
+        } catch (error) {
+            if (requestId === state.calcPriceRequest && selection === negotiatedSelectionKey()) {
+                toast('Não foi possível consultar o acordo. Confira o preço antes de calcular.', 'warning');
+            }
+        } finally {
+            if (requestId === state.calcPriceRequest) state.calcPricePending = false;
         }
     }
 
@@ -7949,8 +7993,7 @@
 
 
     $('#calcProduct')?.addEventListener('change', async () => {
-        const product = getOrderProduct($('#calcProduct').value);
-        fillCalcColors(product);
+        invalidateCalculation();
         await loadCalcNegotiatedPrice();
     });
 
@@ -7968,61 +8011,164 @@
        CÁLCULO
     ========================================================= */
 
+    // V4.2.3-A: validação de entradas e elegibilidade da cotação, sem alterar fórmulas.
+    function commercialNumber(value, label, { defaultValue, min = 0, max = Infinity, integer = false } = {}) {
+        if (value === undefined && defaultValue !== undefined) value = defaultValue;
+        const number = typeof value === 'number' ? value
+            : typeof value === 'string' && value.trim() ? Number(value.replace(',', '.')) : NaN;
+        if (!Number.isFinite(number) || number < min || number > max || (integer && !Number.isInteger(number))) {
+            throw new Error(`${label}: informe um número válido${integer ? ' e inteiro' : ''}${Number.isFinite(max) ? ` entre ${min} e ${max}` : `, maior ou igual a ${min}`}.`);
+        }
+        return number;
+    }
+
+    function firstNumericValue(...values) {
+        return values.find(value => value !== null && value !== undefined &&
+            !(typeof value === 'string' && !value.trim()));
+    }
+
+    function calculatorContextKey() {
+        const ids = ['calcProduct', 'calcCustomer', 'calcMaterial', 'calcColor', 'cMaterialSelect',
+            'cWeight', 'cTime', 'cQuantity', 'setMachine', 'setWaste', 'setMinimumMargin',
+            'cFinishing', 'cPainting', 'cPackaging', 'cOther', 'cCommission', 'cMargin',
+            'cResellerMargin', 'cTargetPrice', 'cRounding'];
+        return JSON.stringify([state.calcMode, state.calcInputMode,
+            ids.map(id => String($('#' + id)?.value ?? '')),
+            $('#cTargetPrice')?.dataset?.negotiatedPrice || '', $('#cTargetPrice')?.dataset?.priceType || 'public', state.settings, state.settingsRevision]);
+    }
+
+    function negotiatedSelectionKey() {
+        return JSON.stringify([state.calcMode, state.calcInputMode,
+            ...['calcCustomer', 'calcProduct', 'calcMaterial', 'cMaterialSelect', 'calcColor', 'cTargetPrice']
+                .map(id => String($('#' + id)?.value ?? ''))]);
+    }
+
+    function calculationStatus(message) {
+        let node = $('#calcValidity');
+        if (!node && $('#savePrice')?.parentElement) {
+            node = document.createElement('p');
+            node.id = 'calcValidity';
+            node.className = 'small muted';
+            node.setAttribute('role', 'status');
+            $('#savePrice').parentElement.insertBefore(node, $('#savePrice'));
+        }
+        if (node) node.textContent = message;
+    }
+
+    function invalidateCalculation(message = 'Os dados mudaram. Recalcule antes de salvar ou criar pedido.') {
+        state.calcRevision = (state.calcRevision || 0) + 1;
+        state.lastCalculation = null;
+        calculationStatus(message);
+    }
+
+    function currentCalculation() {
+        const calc = state.lastCalculation;
+        if (!calc || calc.inputContext !== calculatorContextKey() ||
+            calc.inputRevision !== state.calcRevision ||
+            (state.calcMode === 'reseller' && state.calcPricePending)) {
+            invalidateCalculation('Faça um novo cálculo com os dados atuais antes de continuar.');
+            toast('Recalcule com os dados atuais antes de salvar ou criar pedido.', 'warning');
+            return null;
+        }
+        return calc;
+    }
+
+    function onCalculationInput(event) {
+        const ids = ['calcProduct', 'calcCustomer', 'calcMaterial', 'calcColor', 'cMaterialSelect',
+            'cWeight', 'cTime', 'cQuantity', 'setMachine', 'setWaste', 'setMinimumMargin', 'setMargin',
+            'setResellerMargin', 'cFinishing', 'cPainting', 'cPackaging', 'cOther', 'cCommission',
+            'cMargin', 'cResellerMargin', 'cTargetPrice', 'cRounding'];
+        if (ids.includes(event.target?.id) || event.target?.closest?.('#materialsSettings, #volumeSettings')) {
+            if (event.target?.id === 'cTargetPrice') {
+                delete event.target.dataset.negotiatedPrice;
+                setCalculatorPriceType('public');
+            }
+            invalidateCalculation();
+        }
+    }
+
+    document.addEventListener('input', onCalculationInput, true);
+    document.addEventListener('change', onCalculationInput, true);
+
+    function validateCalculatorVolume() {
+        for (const tier of state.settings.volume || []) {
+            commercialNumber(tier.discount, 'Desconto por volume', { max: 100 });
+        }
+    }
+
     async function calculate() {
+        if (state.calcMode === 'reseller' && state.calcPricePending) {
+            toast('Aguarde a consulta do preço negociado antes de calcular.', 'warning');
+            return;
+        }
+        invalidateCalculation('Calculando com os dados atuais...');
+        const inputRevision = state.calcRevision;
+        const selection = calculatorContextKey();
+        try {
         let weight = 0, time = 0, materialName = 'PLA';
         let material = materialPrice(materialName);
 
         if (state.calcInputMode === 'product') {
             const folder = String($('#calcProduct')?.value || '').trim();
-            if (!folder) return;
+            if (!folder) throw new Error('Selecione um produto ou use o modo manual.');
             try {
                 const d = await api('/api/product?folder=' + encodeURIComponent(folder));
+                if (inputRevision !== state.calcRevision || selection !== calculatorContextKey()) return;
                 const dados = d?.dados || {};
-                weight = Number(dados.filament_weight_g ?? dados.weight_g ?? 0) || 0;
-                time = Number(dados.print_time_h ?? 0) || 0;
+                weight = commercialNumber(firstNumericValue(dados.filament_weight_g, dados.weight_g), 'Peso do produto');
+                time = commercialNumber(dados.print_time_h, 'Tempo de impressão do produto');
                 materialName = String($('#calcMaterial')?.value || dados.material || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
                 if ($('#calcMaterial') && [...$('#calcMaterial').options].some(o => o.value === materialName)) $('#calcMaterial').value = materialName;
                 if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
                 material = materialPrice(materialName);
-            } catch (e) { toast(e.message); return; }
+            } catch (e) { throw e; }
         } else {
-            weight = Number($('#cWeight')?.value || 0) || 0;
-            time = Number($('#cTime')?.value || 0) || 0;
+            weight = commercialNumber($('#cWeight')?.value, 'Peso do filamento');
+            time = commercialNumber($('#cTime')?.value, 'Tempo de impressão');
             materialName = String($('#calcMaterial')?.value || $('#cMaterialSelect')?.value || 'PLA').trim() || 'PLA';
             if ($('#cMaterialSelect') && [...$('#cMaterialSelect').options].some(o => o.value === materialName)) $('#cMaterialSelect').value = materialName;
             material = materialPrice(materialName);
         }
 
-        const quantity = Math.max(1, parseInt($('#cQuantity')?.value || 1, 10) || 1);
-        const wastePercent = Math.max(0, Number($('#setWaste')?.value || 0) || 0);
+        if (weight <= 0) throw new Error('Informe um peso de filamento maior que zero; use o modo manual se o produto estiver incompleto.');
+        const selectedMaterial = state.settings.materials.find(item =>
+            String(item?.name || '').trim().toUpperCase() === materialName.toUpperCase());
+        if (!selectedMaterial) {
+            throw new Error('Selecione um material cadastrado nas configurações.');
+        }
+        material = commercialNumber(selectedMaterial.price, 'Preço do filamento');
+        validateCalculatorVolume();
+        const quantity = commercialNumber($('#cQuantity')?.value, 'Quantidade', { min: 1, integer: true });
+        const wastePercent = commercialNumber($('#setWaste')?.value, 'Desperdício');
         const wasteFactor = wastePercent / 100;
         const filamentBase = weight * material / 1000;
         const wasteCost = filamentBase * wasteFactor;
         const filament = filamentBase;
-        const machine = time * (Number($('#setMachine')?.value || 2) || 2);
-        const finishing = Number($('#cFinishing')?.value || 0) || 0;
-        const painting = Number($('#cPainting')?.value || 0) || 0;
-        const packaging = Number($('#cPackaging')?.value || 0) || 0;
-        const other = Number($('#cOther')?.value || 0) || 0;
+        const machine = time * commercialNumber($('#setMachine')?.value, 'Custo da máquina por hora');
+        const finishing = commercialNumber($('#cFinishing')?.value || 0, 'Acabamento');
+        const painting = commercialNumber($('#cPainting')?.value || 0, 'Pintura');
+        const packaging = commercialNumber($('#cPackaging')?.value || 0, 'Embalagem');
+        const other = commercialNumber($('#cOther')?.value || 0, 'Outros custos');
 
         // Comissão é custo comercial sobre o valor que a 4Maker realmente recebe.
         // Limitamos a 95% para impedir divisão por zero ou preços infinitos.
-        const commissionPercent = Math.min(0.95, Math.max(0, Number($('#cCommission')?.value || 0) || 0) / 100);
+        const commissionPercent = Math.min(0.95, commercialNumber($('#cCommission')?.value || 0, 'Comissão', { max: 95 }) / 100);
 
         const productionCost = filament + wasteCost + machine + finishing + painting + packaging + other;
 
         // "Acréscimo" continua sendo markup sobre custo, não margem sobre preço de venda.
-        const makerMarkup = Math.max(0, Number($('#cMargin')?.value || 0) || 0) / 100;
-        const minimumMarkup = Math.max(0, Number($('#setMinimumMargin')?.value || 0) || 0) / 100;
+        const makerMarkup = commercialNumber($('#cMargin')?.value, 'Acréscimo sobre o custo') / 100;
+        const minimumMarkup = commercialNumber($('#setMinimumMargin')?.value, 'Acréscimo mínimo') / 100;
         const effectiveMakerMarkup = Math.max(makerMarkup, minimumMarkup);
 
         // Agora este percentual é margem REAL do revendedor sobre o preço público.
         // Ex.: 20% significa comprar por 80% do preço público.
-        const resellerMarginRate = Math.min(0.95, Math.max(0, Number($('#cResellerMargin')?.value || 0) || 0) / 100);
+        const resellerMarginRate = Math.min(0.95, commercialNumber($('#cResellerMargin')?.value || 0, 'Margem do revendedor', { max: 95 }) / 100);
 
         const targetEl = $('#cTargetPrice');
-        const targetPrice = Math.max(0, Number(targetEl?.value || 0) || 0);
+        const targetPrice = commercialNumber(targetEl?.value || 0, 'Preço alvo');
         const negotiatedPrice = targetEl?.dataset?.negotiatedPrice === 'true';
+        const targetIsNet = negotiatedPrice && state.calcMode === 'reseller' && targetEl?.dataset?.priceType === 'net';
 
         // Receita mínima necessária para a 4Maker conservar o acréscimo mínimo
         // mesmo depois de pagar comissão sobre a venda.
@@ -8031,8 +8177,9 @@
 
         // O preço público é único: venda direta e revenda partem da mesma referência.
         // Se houver preço público desejado/negociado, ele vira a referência principal.
+        if (targetIsNet && targetPrice < makerMinimumRevenue) throw new Error("Compra negociada abaixo do piso informado. Recalcule ou renegocie explicitamente.");
         let publicPrice = targetPrice > 0
-            ? targetPrice
+            ? (targetIsNet ? targetPrice / (1 - resellerMarginRate) : targetPrice)
             : productionCost * (1 + effectiveMakerMarkup) / (1 - commissionPercent);
 
         let makerRevenue = publicPrice;
@@ -8082,7 +8229,7 @@
             }
         }
 
-        const rounding = Math.max(0, Number($('#cRounding')?.value || 0) || 0);
+        const rounding = commercialNumber($('#cRounding')?.value || 0, 'Degrau comercial');
         if (rounding > 0) {
             if (state.calcMode === 'reseller') {
                 makerRevenue = roundUp(makerRevenue, rounding);
@@ -8122,6 +8269,12 @@
         const orderUnitPrice = orderDiscount > 0 && orderDiscount < 1
             ? netOrderUnitPrice / (1 - orderDiscount)
             : netOrderUnitPrice;
+
+        for (const value of [productionCost, publicPrice, makerRevenue, totalCost, finalTotal, profit,
+            resellerProfit, orderUnitPrice, machine, effectiveMakerMarkup]) {
+            if (!Number.isFinite(value)) throw new Error('O cálculo excede os limites numéricos. Revise os valores informados.');
+        }
+        if (inputRevision !== state.calcRevision) return;
 
         $('#rFilament').textContent = money(filament);
         $('#rMachine').textContent = money(machine);
@@ -8178,6 +8331,9 @@
         $('#volumeInfo').textContent = volumeText;
 
         state.lastCalculation = {
+            inputContext: calculatorContextKey(),
+            inputRevision,
+            mode: state.calcMode,
             product: String($('#calcProduct')?.value || ''),
             material: materialName,
             weight,
@@ -8186,6 +8342,8 @@
             quantity,
             cost: totalCost,
             productionCost,
+            commissionPercent: commissionPercent * 100,
+            commissionUnitCost: commission,
             resellerPrice,
             finalPrice: finalUnitPrice,
             publicPrice: finalUnitPrice,
@@ -8202,6 +8360,10 @@
             wastePercent,
             makerMarkup: effectiveMakerMarkup * 100,
             minimumMarkup: minimumMarkup * 100,
+            minimumUnitRevenue: makerMinimumRevenue,
+            priceOrigin: negotiatedPrice ? (targetIsNet ? "negotiated_net" : "negotiated_public") : targetPrice > 0 ? "manual_target" : "calculated",
+            settingsRevision: state.settingsRevision || null,
+            settingsSnapshot: JSON.parse(JSON.stringify({ ...state.settings, used: { machine_hour_cost: Number($("#setMachine").value), waste_percent: wastePercent, markup_percent: effectiveMakerMarkup * 100, minimum_markup_percent: minimumMarkup * 100, reseller_margin_percent: resellerMarginRate * 100, commission_percent: commissionPercent * 100, finishing, painting, packaging, other, rounding } })),
             resellerMargin: resellerMarginRate * 100,
             resellerMarginActual,
             resellerProfit,
@@ -8211,8 +8373,15 @@
 
         if ($('#savePrice')) {
             $('#savePrice').textContent = state.calcMode === 'reseller' && $('#calcCustomer')?.value
-                ? 'SALVAR PREÇO PÚBLICO NEGOCIADO'
+                ? ($('#savePriceType')?.value === 'net' ? 'SALVAR COMPRA NEGOCIADA' : 'SALVAR PREÇO PÚBLICO NEGOCIADO')
                 : 'SALVAR CÁLCULO';
+        }
+        calculationStatus('Cotação atualizada com os dados atuais.');
+        } catch (error) {
+            if (inputRevision === state.calcRevision) {
+                invalidateCalculation(error.message || 'Revise os dados e recalcule.');
+                toast(error.message || 'Revise os dados de produção.', 'warning');
+            }
         }
     }
 
@@ -8362,7 +8531,39 @@
     }
 
 
+    function setReadStatus(key, status, error = null, count = null) {
+        const labels = { products: 'Produtos', clients: 'Clientes', orders: 'Pedidos', billing: 'Faturamento', settings: 'Configurações' };
+        const targets = { products: '#products', clients: '#clients', orders: '#orders', billing: '#billing', settings: '#materialsSettings' };
+        state.readStatus = state.readStatus || {};
+        const previous = state.readStatus[key] || {};
+        const entry = { ...previous, status, error: error?.message || '' };
+        if (status === 'success') {
+            entry.lastSuccess = new Date().toISOString();
+            entry.count = count;
+            if (count === 0) entry.status = 'empty';
+        }
+        const last = entry.lastSuccess ? new Date(entry.lastSuccess).toLocaleTimeString('pt-BR') : '';
+        entry.message = status === 'loading' ? `${labels[key]}: carregando...`
+            : status === 'success' ? `${labels[key]}: ${count === 0 ? 'nenhum registro nesta leitura' : 'atualizado'} às ${last}.`
+            : `${labels[key]}: não foi possível atualizar. ${last ? `Última leitura válida às ${last}; os dados podem estar desatualizados.` : 'Sem leitura confirmada nesta sessão; confira os dados antes de usar.'}`;
+        state.readStatus[key] = entry;
+        let node = $('#readStatus_' + key);
+        const target = $(targets[key]);
+        if (!node && target?.parentElement) {
+            node = document.createElement('p');
+            node.id = 'readStatus_' + key;
+            node.className = 'small muted';
+            node.setAttribute('role', 'status');
+            target.parentElement.insertBefore(node, target);
+        }
+        if (node) node.textContent = entry.message;
+        if (status === 'error') toast(entry.message, 'warning');
+        return entry;
+    }
+
     async function loadClients() {
+
+        setReadStatus('clients', 'loading');
 
         try {
 
@@ -8371,6 +8572,7 @@
                     '/api/clients'
                 );
 
+            if (!Array.isArray(d?.clients)) throw new Error('A lista de clientes recebida é inválida.');
 
             state.clients =
                 Array.isArray(d?.clients)
@@ -8383,23 +8585,18 @@
                     : [];
 
 
+            state.clientRevisions = d.revisions || {};
             renderClients();
 
             fillOrderSelectors();
             fillCalcCustomers();
 
             updateDashboard();
+            setReadStatus('clients', 'success', null, state.clients.length);
 
         } catch (e) {
 
-            state.clients =
-                Array.isArray(
-                    state.clients
-                )
-                    ? state.clients
-                    : [];
-
-            renderClients();
+            setReadStatus('clients', 'error', e);
 
         }
 
@@ -8471,6 +8668,7 @@
 
         state.currentClient =
             client;
+        state.currentClientRevision = state.clientRevisions?.[clientId(client)] || "";
 
 
         $('#clientModalName')
@@ -8798,6 +8996,7 @@
                     .dataset
                     .editingId =
                         clientId(client);
+                $('#clientForm').dataset.expectedRevision = state.currentClientRevision || '';
 
                 $('#clientFormCard')
                     .style
@@ -8833,6 +9032,7 @@
                         'none';
 
                 delete $('#clientForm').dataset.editingId;
+                delete $('#clientForm').dataset.expectedRevision;
 
             };
 
@@ -9272,28 +9472,185 @@
         select.value = selected || '';
     }
 
+    function commercialItemsKey(customerId, items) {
+        const number = value => Number(String(value ?? '').replace(',', '.')) || 0;
+        const cents = value => Math.round(number(value) * 100) / 100;
+        return JSON.stringify([String(customerId || ''), (items || []).map(item => [
+            String(item.product_folder || item.folder || item.product?.folder || ''),
+            (item.variants || item.product_variants || (item.quantity ? [item] : [])).map(v => [
+                String(v.material || ''), String(v.color || ''), number(v.quantity), cents(v.unit_price ?? v.unitPrice)
+            ]).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)))
+        ])]);
+    }
+
+    function orderFormSignature(items = collectOrderItemsFromForm()) {
+        return commercialItemsKey($('#orderClient')?.value || '', items);
+    }
+
+    function historicalContractApplies(items = collectOrderItemsFromForm()) {
+        const snapshot = state.editingOrder?.snapshot;
+        return snapshot && !state.orderRenegotiation && orderFormSignature(items) === commercialItemsKey(snapshot.customer_id || snapshot.customer?.id || '', snapshot.items);
+    }
+
+    function orderQuoteValid(items = collectOrderItemsFromForm()) {
+        return !state.orderQuote || (state.orderQuote.signature === orderFormSignature(items) &&
+            state.orderQuote.settings_revision === state.settingsRevision);
+    }
+
+    function orderContractStatus(message) {
+        const node = $('#orderContractStatus');
+        if (node) node.textContent = message;
+        const button = $('#renegotiateOrder');
+        if (button) button.style.display = state.editingOrder ? '' : 'none';
+    }
+
+    function orderSubmissionContext(items) {
+        if (state.editingOrder) {
+            if (historicalContractApplies(items)) return {};
+            if (!state.orderRenegotiation || state.orderRenegotiation.signature !== orderFormSignature(items) ||
+                state.orderRenegotiation.settings_revision !== state.settingsRevision) {
+                throw new Error('Alteração comercial: confira o novo total e confirme a renegociação manual antes de salvar.');
+            }
+            return { pricing_action: 'renegotiate', quote_context: null };
+        }
+        if (!orderQuoteValid(items)) throw new Error('Cliente, itens, quantidade ou configuração mudou. Refaça a cotação na calculadora antes de salvar.');
+        return state.orderQuote ? { quote_context: state.orderQuote } : {};
+    }
+
+    function captureCalculatorOrder(calc) {
+        const items = collectOrderItemsFromForm();
+        state.orderQuote = {
+            version: 1, source: 'calculator', channel: calc.mode, customer_id: calc.customerId || '',
+            signature: orderFormSignature(items), items: JSON.parse(JSON.stringify(items)),
+            quantity: calc.quantity, volume_discount_percent: calc.configuredVolumeDiscount,
+            price_origin: calc.priceOrigin, public_price: calc.publicPrice,
+            purchase_price: calc.mode === 'reseller' ? calc.resellerPrice : calc.finalPrice,
+            expected_total: (calc.mode === 'reseller' ? calc.resellerPrice : calc.finalPrice) * calc.quantity,
+            minimum_unit_revenue: calc.minimumUnitRevenue, production_cost: calc.productionCost,
+            unit_cost: calc.cost, commission_percent: calc.commissionPercent, commission_unit_cost: calc.commissionUnitCost,
+            settings_revision: calc.settingsRevision, settings_snapshot: calc.settingsSnapshot
+        };
+        orderContractStatus('Cotação vinculada ao pedido. Alterações comerciais exigem novo cálculo.');
+    }
+
+    function orderLookupContext(card) {
+        return JSON.stringify([$('#orderClient')?.value || '', card.querySelector('.order-product-select')?.value || '',
+            $$('.order-product').map(product => [product.querySelector('.order-product-select')?.value || '',
+                [...product.querySelectorAll('.variation-row')].map(row => [row.querySelector('.variation-material')?.value || '', row.querySelector('.variation-color')?.value || '', row.querySelector('.variation-quantity')?.value || ''])]),
+            state.settingsRevision, state.settings]);
+    }
+
+    function captureAgreementOrder() {
+        const items = collectOrderItemsFromForm();
+        const quantity = items.reduce((sum, item) => sum + item.variants.reduce((sum, v) => sum + v.quantity, 0), 0);
+        const discount = getVolumeDiscount(quantity);
+        const subtotal = items.reduce((sum, item) => sum + item.variants.reduce((sum, v) => sum + v.quantity * v.unit_price, 0), 0);
+        const agreements = $$('.variation-row').filter(row => row._agreement).map(row => row._agreement);
+        const client = state.clients.find(client => clientId(client) === String($('#orderClient')?.value || ''));
+        state.orderQuote = { version: 1, source: 'agreement', channel: ['reseller', 'revendedor', 'revenda'].includes(String(client?.type || '').toLowerCase()) ? 'reseller' : 'final',
+            customer_id: $('#orderClient')?.value || '', signature: orderFormSignature(items), items: JSON.parse(JSON.stringify(items)),
+            quantity, volume_discount_percent: discount, price_origin: 'typed_agreement', agreements,
+            public_price: null, purchase_price: null, minimum_unit_revenue: null, cost_known: false, commission_known: false,
+            expected_total: subtotal * (1 - discount / 100), settings_revision: state.settingsRevision,
+            settings_snapshot: JSON.parse(JSON.stringify(state.settings)) };
+    }
+
+    function confirmOrderRenegotiation() {
+        if (!state.editingOrder) return;
+        try {
+            const items = collectOrderItemsFromForm(true);
+            const previous = state.orderRenegotiation;
+            state.orderRenegotiation = { preview: true };
+            const preview = calculateOrder();
+            state.orderRenegotiation = previous;
+            if (!confirm(`Renegociação manual substitui a cotação/acordo anterior e aplica as regras atuais. Novo total: ${money(preview.total)}. O piso não será validado como cotação. Confirma?`)) { calculateOrder(); return; }
+            state.orderRenegotiation = { signature: orderFormSignature(items), settings_revision: state.settingsRevision };
+            state.orderQuote = null;
+            calculateOrder();
+            orderContractStatus('Renegociação manual confirmada para estes dados e regras atuais. Piso não validado por cotação.');
+        } catch (error) { toast(error.message, 'warning'); }
+    }
+
+    $('#renegotiateOrder').onclick = confirmOrderRenegotiation;
+    $('#savePriceType')?.addEventListener('change', () => {
+        if (state.calcMode === 'reseller') $('#savePrice').textContent = $('#savePriceType').value === 'net' ? 'SALVAR COMPRA NEGOCIADA' : 'SALVAR PREÇO PÚBLICO NEGOCIADO';
+    });
+
     async function loadNegotiatedPrices(card) {
+        if (state.orderQuote && !orderQuoteValid()) {
+            orderContractStatus('Cliente, composição ou regras mudaram. Refaça a cotação antes de aplicar outro acordo.');
+            return;
+        }
         const customerId = String($('#orderClient')?.value || '').trim();
         const folder = String(card?.querySelector('.order-product-select')?.value || '').trim();
         if (!customerId || !folder) return;
+        const selection = orderLookupContext(card);
+        const requestId = (card._priceRequest || 0) + 1;
+        card._priceRequest = requestId;
         try {
             const d = await api('/api/prices?customerId=' + encodeURIComponent(customerId) + '&productFolder=' + encodeURIComponent(folder));
-            const prices = Array.isArray(d?.prices) ? d.prices : [];
+            if (requestId !== card._priceRequest || selection !== orderLookupContext(card)) return;
+            if (!Array.isArray(d?.prices)) throw new Error('Lista de acordos inválida.');
+            const client = state.clients.find(client => clientId(client) === customerId);
+            const reseller = ['reseller', 'revendedor', 'revenda'].includes(String(client?.type || '').toLowerCase());
+            let applied = false;
             card.querySelectorAll('.variation-row').forEach(row => {
+                const input = row.querySelector('.variation-price');
+                if (!input || (input.value && input.dataset.autoPrice !== 'true')) return;
                 const material = String(row.querySelector('.variation-material')?.value || '').trim();
                 const color = String(row.querySelector('.variation-color')?.value || '').trim();
-                const found = prices.find(x => String(x?.material || '').trim() === material && String(x?.color || '').trim() === color) || prices.find(x => String(x?.material || '').trim() === material && !x?.color);
-                const input = row.querySelector('.variation-price');
-                if (found && input && (!input.value || input.dataset.autoPrice === 'true')) { input.value = Number(found.price).toFixed(2); input.dataset.autoPrice = 'true'; }
+                const compatible = d.prices.filter(price => String(price.customer_id) === customerId && String(price.product_folder) === folder && String(price.material || '') === material);
+                const found = compatible.find(price => String(price.color || '') === color) || compatible.find(price => !price.color);
+                if (!found) return;
+                if (!['public', 'net'].includes(found.price_type) || (reseller && found.price_type === 'public') || (!reseller && found.price_type === 'net')) {
+                    if (input.dataset.autoPrice === 'true') input.value = '';
+                    row._agreementIssue = true;
+                    toast(!found.price_type ? 'Acordo legado sem tipo: informe um preço manual ou refaça a cotação.' : 'O tipo deste acordo não corresponde ao valor cobrado neste canal. Use a calculadora ou informe preço manual.', 'warning');
+                    return;
+                }
+                const quantity = $$('.variation-quantity').reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+                const discount = getVolumeDiscount(quantity) / 100;
+                if (discount >= 1) throw new Error('Esta faixa não permite compensar preço protegido. Recalcule com outra política.');
+                const net = commercialNumber(found.price, 'Preço negociado');
+                input.value = String(discount > 0 ? net / (1 - discount) : net);
+                input.dataset.autoPrice = 'true';
+                row._agreement = { id: found.id, price_type: found.price_type, price: net, customer_id: customerId, product_folder: folder, material, color };
+                delete row._agreementIssue;
+                applied = true;
             });
+            if (applied) { captureAgreementOrder(); orderContractStatus('Acordo aplicado. O preço bruto compensa o desconto do pedido para preservar o valor líquido; mudanças exigem novo cálculo.'); }
             calculateOrder();
-        } catch {}
+        } catch (error) { toast(error.message || 'Não foi possível conferir os acordos.', 'warning'); }
     }
 
     $('#orderClient')?.addEventListener('change', () => {
         $$('#orderProducts .order-product').forEach(loadNegotiatedPrices);
     });
 
+
+    function variationCostContext(row) {
+        const card = row.closest('.order-product');
+        return JSON.stringify([card?.querySelector('.order-product-select')?.value || '',
+            row.querySelector('.variation-material')?.value || '', row.querySelector('.variation-color')?.value || '',
+            Number(row.querySelector('.variation-quantity')?.value || 0), Number(row.querySelector('.variation-price')?.value || 0)]);
+    }
+
+    function variationCostFields(row) {
+        if (!row._costSnapshot || row._costContext !== variationCostContext(row)) {
+            return { unit_cost: null, cost_known: false, commission_known: false, profit_basis_complete: false };
+        }
+        return { ...row._costSnapshot };
+    }
+
+    function captureVariationCost(row, values) {
+        row._orderVariantSnapshot = JSON.parse(JSON.stringify(values));
+        const fields = {};
+        for (const key of ['unit_cost', 'cost_known', 'production_unit_cost', 'commission_percent', 'commission_unit_cost', 'commission_known', 'cost_includes_commission', 'profit_basis_complete']) {
+            if (Object.prototype.hasOwnProperty.call(values, key)) fields[key] = values[key];
+        }
+        row._costSnapshot = fields;
+        row._costContext = variationCostContext(row);
+    }
 
     function addVariationRow(
         productCard,
@@ -9581,6 +9938,7 @@
             );
 
 
+        captureVariationCost(row, values);
         return row;
 
     }
@@ -9592,6 +9950,22 @@
 
 
     function calculateOrder() {
+
+        if (historicalContractApplies()) {
+            const order = state.editingOrder.snapshot;
+            const subtotal = Number(order.subtotal ?? order.totals?.subtotal ?? 0);
+            const discountValue = Number(order.volume_discount_value ?? order.totals?.discount ?? 0);
+            const total = Number(order.total ?? order.totals?.total ?? 0);
+            $('#orderSubtotal').textContent = money(subtotal);
+            $('#orderDiscount').textContent = money(discountValue);
+            $('#orderTotal').textContent = money(total);
+            $$('.order-product').forEach(card => { const box = card.querySelector('.product-card-total'); if (box) box.textContent = 'Total contratado do produto: ' + money(card._orderItemSnapshot?.subtotal); });
+            orderContractStatus('Contrato histórico preservado. Alterações administrativas não aplicam descontos atuais.');
+            return { subtotal, discount: Number(order.volume_discount_percent || 0), discountValue, total, historical: true };
+        }
+        orderContractStatus(state.editingOrder ? 'Prévia com regras atuais: confirme renegociação antes de salvar.'
+            : !orderQuoteValid() ? 'Cotação fora do contexto. Refaça o cálculo antes de salvar.'
+            : state.orderQuote ? 'Cotação/acordo vinculado: alterações comerciais exigem novo cálculo.' : 'Pedido manual: piso não validado por cotação.');
 
         let subtotal =
             0;
@@ -9970,7 +10344,9 @@
 
     function clearOrder() {
 
-        state.currentOrder = null;
+        state.editingOrder = null;
+        state.orderQuote = null;
+        state.orderRenegotiation = null;
 
         $('#saveOrder').textContent = 'SALVAR PEDIDO';
         $('#clearOrder').textContent = 'LIMPAR';
@@ -10016,6 +10392,8 @@
 
     async function loadOrders() {
 
+        setReadStatus('orders', 'loading');
+
         try {
 
             const d =
@@ -10024,18 +10402,20 @@
                 );
 
 
-            state.orders =
-                d.orders || [];
+            if (!Array.isArray(d?.orders)) throw new Error('A lista de pedidos recebida é inválida.');
+            state.orders = d.orders;
+            state.orderRevisions = d.revisions || {};
 
 
             renderOrders();
 
 
             updateDashboard();
+            setReadStatus('orders', 'success', null, state.orders.length);
 
-        } catch {
+        } catch (error) {
 
-            renderOrders();
+            setReadStatus('orders', 'error', error);
 
         }
 
@@ -10179,6 +10559,7 @@
                         : [];
 
                 state.orders = orders;
+                state.orderRevisions = d.revisions || {};
 
                 order =
                     orders.find(
@@ -10202,6 +10583,7 @@
         }
 
         state.currentOrder = order;
+        state.viewOrderRevision = state.orderRevisions?.[orderId(order)] || "";
 
         const customer =
             order?.customer || {};
@@ -10571,17 +10953,21 @@
                 const d = await api('/api/orders');
                 const orders = Array.isArray(d?.orders) ? d.orders : [];
                 state.orders = orders;
+                state.orderRevisions = d.revisions || {};
                 order = orders.find(o => orderId(o) === key || String(o?.order_number || o?.number || '').trim() === key);
             } catch {}
         }
         if (!order) { toast('Pedido não encontrado.'); return; }
-        state.currentOrder = order;
         go('pedidos');
         fillOrderForEdit(order);
     }
 
 
     function fillOrderForEdit(order) {
+
+        state.orderQuote = order.quote_context ? JSON.parse(JSON.stringify(order.quote_context)) : null;
+        state.orderRenegotiation = null;
+        state.editingOrder = { id: orderId(order), revision: state.orderRevisions?.[orderId(order)] || '', snapshot: JSON.parse(JSON.stringify(order)) };
 
         $('#orderClient').value =
             String(
@@ -10655,6 +11041,8 @@
                 }
 
 
+                card._orderItemSnapshot = JSON.parse(JSON.stringify(item));
+
                 const variants =
                     Array.isArray(
                         item?.variants
@@ -10679,6 +11067,7 @@
                         addVariationRow(
                             card,
                             {
+                                ...variant,
                                 material:
                                     variant?.material ||
                                     '',
@@ -10941,6 +11330,7 @@
             );
 
         state.currentOrder = null;
+        state.viewOrderRevision = null;
     }
 
 
@@ -10979,6 +11369,8 @@
 
     async function loadBilling() {
 
+        setReadStatus('billing', 'loading');
+
         try {
 
             const d =
@@ -10987,24 +11379,28 @@
                 );
 
 
-            state.billing =
+            const billing =
                 Array.isArray(d?.billing)
                     ? d.billing
                     : Array.isArray(d?.billing?.orders)
                         ? d.billing.orders
                         : Array.isArray(d?.orders)
                             ? d.orders
-                            : [];
+                            : null;
+
+            if (!Array.isArray(billing)) throw new Error('Os dados de faturamento recebidos são inválidos.');
+            state.billing = billing;
 
 
             renderBilling();
 
 
             updateDashboard();
+            setReadStatus('billing', 'success', null, state.billing.length);
 
-        } catch {
+        } catch (error) {
 
-            renderBilling();
+            setReadStatus('billing', 'error', error);
 
         }
 
@@ -11056,6 +11452,7 @@
                                     (Number(item.amount_paid ?? item.received ?? 0) || 0)
                                 )
                             ) || 0,
+                        profitKnown: item.profit_basis_complete === true && item.estimated_profit !== null,
                         profit:
                             Number(
                                 item.profit ??
@@ -11142,8 +11539,8 @@
                     : 0
             );
 
-        $('#fProfit').textContent =
-            money(profit);
+        $('#fProfit').textContent = list.every(item => item.profitKnown)
+            ? money(profit) : 'Indisponível: custo/comissão incompletos';
 
         if (!list.length) {
             $('#billing').innerHTML =
@@ -11240,7 +11637,7 @@
     ========================================================= */
 
     $('#savePrice').onclick = async () => {
-        const calc = state.lastCalculation;
+        const calc = currentCalculation();
         if (!calc) { toast('Faça um cálculo primeiro.'); return; }
 
         if (state.calcMode === 'reseller' && String($('#calcCustomer')?.value || '').trim()) {
@@ -11249,8 +11646,10 @@
                 await api('/api/price', { method:'POST', body:{
                     customer_id: customerId, product_folder: calc.product,
                     product_name: state.products.find(p => String(p?.folder || '') === calc.product)?.name || calc.product,
-                    material: calc.material || '', color: calc.color || '', price: Number(calc.finalPrice || 0),
-                    notes: 'Preço público negociado salvo pela calculadora.'
+                    material: calc.material || '', color: calc.color || '',
+                    price_type: $('#savePriceType')?.value === 'net' ? 'net' : 'public',
+                    price: Number($('#savePriceType')?.value === 'net' ? calc.resellerPrice : calc.finalPrice),
+                    notes: $('#savePriceType')?.value === 'net' ? 'Preço de compra/líquido negociado salvo pela calculadora.' : 'Preço público negociado salvo pela calculadora.'
                 }});
                 toast('Preço negociado salvo para o cliente.');
                 return;
@@ -11392,7 +11791,7 @@
 
 
     function applyClientPaymentDefaults() {
-        if (state.currentOrder) return;
+        if (state.editingOrder) return;
         const id = String($('#orderClient')?.value || '').trim();
         const client = state.clients.find(c => clientId(c) === id);
         if (!client) return;
@@ -11408,23 +11807,34 @@
     }
 
 
-    function collectOrderItemsFromForm() {
+    function collectOrderItemsFromForm(strict = false) {
+        if (strict) validateCalculatorVolume();
         return $$('.order-product')
             .map(card => {
                 const folder = String(card.querySelector('.order-product-select')?.value || '').trim();
+                if (strict && !folder) throw new Error('Selecione o produto de cada item antes de salvar.');
                 const product = state.products.find(p => String(p?.folder || '') === folder);
                 const variants = [...card.querySelectorAll('.variation-row')]
                     .map(row => ({
+                        ...(row._orderVariantSnapshot || {}),
+                        ...variationCostFields(row),
                         material: String(row.querySelector('.variation-material')?.value || ''),
                         color: String(row.querySelector('.variation-color')?.value || ''),
-                        quantity: parseInt(row.querySelector('.variation-quantity')?.value, 10) || 0,
-                        unit_price: parseFloat(row.querySelector('.variation-price')?.value) || 0
+                        quantity: strict
+                            ? commercialNumber(row.querySelector('.variation-quantity')?.value, 'Quantidade', { min: 1, integer: true })
+                            : parseInt(row.querySelector('.variation-quantity')?.value, 10) || 0,
+                        unit_price: strict
+                            ? commercialNumber(row.querySelector('.variation-price')?.value, 'Preço unitário')
+                            : parseFloat(row.querySelector('.variation-price')?.value) || 0
                     }))
                     .filter(v => v.quantity > 0);
+                if (strict && !variants.length) throw new Error('Adicione uma variação válida a cada item.');
 
+                const snapshot = card._orderItemSnapshot;
                 return {
+                    ...(snapshot || {}),
                     product_folder: folder,
-                    product_name: product?.name || folder,
+                    product_name: snapshot && String(snapshot.product_folder || snapshot.folder || "") === folder ? (snapshot.product_name || snapshot.name || folder) : product?.name || folder,
                     variants
                 };
             })
@@ -11435,6 +11845,7 @@
     function serializeOrderDraft() {
         return {
             version: 1,
+            quote_context: state.orderQuote || null,
             saved_at: new Date().toISOString(),
             customer_id: String($('#orderClient')?.value || ''),
             status: String($('#orderStatus')?.value || 'Orçamento'),
@@ -11447,7 +11858,7 @@
 
 
     function saveOrderDraftNow() {
-        if (state.currentOrder) return;
+        if (state.editingOrder) return;
         const draft = serializeOrderDraft();
         const meaningful = draft.customer_id || draft.items.length || draft.payment_method || draft.due_date;
         if (!meaningful) {
@@ -11459,7 +11870,7 @@
 
 
     function scheduleOrderDraftSave() {
-        if (state.currentOrder) return;
+        if (state.editingOrder) return;
         window.clearTimeout(orderDraftTimer);
         orderDraftTimer = window.setTimeout(saveOrderDraftNow, 350);
     }
@@ -11500,7 +11911,7 @@
             return;
         }
 
-        state.currentOrder = null;
+        state.editingOrder = null;
         go('pedidos');
         $('#orderClient').value = String(draft.customer_id || '');
         $('#orderStatus').value = String(draft.status || 'Orçamento');
@@ -11516,6 +11927,8 @@
         });
 
         if (!$('#orderProducts .order-product')) addOrderProductCard();
+        state.orderQuote = draft.quote_context || null;
+        state.orderRenegotiation = null;
         syncOrderPaymentFields({ recalculateDue: false });
         calculateOrder();
         refreshOrderDraftBanner();
@@ -11598,7 +12011,7 @@
             return null;
         }
 
-        const response = await api('/api/order', { method: 'PUT', body: { id, ...fields } });
+        const response = await api('/api/order', { method: 'PUT', body: { id, ...fields, expected_revision: state.viewOrderRevision || "" } });
         await loadOrders();
         await loadBilling();
         const updated = state.orders.find(o => orderId(o) === orderId(response?.order) || orderId(o) === id) || response?.order;
@@ -11610,7 +12023,7 @@
 
 
     async function createOrderFromCalculation() {
-        const calc = state.lastCalculation;
+        const calc = currentCalculation();
         if (!calc) {
             toast('Faça um cálculo primeiro.', 'warning');
             return;
@@ -11625,7 +12038,7 @@
         }
 
         clearOrder();
-        state.currentOrder = null;
+        state.editingOrder = null;
         go('pedidos');
         fillOrderSelectors();
 
@@ -11646,9 +12059,17 @@
             material: calc.material || 'PLA',
             color: calc.color || '',
             quantity: Math.max(1, Number(calc.quantity || 1) || 1),
-            unit_price: unitPrice
+            unit_price: unitPrice,
+            unit_cost: calc.cost,
+            cost_known: true,
+            production_unit_cost: calc.productionCost,
+            commission_percent: calc.commissionPercent,
+            commission_unit_cost: calc.commissionUnitCost,
+            commission_known: true,
+            cost_includes_commission: true
         });
 
+        captureCalculatorOrder(calc);
         $('#orderStatus').value = 'Orçamento';
         calculateOrder();
         saveOrderDraftNow();
@@ -11671,6 +12092,7 @@
             due_date: ''
         });
         state.currentOrder = null;
+        state.editingOrder = null;
         $('#saveOrder').textContent = 'SALVAR NOVO PEDIDO';
         $('#clearOrder').textContent = 'CANCELAR E LIMPAR';
         saveOrderDraftNow();
@@ -11970,7 +12392,7 @@
         const form = event.currentTarget;
         const editingId = String(form.dataset.editingId || '').trim();
         const client = {
-            ...(editingId ? { id: editingId } : {}),
+            ...(editingId ? { id: editingId, expected_revision: form.dataset.expectedRevision || '' } : {}),
             name: $('#clientName').value.trim(),
             cpf_cnpj: $('#clientDocument').value.trim(),
             phone: $('#clientPhone').value.trim(),
@@ -11993,6 +12415,7 @@
             toast('Cliente salvo com sucesso.', 'success');
             form.reset();
             delete form.dataset.editingId;
+            delete form.dataset.expectedRevision;
             $('#clientFormCard').style.display = 'none';
             await loadClients();
         } catch (err) {
@@ -12008,16 +12431,24 @@
             return;
         }
 
+        let items, commercialContext;
+        try {
+            items = collectOrderItemsFromForm(true);
+            commercialContext = orderSubmissionContext(items);
+        } catch (error) {
+            toast(error.message, 'warning');
+            return;
+        }
         const result = calculateOrder();
-        const items = collectOrderItemsFromForm();
         if (!items.length) {
             toast('Adicione pelo menos um produto com quantidade maior que zero.', 'warning');
             return;
         }
 
-        const editingId = String(state.currentOrder?.id || state.currentOrder?.order_number || '').trim();
+        const editingId = String(state.editingOrder?.id || '').trim();
         const payload = {
-            ...(editingId ? { id: editingId } : {}),
+            ...commercialContext,
+            ...(editingId ? { id: editingId, expected_revision: state.editingOrder.revision } : {}),
             customer_id: customerId,
             status: $('#orderStatus').value,
             payment_method: $('#orderPayment').value,
@@ -12045,8 +12476,8 @@
             toast(err.message || 'Não foi possível salvar o pedido.', 'error');
         } finally {
             button.disabled = false;
-            button.textContent = state.currentOrder ? 'ATUALIZAR PEDIDO' : 'SALVAR PEDIDO';
-            if (!state.currentOrder && oldText === 'SALVAR NOVO PEDIDO') button.textContent = 'SALVAR PEDIDO';
+            button.textContent = state.editingOrder ? 'ATUALIZAR PEDIDO' : 'SALVAR PEDIDO';
+            if (!state.editingOrder && oldText === 'SALVAR NOVO PEDIDO') button.textContent = 'SALVAR PEDIDO';
         }
     };
 
@@ -12070,7 +12501,7 @@
                 payment_terms_days: modalPaymentTermDays(),
                 amount_paid: Number($('#orderModalAmountPaid').value || 0) || 0,
                 due_date: $('#orderModalDueDate').value || '',
-                ...(String($('#orderModalPaymentStatus').value) === 'Pago' ? { payment_received_date: dateInputToday() } : {})
+                ...(Number($('#orderModalAmountPaid').value || 0) > Number(order.amount_paid || 0) ? { payment_received_date: dateInputToday() } : {})
             }, 'Status e pagamento atualizados.');
         } catch (err) {
             toast(err.message || 'Não foi possível atualizar o pedido.', 'error');
@@ -12088,7 +12519,7 @@
             await updateCurrentOrderFields({
                 payment_status: 'Pago',
                 amount_paid: Number(order.total || 0) || 0,
-                payment_received_date: dateInputToday()
+                ...(Number(order.total || 0) > Number(order.amount_paid || 0) ? { payment_received_date: dateInputToday() } : {})
             }, 'Pedido marcado como pago.');
         } catch (err) {
             toast(err.message || 'Não foi possível marcar como pago.', 'error');
@@ -12416,6 +12847,8 @@
 
     function renderSettings() {
 
+        const previousContext = calculatorContextKey();
+
         state.settings =
             normalizeSettings(
                 state.settings,
@@ -12441,6 +12874,7 @@
         renderVolumeSettings();
         setupMaterialSelectors();
         syncCalculatorCommercialDefaults(true);
+        if (previousContext !== calculatorContextKey()) invalidateCalculation('Configurações alteradas. Recalcule antes de usar.');
     }
 
 
@@ -12619,6 +13053,8 @@
 
     $('#saveSettings').onclick = async () => {
 
+        try {
+
         const materials =
             $$('#materialsSettings [data-material-index]')
                 .map(
@@ -12626,9 +13062,7 @@
                         name:
                             row.querySelector('.material-name')?.value.trim() || '',
                         price:
-                            Number(
-                                row.querySelector('.material-price')?.value
-                            ) || 0
+                            commercialNumber(row.querySelector('.material-price')?.value, 'Preço por kg')
                     })
                 )
                 .filter(m => m.name);
@@ -12642,41 +13076,31 @@
 
                         return {
                             min:
-                                Math.max(
-                                    1,
-                                    parseInt(
-                                        row.querySelector('.volume-min')?.value
-                                    ) || 1
-                                ),
+                                commercialNumber(row.querySelector('.volume-min')?.value, 'Início da faixa', { min: 1, integer: true }),
                             max:
                                 maxValue === ''
                                     ? null
-                                    : parseInt(maxValue),
+                                    : commercialNumber(maxValue, 'Fim da faixa', { min: 1, integer: true }),
                             discount:
-                                Math.max(
-                                    0,
-                                    parseFloat(
-                                        row.querySelector('.volume-discount')?.value
-                                    ) || 0
-                                )
+                                commercialNumber(row.querySelector('.volume-discount')?.value, 'Desconto por volume', { max: 100 })
                         };
                     }
                 );
 
         const machine =
-            Number($('#setMachine')?.value) || 0;
+            commercialNumber($('#setMachine')?.value, 'Custo da máquina por hora');
 
         const margin =
-            Number($('#setMargin')?.value) || 0;
+            commercialNumber($('#setMargin')?.value, 'Acréscimo sobre o custo');
 
         const minimumMargin =
-            Number($('#setMinimumMargin')?.value) || 0;
+            commercialNumber($('#setMinimumMargin')?.value, 'Acréscimo mínimo');
 
         const resellerMargin =
-            Number($('#setResellerMargin')?.value) || 0;
+            commercialNumber($('#setResellerMargin')?.value, 'Margem do revendedor', { max: 95 });
 
         const waste =
-            Number($('#setWaste')?.value) || 0;
+            commercialNumber($('#setWaste')?.value, 'Desperdício');
 
         const costs =
             state.settings.costs || {
@@ -12723,8 +13147,6 @@
                 )
         };
 
-        try {
-
             const response =
                 await api(
                     '/api/settings',
@@ -12739,6 +13161,7 @@
              * Não misturamos um objeto antigo do localStorage
              * com o objeto novo retornado pelo Worker.
              */
+            state.settingsRevision = response.revision || null;
             state.settings =
                 normalizeSettings(
                     response?.settings ||
@@ -12752,6 +13175,9 @@
             );
 
             renderSettings();
+
+            invalidateCalculation('Configurações salvas. Recalcule antes de usar.');
+            setReadStatus('settings', 'success');
 
             toast('Configurações salvas com sucesso.');
 
@@ -12790,13 +13216,20 @@
 
     async function loadRemoteSettings() {
 
+        setReadStatus('settings', 'loading');
+
         try {
             const d =
                 await api(
                     '/api/settings'
                 );
 
+            if (!d?.settings || typeof d.settings !== 'object' || Array.isArray(d.settings)) {
+                throw new Error('As configurações recebidas são inválidas.');
+            }
             if (d?.settings) {
+                const previousContext = calculatorContextKey();
+                state.settingsRevision = d.revision || null;
                 /*
                  * REMOTO SEMPRE VENCE O LOCAL.
                  * Isso impede que valores antigos do celular
@@ -12808,13 +13241,16 @@
                         state.settings
                     );
 
+                if (previousContext !== calculatorContextKey()) invalidateCalculation('Configurações atualizadas. Recalcule antes de usar.');
+
                 localStorage.setItem(
                     '4maker_settings',
                     JSON.stringify(state.settings)
                 );
             }
-        } catch {
-            /* Se a API falhar, mantém o último estado local. */
+            setReadStatus('settings', 'success');
+        } catch (error) {
+            setReadStatus('settings', 'error', error);
         }
     }
 
