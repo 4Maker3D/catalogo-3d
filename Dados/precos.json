@@ -6,10 +6,11 @@
         "product_name": "Vaso Autoirrigável Redondo",
         "material": "PLA",
         "color": "",
-        "price": 102.67,
-        "notes": "Preço público negociado salvo pela calculadora.",
+        "price": 82.13,
+        "notes": "Preço de compra/líquido negociado salvo pela calculadora.",
         "created_at": "2026-09-05T17:24:21.276Z",
-        "updated_at": "2026-09-05T23:24:23.299Z"
+        "updated_at": "2026-09-10T00:48:07.433Z",
+        "price_type": "net"
     },
     {
         "id": "PRE-9003eb0a-1d7b-4e08-aa16-c4e9638491af",
