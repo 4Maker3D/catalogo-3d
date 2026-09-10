@@ -1920,6 +1920,180 @@ async function updateProduct(
 
 
 /* =========================================================
+   ÍNDICE DE PRODUTOS
+   ========================================================= */
+
+const PRODUCT_INDEX_PATH =
+  "Modelos/produtos.json";
+
+
+async function readProductIndex(
+  env
+) {
+  const file =
+    await getFile(
+      PRODUCT_INDEX_PATH,
+      env
+    );
+
+  if (!file) {
+    throw storedDataError(
+      PRODUCT_INDEX_PATH,
+      "Arquivo obrigatório ausente."
+    );
+  }
+
+  const index =
+    parseJsonSafe(
+      file.content,
+      {},
+      PRODUCT_INDEX_PATH
+    );
+
+  if (
+    !Array.isArray(
+      index.produtos
+    )
+  ) {
+    throw storedDataError(
+      PRODUCT_INDEX_PATH,
+      'Era esperada a propriedade "produtos" como lista.'
+    );
+  }
+
+  for (
+    const entry of
+    index.produtos
+  ) {
+    if (
+      !entry ||
+      typeof entry !==
+        "object" ||
+      Array.isArray(entry) ||
+      typeof entry.folder !==
+        "string" ||
+      !entry.folder.trim()
+    ) {
+      throw storedDataError(
+        PRODUCT_INDEX_PATH,
+        'Existe uma entrada inválida na lista "produtos".'
+      );
+    }
+  }
+
+  return {
+    file,
+    index
+  };
+}
+
+
+function productIndexWithFolder(
+  index,
+  folder
+) {
+  const exists =
+    index.produtos.some(
+      entry =>
+        entry.folder ===
+        folder
+    );
+
+  if (exists) {
+    return {
+      index,
+      changed: false
+    };
+  }
+
+  return {
+    index: {
+      ...index,
+      produtos: [
+        ...index.produtos,
+        {
+          folder
+        }
+      ]
+    },
+    changed: true
+  };
+}
+
+
+async function syncProductIndex(
+  folder,
+  env,
+  prepared = null
+) {
+  let current =
+    prepared ||
+    await readProductIndex(
+      env
+    );
+
+  let next =
+    productIndexWithFolder(
+      current.index,
+      folder
+    );
+
+  if (!next.changed) {
+    return false;
+  }
+
+  try {
+    await putFile(
+      PRODUCT_INDEX_PATH,
+      encodeUtf8(
+        next.index
+      ),
+      `4Maker 3D: adicionar ${folder} ao índice de produtos`,
+      env,
+      current.file.sha
+    );
+
+    return true;
+  } catch (error) {
+    if (
+      error?.status !== 409
+    ) {
+      throw error;
+    }
+  }
+
+  // Se outro cadastro atualizou o índice entre a leitura e a gravação,
+  // releia o SHA mais recente e faça o merge uma única vez.
+  current =
+    await readProductIndex(
+      env
+    );
+
+  next =
+    productIndexWithFolder(
+      current.index,
+      folder
+    );
+
+  if (!next.changed) {
+    return false;
+  }
+
+  await putFile(
+    PRODUCT_INDEX_PATH,
+    encodeUtf8(
+      next.index
+    ),
+    `4Maker 3D: adicionar ${folder} ao índice de produtos`,
+    env,
+    current.file.sha
+  );
+
+  return true;
+}
+
+
+/* =========================================================
    CRIAR PRODUTO
    ========================================================= */
 
@@ -2027,6 +2201,13 @@ async function createProduct(
     );
   }
 
+  // Valide o índice antes de criar arquivos. Um índice existente
+  // inválido nunca pode ser substituído silenciosamente.
+  const productIndexState =
+    await readProductIndex(
+      env
+    );
+
   await putFile(
     `Modelos/${encodeURIComponent(
       folder
@@ -2056,6 +2237,12 @@ async function createProduct(
     stlBase64,
     `4Maker 3D: adicionar STL ${folder}`,
     env
+  );
+
+  await syncProductIndex(
+    folder,
+    env,
+    productIndexState
   );
 
   return json(
