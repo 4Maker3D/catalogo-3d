@@ -9,6 +9,11 @@
             "name": "Branco",
             "hex": 16777215,
             "swatch": 16777215
+        },
+        {
+            "name": "Azul ",
+            "hex": 255,
+            "swatch": 255
         }
     ]
 }
