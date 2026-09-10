@@ -30,7 +30,7 @@ body{display:grid;place-items:center;padding:24px}.login{width:min(430px,100%);a
   <div class="foot">Acesso restrito • 4Maker 3D</div>
 </main>
 <script>
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));}
+if('serviceWorker' in navigator){window.addEventListener('load',async()=>{try{const r=await navigator.serviceWorker.register('./service-worker.js?v=4.2.3.4',{updateViaCache:'none'});await r.update();}catch{}});}
 const API_URL = 'https://4maker3d-admin-api.4makerimpressoes.workers.dev';
 const form=document.getElementById('form'),error=document.getElementById('error'),submit=document.getElementById('submit');
 (async()=>{try{const token=sessionStorage.getItem('4maker_session');if(!token)return;const r=await fetch(API_URL+'/api/session',{headers:{Authorization:'Bearer '+token}});if(r.ok)location.replace('painel.html#dashboard');else sessionStorage.removeItem('4maker_session')}catch{}})();

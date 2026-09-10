@@ -1,13 +1,13 @@
 # 4Maker 3D — Catálogo 3D + Painel Administrativo
 
-Versão administrativa/documentada: **V4.2.3.3**  
+Versão administrativa/documentada: **V4.2.3.4**  
 Base funcional: **V4.2.3-FINAL**  
 Backend: **Cloudflare Worker + GitHub REST API**  
 Frontend público: **GitHub Pages + Three.js**
 
 Este repositório reúne o catálogo público 3D e o painel administrativo da 4Maker 3D. O catálogo permanece público e independente do painel. Operações administrativas são feitas pelo Cloudflare Worker, que mantém a credencial do GitHub fora do navegador.
 
-A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adicionou a sincronização automática de `Modelos/produtos.json`. A V4.2.3.2 corrigiu a compatibilidade do índice com a chave `products` e adotou network-first para JSONs públicos mutáveis. A **V4.2.3.3** fecha o caso reproduzido em navegador real em que um Service Worker antigo ainda podia servir recursos de produto em cache: o visualizador agora registra/atualiza o Service Worker e solicita `produto.json` e `modelo.stl` com uma chave única por abertura da página.
+A V4.2.3 consolidou correções de integridade, validação, concorrência, custos, pagamentos, cores, contratos históricos e contexto comercial. A V4.2.3.1 adicionou a sincronização automática de `Modelos/produtos.json`. A V4.2.3.2 corrigiu a compatibilidade do índice com a chave `products` e adotou network-first para JSONs públicos mutáveis. A V4.2.3.3 passou a proteger `produto.json` e `modelo.stl` com atualização do Service Worker e cache-busting por abertura. O teste real posterior mostrou uma camada anterior do mesmo problema: o próprio `index.html` podia permanecer antigo no cache da navegação. A **V4.2.3.4** corrige essa camada, força navegações online a ignorarem o HTTP cache e registra o Service Worker por URL versionada em `index.html`, `login.html` e `painel.html`.
 
 ---
 
@@ -137,7 +137,7 @@ Formato atual:
 }
 ```
 
-A chave canônica publicada é `products`. Por retrocompatibilidade, o Worker V4.2.3.3 também aceita um índice legado que use somente `produtos`, preservando a chave encontrada durante a gravação. Um arquivo contendo simultaneamente as duas chaves é tratado como ambíguo e bloqueia a mutação.
+A chave canônica publicada é `products`. Por retrocompatibilidade, o Worker do pacote V4.2.3.4 também aceita um índice legado que use somente `produtos`, preservando a chave encontrada durante a gravação. Um arquivo contendo simultaneamente as duas chaves é tratado como ambíguo e bloqueia a mutação.
 
 A partir da **V4.2.3.1**, o cadastro de produto mantém esse índice automaticamente sincronizado; a V4.2.3.2 corrige a compatibilidade com o formato `products` do repositório publicado.
 
@@ -156,7 +156,7 @@ O produto `Teste`, criado no repositório operacional antes deste hotfix, foi ad
 
 ---
 
-## 4. Fluxo de cadastro de produto — V4.2.3.3
+## 4. Fluxo de cadastro de produto — V4.2.3.4
 
 Antes do hotfix:
 
@@ -867,6 +867,24 @@ Correções desta etapa:
 - respostas HTTP 404/500 atuais não são substituídas por conteúdo antigo; fallback ocorre apenas em falha real de rede;
 - `painel.html`, `worker.js`, regras comerciais, PDF e dados permanecem inalterados nesta etapa.
 
+### V4.2.3.4 — navegação atualizada e bootstrap do Service Worker
+
+O teste em navegador real confirmou que acrescentar um parâmetro novo à própria URL do visualizador fazia o produto abrir imediatamente. Isso demonstrou que a camada restante era o `index.html` antigo servido pelo estado persistente de navegação/HTTP cache, antes mesmo de o código novo de cache-busting do produto poder executar.
+
+Correções desta etapa:
+
+- navegações same-origin controladas pelo Service Worker usam `fetch` com `cache: "no-store"`;
+- a resposta online atual passa a prevalecer sobre uma cópia antiga do HTML;
+- em falha real de rede, o cache continua disponível como fallback offline;
+- `index.html`, `login.html` e `painel.html` registram `service-worker.js?v=4.2.3.4`;
+- os três registros usam `updateViaCache: "none"` e solicitam `registration.update()`;
+- `skipWaiting()` e `clients.claim()` continuam permitindo que a versão nova assuma o controle sem esperar o fechamento de todas as abas;
+- o identificador `_4mcb` de V4.2.3.3 continua protegendo `produto.json` e `modelo.stl`;
+- o cache do Service Worker sobe para `4maker-admin-v4.2.3.4` e remove caches administrativos antigos na ativação;
+- `worker.js`, `Modelos/produtos.json`, regras comerciais, PDF, STL e dados não são modificados por este hotfix.
+
+Para instalações que já ficaram presas em uma navegação antiga, faça **uma única abertura cache-busted após o deploy**, por exemplo `?modelo=Teste&v=4234`. Essa abertura carrega o HTML atual e registra o Service Worker V4.2.3.4. Depois disso, a URL normal sem `v` volta a usar navegação network-first/no-store e futuras atualizações não devem exigir guia anônima ou limpeza manual de cache.
+
 ### Worker
 
 O deploy pode ser feito pelo fluxo já usado no Cloudflare/Wrangler.
@@ -885,17 +903,19 @@ Na V4.2.3.3 o `painel.html` continua idêntico à V4.2.3-FINAL.
 
 Painel e Worker devem continuar sendo tratados como um conjunto de mesma geração funcional, principalmente por causa de `expected_revision`, contratos de preço e contexto de cotação.
 
-### Hotfix V4.2.3.3
+### Hotfix V4.2.3.4
 
-Arquivos alterados da V4.2.3.2 para a V4.2.3.3:
+Arquivos alterados da V4.2.3.3 para a V4.2.3.4:
 
 ```text
 index.html
+login.html
+painel.html
 service-worker.js
 README.md   # documentação; não é requisito de runtime
 ```
 
-`worker.js` e `Modelos/produtos.json` permanecem byte a byte iguais à V4.2.3.2, mantendo a sincronização automática do índice e a entrada `Teste`.
+`worker.js` e `Modelos/produtos.json` permanecem byte a byte iguais à V4.2.3.3, mantendo a sincronização automática do índice e a entrada `Teste`. A alteração em `painel.html` limita-se ao registro/atualização versionado do Service Worker; as regras administrativas e comerciais não são alteradas.
 
 **Preserve `Modelos/Teste/` no repositório real.** Essa pasta foi criada depois do ZIP V4.2.3-FINAL utilizado como base local e não está contida naquele baseline.
 
@@ -940,7 +960,7 @@ Para rollback de código:
 - **não substitua `Dados/*.json` do ambiente real por JSONs antigos de um checkpoint**;
 - não substitua `Modelos/` atual por uma cópia antiga que não contenha produtos cadastrados depois do checkpoint.
 
-No hotfix V4.2.3.3, reverter código sem reverter dados é preferível a restaurar todo o ZIP antigo. Se houver rollback do Service Worker, considere também o efeito do nome/versionamento do cache.
+No hotfix V4.2.3.4, reverter código sem reverter dados é preferível a restaurar todo o ZIP antigo. Se houver rollback do Service Worker, considere também o efeito do nome/versionamento do cache.
 
 ---
 
@@ -1013,8 +1033,8 @@ Essas decisões devem ser guiadas por problema real, escala, concorrência, lat�
 
 ## 31. Estado desta documentação
 
-Este README descreve o comportamento até **V4.2.3.3**.
+Este README descreve o comportamento até **V4.2.3.4**.
 
-A V4.2.3-FINAL é a baseline funcional das correções A/B/C. A V4.2.3.1 introduziu a sincronização do índice; a V4.2.3.2 corrigiu o formato `products` e adotou network-first para dados públicos mutáveis. A V4.2.3.3 adiciona recuperação contra Service Worker antigo: `index.html` atualiza o registro e usa cache-busting por abertura para `produto.json` e `modelo.stl`, enquanto o Service Worker atual normaliza a chave do cache para evitar acúmulo de versões. A entrada `Teste` permanece no índice e sua pasta operacional existente deve ser preservada.
+A V4.2.3-FINAL é a baseline funcional das correções A/B/C. A V4.2.3.1 introduziu a sincronização do índice; a V4.2.3.2 corrigiu o formato `products` e adotou network-first para dados públicos mutáveis; a V4.2.3.3 adicionou cache-busting por abertura para `produto.json` e `modelo.stl`. A V4.2.3.4 completa a correção fazendo a própria navegação ignorar o HTTP cache quando online e usando uma URL versionada para atualização do Service Worker em todas as páginas que o registram. A entrada `Teste` permanece no índice e sua pasta operacional existente deve ser preservada.
 
 O status de I01/SEC-001 continua **PENDENTE** e nenhuma alegação de exposição ou isolamento definitivo deve ser feita sem verificação no ambiente publicado.
